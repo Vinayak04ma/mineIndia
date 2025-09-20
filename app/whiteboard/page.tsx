@@ -30,6 +30,8 @@ import {
   ZoomIn,
   ZoomOut,
   Link,
+  RefreshCcw,
+  Trash2,
 } from "lucide-react"
 
 interface ProcessNode {
@@ -51,10 +53,16 @@ interface Connection {
   material: string
   quantity: number
   unit: string
+  fromSide?: 'left' | 'right'
+  toSide?: 'left' | 'right'
 }
 
 export default function WhiteboardPage() {
-  const [nodes, setNodes] = useState<ProcessNode[]>([
+  // Node visual constants (match styles): w-48 => 192px; approx height ~120px
+  const NODE_WIDTH = 192
+  const NODE_HEIGHT = 120
+  const BASE_UI_ZOOM = 0.8
+  const INITIAL_NODES: ProcessNode[] = [
     {
       id: "1",
       type: "extraction",
@@ -88,9 +96,9 @@ export default function WhiteboardPage() {
       impact: 92,
       category: "Processing & Manufacturing",
     },
-  ])
+  ]
 
-  const [connections, setConnections] = useState<Connection[]>([
+  const INITIAL_CONNECTIONS: Connection[] = [
     {
       id: "c1",
       from: "1",
@@ -98,6 +106,8 @@ export default function WhiteboardPage() {
       material: "Bauxite Ore",
       quantity: 4,
       unit: "tonnes",
+      fromSide: 'right',
+      toSide: 'left',
     },
     {
       id: "c2",
@@ -106,21 +116,39 @@ export default function WhiteboardPage() {
       material: "Alumina",
       quantity: 2,
       unit: "tonnes",
+      fromSide: 'right',
+      toSide: 'left',
     },
-  ])
+  ]
 
-  const [selectedNode, setSelectedNode] = useState<string | null>(null)
+  const [nodes, setNodes] = useState<ProcessNode[]>(() => INITIAL_NODES.map((n) => ({ ...n, inputs: [...n.inputs], outputs: [...n.outputs] })))
+
+  const [connections, setConnections] = useState<Connection[]>(() => INITIAL_CONNECTIONS.map((c) => ({ ...c })))
+
+  const [selectedNode, setSelectedNode] = useState<string | null>("2")
   const [isCalculating, setIsCalculating] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [draggedNodeType, setDraggedNodeType] = useState<string | null>(null)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [isDraggingNode, setIsDraggingNode] = useState<string | null>(null)
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 })
+  // Canvas (content) zoom. Base UI is already at 80% via CSS zoom
   const [zoomLevel, setZoomLevel] = useState(1)
   const [isConnecting, setIsConnecting] = useState(false)
   const [connectionStart, setConnectionStart] = useState<string | null>(null)
+  const [connectionStartSide, setConnectionStartSide] = useState<'left' | 'right' | null>(null)
   const [tempConnection, setTempConnection] = useState<{ x: number; y: number } | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
+
+  const deleteNode = (nodeId: string) => {
+    // Prevent deleting initial nodes
+    const isInitial = INITIAL_NODES.some((n) => n.id === nodeId)
+    if (isInitial) return
+    setNodes((prev) => prev.filter((n) => n.id !== nodeId))
+    setConnections((prev) => prev.filter((c) => c.from !== nodeId && c.to !== nodeId))
+    if (selectedNode === nodeId) setSelectedNode(null)
+    if (isDraggingNode === nodeId) setIsDraggingNode(null)
+  }
 
   const nodeTypes = [
     {
@@ -165,14 +193,15 @@ export default function WhiteboardPage() {
     }
   }
 
-  const handleStartConnection = (nodeId: string, event: React.MouseEvent) => {
+  const handleStartConnection = (nodeId: string, event: React.MouseEvent, side?: 'left' | 'right') => {
     event.stopPropagation()
     setIsConnecting(true)
     setConnectionStart(nodeId)
+    if (side) setConnectionStartSide(side)
     console.log("[v0] Starting connection from node:", nodeId)
   }
 
-  const handleEndConnection = (nodeId: string, event: React.MouseEvent) => {
+  const handleEndConnection = (nodeId: string, event: React.MouseEvent, endSide?: 'left' | 'right') => {
     event.stopPropagation()
     if (isConnecting && connectionStart && connectionStart !== nodeId) {
       const newConnection: Connection = {
@@ -182,12 +211,15 @@ export default function WhiteboardPage() {
         material: "Material Flow",
         quantity: 1,
         unit: "unit",
+        fromSide: connectionStartSide || 'right',
+        toSide: endSide || 'left',
       }
       setConnections((prev) => [...prev, newConnection])
       console.log("[v0] Created connection:", newConnection)
     }
     setIsConnecting(false)
     setConnectionStart(null)
+    setConnectionStartSide(null)
     setTempConnection(null)
   }
 
@@ -299,7 +331,10 @@ export default function WhiteboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div
+      className="min-h-screen bg-background"
+      style={{ transform: `scale(${BASE_UI_ZOOM})`, transformOrigin: "top left", width: `${100 / BASE_UI_ZOOM}%` }}
+    >
       <Navigation />
 
       <div className="flex h-[calc(100vh-4rem)]">
@@ -423,7 +458,7 @@ export default function WhiteboardPage() {
                   Interactive LCA Mapping
                 </Badge>
                 <span className="text-sm text-muted-foreground">
-                  {nodes.length} nodes • {connections.length} connections • {Math.round(zoomLevel * 100)}%
+                  {nodes.length} nodes • {connections.length} connections • {Math.round(zoomLevel * BASE_UI_ZOOM * 100)}%
                 </span>
               </div>
               <div className="flex items-center space-x-2">
@@ -433,6 +468,7 @@ export default function WhiteboardPage() {
                 <Button size="sm" variant="outline" onClick={handleZoomIn} disabled={zoomLevel >= 2}>
                   <ZoomIn className="h-3 w-3" />
                 </Button>
+                <Button size="sm" variant="outline" onClick={() => setZoomLevel(1)}>Reset</Button>
                 <Button
                   size="sm"
                   variant={isConnecting ? "default" : "outline"}
@@ -449,6 +485,21 @@ export default function WhiteboardPage() {
                   <Plus className="mr-2 h-3 w-3" />
                   Add Node
                 </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setNodes(INITIAL_NODES.map((n) => ({ ...n, inputs: [...n.inputs], outputs: [...n.outputs] })))
+                    setConnections(INITIAL_CONNECTIONS.map((c) => ({ ...c })))
+                    setSelectedNode(null)
+                    setIsConnecting(false)
+                    setConnectionStart(null)
+                    setTempConnection(null)
+                  }}
+                >
+                  <RefreshCcw className="mr-2 h-3 w-3" />
+                  Reset
+                </Button>
                 <Button size="sm" variant="outline">
                   <Settings className="mr-2 h-3 w-3" />
                   Settings
@@ -461,8 +512,13 @@ export default function WhiteboardPage() {
           <div className="absolute inset-0 pt-20 pb-4">
             <div
               ref={canvasRef}
-              className={`relative w-full h-full overflow-auto ${isConnecting ? "cursor-crosshair" : "cursor-default"}`}
-              onMouseUp={handleCanvasDrop}
+              className={`relative w-full h-full overflow-auto ${
+                isConnecting ? "cursor-crosshair" : "cursor-default"
+              } ${isDraggingNode ? "select-none" : ""}`}
+              onMouseUp={(e) => {
+                handleCanvasDrop(e)
+                handleNodeMouseUp()
+              }}
               onMouseLeave={() => {
                 setDraggedNodeType(null)
                 setIsConnecting(false)
@@ -470,31 +526,43 @@ export default function WhiteboardPage() {
                 setTempConnection(null)
               }}
               onMouseMove={handleCanvasMouseMove}
-              onMouseUp={handleNodeMouseUp}
               onWheel={handleWheel}
               style={{ transform: `scale(${zoomLevel})`, transformOrigin: "top left" }}
             >
-              <svg className="absolute inset-0 w-full h-full pointer-events-none">
+              <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
+                <style>{`
+                  @keyframes dash {
+                    to { stroke-dashoffset: -28; }
+                  }
+                  .flow-line { stroke-dasharray: 14 14; stroke-dashoffset: 0; animation: dash 2s linear infinite; }
+                `}</style>
                 {/* Render connections */}
                 {connections.map((connection) => {
                   const fromNode = nodes.find((n) => n.id === connection.from)
                   const toNode = nodes.find((n) => n.id === connection.to)
                   if (!fromNode || !toNode) return null
+                  const fromX = connection.fromSide === 'left' ? fromNode.x : fromNode.x + NODE_WIDTH
+                  const toX = connection.toSide === 'right' ? toNode.x + NODE_WIDTH : toNode.x
+                  const fromY = fromNode.y + NODE_HEIGHT / 2
+                  const toY = toNode.y + NODE_HEIGHT / 2
 
                   return (
                     <g key={connection.id}>
                       <line
-                        x1={fromNode.x + 120}
-                        y1={fromNode.y + 40}
-                        x2={toNode.x}
-                        y2={toNode.y + 40}
-                        stroke="hsl(var(--primary))"
-                        strokeWidth="2"
-                        markerEnd="url(#arrowhead)"
+                        x1={fromX}
+                        y1={fromY}
+                        x2={toX}
+                        y2={toY}
+                        stroke="url(#flowGradient)"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        markerEnd="url(#arrowheadPrimary)"
+                        filter="url(#glow)"
+                        className="flow-line"
                       />
                       <text
-                        x={(fromNode.x + toNode.x + 120) / 2}
-                        y={(fromNode.y + toNode.y) / 2 + 35}
+                        x={(fromX + toX) / 2}
+                        y={(fromY + toY) / 2 + 20}
                         textAnchor="middle"
                         className="fill-muted-foreground text-xs"
                       >
@@ -506,21 +574,36 @@ export default function WhiteboardPage() {
 
                 {isConnecting && connectionStart && tempConnection && (
                   <line
-                    x1={nodes.find((n) => n.id === connectionStart)!.x + 120}
-                    y1={nodes.find((n) => n.id === connectionStart)!.y + 40}
+                    x1={(connectionStartSide === 'left'
+                      ? nodes.find((n) => n.id === connectionStart)!.x
+                      : nodes.find((n) => n.id === connectionStart)!.x + NODE_WIDTH)}
+                    y1={nodes.find((n) => n.id === connectionStart)!.y + NODE_HEIGHT / 2}
                     x2={tempConnection.x}
                     y2={tempConnection.y}
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="2"
-                    strokeDasharray="5,5"
-                    opacity="0.6"
+                    stroke="url(#flowGradient)"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeDasharray="8,8"
+                    opacity="0.7"
+                    markerEnd="url(#arrowheadPrimary)"
                   />
                 )}
 
-                {/* Arrow marker definition */}
+                {/* Arrow marker and effects */}
                 <defs>
-                  <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                    <polygon points="0 0, 10 3.5, 0 7" fill="hsl(var(--primary))" />
+                  <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#06B6D4" />
+                    <stop offset="100%" stopColor="#6366F1" />
+                  </linearGradient>
+                  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                    <feMerge>
+                      <feMergeNode in="coloredBlur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <marker id="arrowheadPrimary" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" markerUnits="strokeWidth">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#6366F1" />
                   </marker>
                 </defs>
               </svg>
@@ -531,12 +614,21 @@ export default function WhiteboardPage() {
                 return (
                   <div
                     key={node.id}
-                    className={`absolute transition-all hover:shadow-lg ${
+                    className={`absolute select-none ${
+                      isDraggingNode === node.id ? "transition-none" : "transition-transform duration-150 ease-out"
+                    } hover:shadow-lg ${
                       selectedNode === node.id ? "ring-2 ring-primary" : ""
                     } ${isDraggingNode === node.id ? "cursor-grabbing z-10" : "cursor-grab"}
                     ${isConnecting ? "cursor-pointer" : ""}`}
-                    style={{ left: node.x, top: node.y }}
+                    style={{
+                      left: 0,
+                      top: 0,
+                      transform: `translate(${node.x}px, ${node.y}px)`,
+                      willChange: "transform",
+                    }}
                     onMouseDown={(e) => {
+                      // prevent text selection on drag start
+                      e.preventDefault()
                       if (isConnecting) {
                         if (!connectionStart) {
                           handleStartConnection(node.id, e)
@@ -549,17 +641,70 @@ export default function WhiteboardPage() {
                     }}
                   >
                     <Card
-                      className={`w-48 ${isConnecting && connectionStart === node.id ? "ring-2 ring-primary" : ""}`}
+                      className={`w-48 relative ${
+                        isConnecting && connectionStart === node.id ? "ring-2 ring-primary" : ""
+                      }`}
                     >
+                      {/* Connection handles */}
+                      <button
+                        title="Start/End connection"
+                        className="absolute -left-2 top-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-primary shadow border border-white/50 hover:scale-110 transition-transform"
+                        onMouseDown={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          if (!isConnecting || !connectionStart) {
+                            setIsConnecting(true)
+                            setConnectionStart(node.id)
+                          } else {
+                            // if already connecting, clicking another handle ends connection
+                            if (connectionStart !== node.id) {
+                              handleEndConnection(node.id, e as unknown as React.MouseEvent)
+                            }
+                          }
+                        }}
+                      />
+                      <button
+                        title="Start/End connection"
+                        className="absolute -right-2 top-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-accent shadow border border-white/50 hover:scale-110 transition-transform"
+                        onMouseDown={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          if (!isConnecting || !connectionStart) {
+                            setIsConnecting(true)
+                            setConnectionStart(node.id)
+                          } else {
+                            if (connectionStart !== node.id) {
+                              handleEndConnection(node.id, e as unknown as React.MouseEvent)
+                            }
+                          }
+                        }}
+                      />
+
                       <CardContent className="p-4">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <div className={`p-2 rounded-lg ${getNodeColor(node.type)}`}>
-                            <Icon className="h-4 w-4" />
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-3">
+                            <div className={`p-2 rounded-lg ${getNodeColor(node.type)}`}>
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-sm">{node.label}</h4>
+                              <p className="text-xs text-muted-foreground">{node.category}</p>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="font-semibold text-sm">{node.label}</h4>
-                            <p className="text-xs text-muted-foreground">{node.category}</p>
-                          </div>
+                          {!INITIAL_NODES.some((n) => n.id === node.id) && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                deleteNode(node.id)
+                              }}
+                              aria-label="Delete node"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
 
                         <div className="space-y-2">

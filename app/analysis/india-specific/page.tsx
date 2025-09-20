@@ -354,7 +354,15 @@ export default function IndiaSpecificAnalysisPage() {
                         </div>
 
                         <Button className="w-full" asChild>
-                          <Link href="/analysis/india-specific/input">
+                          <Link
+                            href={`/analysis/india-specific/input?state=${selectedState}&stateLabel=${encodeURIComponent(
+                              states.find((s) => s.value === selectedState)?.label || ""
+                            )}&mine=${selectedMine}&mineName=${encodeURIComponent(
+                              (currentMines.find((m) => m.id === selectedMine)?.name) || ""
+                            )}&type=${encodeURIComponent(
+                              (currentMines.find((m) => m.id === selectedMine)?.type) || ""
+                            )}`}
+                          >
                             <FileText className="mr-2 h-4 w-4" />
                             Proceed to Analysis
                           </Link>

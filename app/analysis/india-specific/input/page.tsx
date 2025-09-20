@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, MapPin, Zap, Calculator, TrendingUp } from "lucide-react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 
 export default function IndiaSpecificInputPage() {
   const [productionVolume, setProductionVolume] = useState("")
@@ -18,6 +19,16 @@ export default function IndiaSpecificInputPage() {
   const [energySource, setEnergySource] = useState("")
   const [transportDistance, setTransportDistance] = useState("")
   const [additionalInputs, setAdditionalInputs] = useState("")
+  const searchParams = useSearchParams()
+
+  // Build report link preserving context from the state-wise flow
+  const qs = new URLSearchParams()
+  qs.set("auto", "1")
+  ;["state", "stateLabel", "mine", "mineName", "type"].forEach((k) => {
+    const v = searchParams.get(k as any)
+    if (v) qs.set(k, v)
+  })
+  const reportHref = `/analysis/manual?${qs.toString()}`
 
   return (
     <div className="min-h-screen bg-background">
@@ -293,7 +304,7 @@ export default function IndiaSpecificInputPage() {
                     </div>
 
                     <Button className="w-full" asChild>
-                      <Link href="/analysis/manual/loading">
+                      <Link href={reportHref}>
                         <TrendingUp className="mr-2 h-4 w-4" />
                         Generate LCA Report
                       </Link>

@@ -50,8 +50,10 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-3">
-            <Card className="relative overflow-hidden">
+          <div className="mx-auto max-w-6xl px-6 md:px-12">
+            <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-3 justify-items-center">
+              <div className="w-full max-w-sm">
+            <Card className="relative overflow-hidden h-full w-full">
               <CardHeader>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                   <BarChart3 className="h-6 w-6 text-primary" />
@@ -76,8 +78,10 @@ export default function HomePage() {
                 </Button>
               </CardContent>
             </Card>
+              </div>
 
-            <Card className="relative overflow-hidden">
+              <div className="w-full max-w-sm">
+            <Card className="relative overflow-hidden h-full w-full">
               <CardHeader>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent/10">
                   <Palette className="h-6 w-6 text-accent" />
@@ -102,8 +106,10 @@ export default function HomePage() {
                 </Button>
               </CardContent>
             </Card>
+              </div>
 
-            <Card className="relative overflow-hidden">
+              <div className="w-full max-w-sm">
+            <Card className="relative overflow-hidden h-full w-full">
               <CardHeader>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-secondary/10">
                   <MapPin className="h-6 w-6 text-secondary" />
@@ -128,6 +134,8 @@ export default function HomePage() {
                 </Button>
               </CardContent>
             </Card>
+              </div>
+            </div>
           </div>
         </div>
       </section>

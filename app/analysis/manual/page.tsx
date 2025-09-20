@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { ArrowLeft, Upload, Zap, FileText, BarChart3, Leaf } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, XAxis, Pie, PieChart, Cell } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, Pie, PieChart, Cell, LabelList } from "recharts"
 import {
   ChartContainer,
   ChartTooltip,
@@ -22,11 +22,24 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 
 export default function ManualAnalysisPage() {
   const [selectedMaterial, setSelectedMaterial] = useState("")
   const [analysisStep, setAnalysisStep] = useState(1)
   const [showResults, setShowResults] = useState(false)
+  const searchParams = useSearchParams()
+
+  // If arriving from India-specific flow with auto=1, open results directly
+  useEffect(() => {
+    const auto = searchParams.get("auto")
+    if (auto) {
+      // preselect a sensible default to avoid empty states
+      if (!selectedMaterial) setSelectedMaterial("aluminum")
+      setShowResults(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   const comparisonData = [
     { metric: "Carbon Footprint (kg CO₂)", conventional: 15.2, sustainable: 8.7 },
@@ -104,6 +117,11 @@ export default function ManualAnalysisPage() {
     },
   } satisfies ChartConfig
 
+  // Optional context forwarded from India-specific flow
+  const mineName = searchParams.get("mineName") || ""
+  const stateLabel = searchParams.get("stateLabel") || ""
+  const mineType = searchParams.get("type") || ""
+
   const wasteCompositionData = [
     { waste: "Red Mud", percentage: 64, fill: "var(--color-red-mud)" },
     { waste: "Spent Pot Lining", percentage: 21, fill: "var(--color-spl)" },
@@ -155,6 +173,19 @@ export default function ManualAnalysisPage() {
               </div>
             </div>
 
+            {(mineName || stateLabel || mineType) && (
+              <Card className="mb-2">
+                <CardContent className="p-4 flex flex-wrap items-center gap-3">
+                  {mineName && <Badge variant="outline">Mine: {mineName}</Badge>}
+                  {mineType && <Badge variant="secondary">Type: {mineType}</Badge>}
+                  {stateLabel && <Badge>State: {stateLabel}</Badge>}
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    Location-aware analysis generated automatically
+                  </span>
+                </CardContent>
+              </Card>
+            )}
+
             <Tabs defaultValue="comparison" className="space-y-6">
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="comparison">Comparison</TabsTrigger>
@@ -183,8 +214,26 @@ export default function ManualAnalysisPage() {
                         />
                         <ChartTooltip content={<ChartTooltipContent />} />
                         <ChartLegend content={<ChartLegendContent />} />
-                        <Bar dataKey="conventional" fill="#EF4444" radius={[6,6,0,0]} />
-                        <Bar dataKey="sustainable" fill="#22C55E" radius={[6,6,0,0]} />
+                        <Bar
+                          dataKey="conventional"
+                          fill="#EF4444"
+                          radius={[6,6,0,0]}
+                          isAnimationActive
+                          animationDuration={700}
+                          animationBegin={100}
+                        >
+                          <LabelList dataKey="conventional" position="top" formatter={(v: number) => v.toFixed(1)} />
+                        </Bar>
+                        <Bar
+                          dataKey="sustainable"
+                          fill="#22C55E"
+                          radius={[6,6,0,0]}
+                          isAnimationActive
+                          animationDuration={700}
+                          animationBegin={150}
+                        >
+                          <LabelList dataKey="sustainable" position="top" formatter={(v: number) => v.toFixed(1)} />
+                        </Bar>
                       </BarChart>
                     </ChartContainer>
                   </CardContent>
@@ -347,6 +396,11 @@ export default function ManualAnalysisPage() {
                                 innerRadius={70}
                                 outerRadius={110}
                                 paddingAngle={2}
+                                labelLine={false}
+                                label={({ value }) => `${value}%`}
+                                isAnimationActive
+                                animationDuration={800}
+                                animationBegin={100}
                               >
                                 {conventionalProcessData.map((_, i) => (
                                   <Cell key={`c-${i}`} fill={chartColors[i % chartColors.length]} />
@@ -410,6 +464,11 @@ export default function ManualAnalysisPage() {
                                 innerRadius={70}
                                 outerRadius={110}
                                 paddingAngle={2}
+                                labelLine={false}
+                                label={({ value }) => `${value}%`}
+                                isAnimationActive
+                                animationDuration={800}
+                                animationBegin={120}
                               >
                                 {sustainableMetricsData.map((_, i) => (
                                   <Cell key={`s-${i}`} fill={chartColors[i % chartColors.length]} />
@@ -473,6 +532,11 @@ export default function ManualAnalysisPage() {
                               innerRadius={70}
                               outerRadius={110}
                               paddingAngle={2}
+                              labelLine={false}
+                              label={({ value }) => `${value}%`}
+                              isAnimationActive
+                              animationDuration={800}
+                              animationBegin={140}
                             >
                               {wasteCompositionData.map((_, i) => (
                                 <Cell key={`w-${i}`} fill={chartColors[i % chartColors.length]} />
