@@ -277,8 +277,12 @@ export default function WhiteboardPage() {
     }
 
     if (isDraggingNode) {
-      const newX = coords.x - dragOffset.x
-      const newY = coords.y - dragOffset.y
+      const rawX = coords.x - dragOffset.x
+      const rawY = coords.y - dragOffset.y
+
+      // CHANGED: Clamp the node's position to stay within the canvas boundaries.
+      const newX = Math.max(0, Math.min(rawX, CANVAS_WIDTH - BASE_NODE_WIDTH))
+      const newY = Math.max(0, Math.min(rawY, CANVAS_HEIGHT - BASE_NODE_HEIGHT))
       
       setNodes((prev) =>
         prev.map((n) =>
@@ -354,8 +358,12 @@ export default function WhiteboardPage() {
     if (!draggedNodeType || !canvasRef.current) return
 
     const coords = screenToCanvasCoords(event.clientX, event.clientY)
-    const x = coords.x - dragOffset.x / zoomLevel
-    const y = coords.y - dragOffset.y / zoomLevel
+    const rawX = coords.x - dragOffset.x / zoomLevel
+    const rawY = coords.y - dragOffset.y / zoomLevel
+
+    // CHANGED: Clamp the dropped node's position as well
+    const x = Math.max(0, Math.min(rawX, CANVAS_WIDTH - BASE_NODE_WIDTH))
+    const y = Math.max(0, Math.min(rawY, CANVAS_HEIGHT - BASE_NODE_HEIGHT))
 
     const nodeTypeInfo = nodeTypes.find((nt) => nt.type === draggedNodeType)!
 
@@ -363,8 +371,8 @@ export default function WhiteboardPage() {
       id: `node_${Date.now()}`,
       type: draggedNodeType,
       label: `New ${nodeTypeInfo.label}`,
-      x: Math.max(0, x),
-      y: Math.max(0, y),
+      x: x,
+      y: y,
       inputs: ["Input 1"],
       outputs: ["Output 1"],
       impact: Math.floor(Math.random() * 100),
