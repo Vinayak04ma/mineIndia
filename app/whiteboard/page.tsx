@@ -625,10 +625,11 @@ export default function WhiteboardPage() {
                     100% { opacity: 0.6; }
                   }
                   .flow-line {
-                    stroke-dasharray: 12 12;
+                    stroke-dasharray: 8 8;
                     stroke-dashoffset: 0;
-                    animation: dash 3s linear infinite;
+                    animation: dash 2s linear infinite;
                     transition: all 0.3s ease;
+                    marker-end: url(#arrowheadPrimary);
                   }
                   .flow-line:hover {
                     stroke-width: 4px;
@@ -714,13 +715,22 @@ export default function WhiteboardPage() {
                       {/* Connection label with improved styling */}
                       <g transform={`translate(${midX}, ${midY})`}>
                         <foreignObject 
-                          x="-40" 
-                          y="-12" 
-                          width="80" 
-                          height="24"
+                          x="-50" 
+                          y="-16" 
+                          width="100" 
+                          height="64"
                           className="pointer-events-none"
                         >
-                          
+                          <div className="flex flex-col items-center justify-center">
+                            <div className="text-xs font-medium text-center px-3 py-1 rounded-full bg-white dark:bg-gray-800 shadow-md border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
+                              {connection.material}
+                            </div>
+                            {connection.quantity > 0 && (
+                              <div className="text-[10px] mt-0.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary dark:text-primary-foreground">
+                                {connection.quantity} {connection.unit || 'units'}
+                              </div>
+                            )}
+                          </div>
                         </foreignObject>
                       </g>
                     </g>
