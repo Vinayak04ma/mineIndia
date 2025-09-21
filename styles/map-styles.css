@@ -1,0 +1,68 @@
+/* Leaflet Map Styles */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  background-color: #f8fafc; /* Light gray background for map */
+}
+
+/* Fix for Leaflet marker icons */
+.leaflet-div-icon {
+  background: transparent;
+  border: none;
+}
+
+.leaflet-marker-icon {
+  transition: transform 0.2s ease;
+}
+
+.leaflet-marker-icon:hover {
+  transform: scale(1.2);
+  z-index: 1000;
+}
+
+/* Popup styles */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.leaflet-popup-content {
+  margin: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.leaflet-popup-content h4 {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #1f2937; /* gray-800 */
+}
+
+.leaflet-popup-content p {
+  margin: 0.25rem 0;
+  color: #4b5563; /* gray-600 */
+}
+
+/* Dark mode support */
+.dark .leaflet-container {
+  background-color: #0f172a; /* slate-900 */
+  color: #e2e8f0; /* slate-200 */
+}
+
+.dark .leaflet-popup-content h4 {
+  color: #f3f4f6; /* gray-100 */
+}
+
+.dark .leaflet-popup-content p {
+  color: #d1d5db; /* gray-300 */
+}
+
+/* Ensure the map container takes full height */
+.map-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}

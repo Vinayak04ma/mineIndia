@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,8 +8,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, MapPin, Search, Zap, FileText } from "lucide-react"
+import { ArrowLeft, Search, Zap, FileText, MapPin } from "lucide-react"
 import Link from "next/link"
+import dynamic from 'next/dynamic';
+
+// Dynamically import the map component to avoid SSR issues with Leaflet
+const IndiaMiningMap = dynamic(
+  () => import('@/components/india-mining-map'),
+  { ssr: false }
+);
 
 export default function IndiaSpecificAnalysisPage() {
   const [selectedState, setSelectedState] = useState("")
@@ -31,16 +38,28 @@ export default function IndiaSpecificAnalysisPage() {
         name: "Bailadila Iron Ore Mine",
         type: "Iron Ore",
         location: "Dantewada",
-        coordinates: "18.6°N, 81.3°E",
+        coordinates: "18.6, 81.3",
+        lat: 18.6,
+        lng: 81.3
       },
       {
         id: "keonjhar",
         name: "Keonjhar Iron Ore Complex",
         type: "Iron Ore",
         location: "Keonjhar",
-        coordinates: "21.6°N, 85.6°E",
+        coordinates: "21.6, 85.6",
+        lat: 21.6,
+        lng: 85.6
       },
-      { id: "talcher", name: "Talcher Coal Fields", type: "Coal", location: "Angul", coordinates: "20.9°N, 85.2°E" },
+      { 
+        id: "talcher", 
+        name: "Talcher Coal Fields", 
+        type: "Coal", 
+        location: "Angul", 
+        coordinates: "20.9, 85.2",
+        lat: 20.9,
+        lng: 85.2
+      },
     ],
     jharkhand: [
       {
@@ -48,14 +67,48 @@ export default function IndiaSpecificAnalysisPage() {
         name: "Noamundi Iron Ore Mine",
         type: "Iron Ore",
         location: "West Singhbhum",
-        coordinates: "22.2°N, 85.5°E",
+        coordinates: "22.2, 85.5",
+        lat: 22.2,
+        lng: 85.5
       },
-      { id: "jharia", name: "Jharia Coal Fields", type: "Coal", location: "Dhanbad", coordinates: "23.7°N, 86.4°E" },
-      { id: "bokaro", name: "Bokaro Coal Fields", type: "Coal", location: "Bokaro", coordinates: "23.8°N, 86.0°E" },
+      { 
+        id: "jharia", 
+        name: "Jharia Coal Fields", 
+        type: "Coal", 
+        location: "Dhanbad", 
+        coordinates: "23.7, 86.4",
+        lat: 23.7,
+        lng: 86.4
+      },
+      { 
+        id: "bokaro", 
+        name: "Bokaro Coal Fields", 
+        type: "Coal", 
+        location: "Bokaro", 
+        coordinates: "23.8, 86.0",
+        lat: 23.8,
+        lng: 86.0
+      },
     ],
     chhattisgarh: [
-      { id: "korba", name: "Korba Coal Fields", type: "Coal", location: "Korba", coordinates: "22.3°N, 82.7°E" },
-      { id: "raigarh", name: "Raigarh Coal Basin", type: "Coal", location: "Raigarh", coordinates: "21.9°N, 83.4°E" },
+      { 
+        id: "korba", 
+        name: "Korba Coal Fields", 
+        type: "Coal", 
+        location: "Korba", 
+        coordinates: "22.3, 82.7",
+        lat: 22.3,
+        lng: 82.7
+      },
+      { 
+        id: "raigarh", 
+        name: "Raigarh Coal Basin", 
+        type: "Coal", 
+        location: "Raigarh", 
+        coordinates: "21.9, 83.4",
+        lat: 21.9,
+        lng: 83.4
+      },
     ],
     karnataka: [
       {
@@ -63,14 +116,18 @@ export default function IndiaSpecificAnalysisPage() {
         name: "Bellary Iron Ore Belt",
         type: "Iron Ore",
         location: "Bellary",
-        coordinates: "15.1°N, 76.9°E",
+        coordinates: "15.1, 76.9",
+        lat: 15.1,
+        lng: 76.9
       },
       {
         id: "kudremukh",
         name: "Kudremukh Iron Ore Mine",
         type: "Iron Ore",
         location: "Chikkamagaluru",
-        coordinates: "13.3°N, 75.0°E",
+        coordinates: "13.3, 75.0",
+        lat: 13.3,
+        lng: 75.0
       },
     ],
     rajasthan: [
@@ -79,19 +136,37 @@ export default function IndiaSpecificAnalysisPage() {
         name: "Khetri Copper Complex",
         type: "Copper",
         location: "Jhunjhunu",
-        coordinates: "28.0°N, 75.8°E",
+        coordinates: "28.0, 75.8",
+        lat: 28.0,
+        lng: 75.8
       },
       {
         id: "zawar",
         name: "Zawar Lead-Zinc Mines",
         type: "Lead-Zinc",
         location: "Udaipur",
-        coordinates: "24.3°N, 73.7°E",
+        coordinates: "24.3, 73.7",
+        lat: 24.3,
+        lng: 73.7
       },
     ],
   }
 
-  const currentMines = selectedState ? mines[selectedState as keyof typeof mines] || [] : []
+  const currentMines = useMemo(() => {
+    // If a specific mine is selected, show only that mine
+    if (selectedMine) {
+      const allMines = Object.values(mines).flat();
+      return allMines.filter(mine => mine.id === selectedMine);
+    }
+
+    // If a state is selected, show only mines from that state
+    if (selectedState) {
+      return mines[selectedState as keyof typeof mines] || [];
+    }
+
+    // If no state selected, show all mines from all states
+    return Object.values(mines).flat();
+  }, [selectedState, selectedMine]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -121,70 +196,61 @@ export default function IndiaSpecificAnalysisPage() {
                     <MapPin className="mr-2 h-5 w-5" />
                     Interactive Mine Map
                   </CardTitle>
-                  <CardDescription>Select a mine location to access regional environmental data</CardDescription>
+                  <CardDescription>
+                    {selectedMine
+                      ? `Showing selected mine: ${currentMines.find(m => m.id === selectedMine)?.name}`
+                      : selectedState
+                      ? `Showing mines in ${states.find(s => s.value === selectedState)?.label}`
+                      : "Showing all mines across India. Select a state to filter by region."
+                    }
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {/* Mock Map Interface */}
-                  <div className="relative h-96 bg-muted/20 rounded-lg overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10">
-                      {/* Mock India Map with Mine Locations */}
-                      <div className="relative h-full w-full">
-                        <img
-                          src="/india-map-with-mining-locations-marked.jpg"
-                          alt="India Mining Map"
-                          className="w-full h-full object-cover opacity-80"
-                        />
-
-                        {/* Mock Mine Markers */}
-                        <div
-                          className="absolute top-1/4 left-1/3 w-3 h-3 bg-primary rounded-full animate-pulse cursor-pointer"
-                          title="Odisha Mines"
-                        ></div>
-                        <div
-                          className="absolute top-1/3 left-2/5 w-3 h-3 bg-accent rounded-full animate-pulse cursor-pointer"
-                          title="Jharkhand Mines"
-                        ></div>
-                        <div
-                          className="absolute top-2/5 left-1/3 w-3 h-3 bg-secondary rounded-full animate-pulse cursor-pointer"
-                          title="Chhattisgarh Mines"
-                        ></div>
-                        <div
-                          className="absolute bottom-1/3 left-1/4 w-3 h-3 bg-primary rounded-full animate-pulse cursor-pointer"
-                          title="Karnataka Mines"
-                        ></div>
-                        <div
-                          className="absolute top-1/4 left-1/5 w-3 h-3 bg-accent rounded-full animate-pulse cursor-pointer"
-                          title="Rajasthan Mines"
-                        ></div>
-                      </div>
+                  <div className="relative h-[500px] w-full rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800">
+                    <div className="absolute inset-0">
+                      <IndiaMiningMap 
+                        mines={currentMines}
+                        selectedMine={selectedMine}
+                        onMineSelect={setSelectedMine}
+                      />
                     </div>
-
-                    {/* Map Controls */}
-                    <div className="absolute top-4 right-4 space-y-2">
-                      <Button size="sm" variant="secondary">
-                        +
-                      </Button>
-                      <Button size="sm" variant="secondary">
-                        -
-                      </Button>
-                    </div>
-
                     {/* Legend */}
-                    <div className="absolute bottom-4 left-4 bg-background/90 p-3 rounded-lg">
-                      <h4 className="font-semibold text-sm mb-2">Mine Types</h4>
-                      <div className="space-y-1 text-xs">
+                    <div className="absolute bottom-4 left-4 bg-white/90 dark:bg-gray-900/90 p-3 rounded-lg shadow-lg z-[1000] border border-gray-200 dark:border-gray-700">
+                      <h4 className="font-semibold text-sm mb-2 text-gray-900 dark:text-gray-100">Mine Types</h4>
+                      <div className="space-y-1.5 text-xs text-gray-800 dark:text-gray-200">
                         <div className="flex items-center">
-                          <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                          <div className="w-3 h-3 bg-blue-600 rounded-full mr-2 border border-white dark:border-gray-800"></div>
                           <span>Iron Ore</span>
                         </div>
                         <div className="flex items-center">
-                          <div className="w-2 h-2 bg-accent rounded-full mr-2"></div>
+                          <div className="w-3 h-3 bg-green-600 rounded-full mr-2 border border-white dark:border-gray-800"></div>
                           <span>Coal</span>
                         </div>
                         <div className="flex items-center">
-                          <div className="w-2 h-2 bg-secondary rounded-full mr-2"></div>
-                          <span>Copper/Others</span>
+                          <div className="w-3 h-3 bg-yellow-600 rounded-full mr-2 border border-white dark:border-gray-800"></div>
+                          <span>Copper</span>
                         </div>
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 bg-red-600 rounded-full mr-2 border border-white dark:border-gray-800"></div>
+                          <span>Lead-Zinc</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          {selectedMine ? "Showing 1 selected mine" : `${currentMines.length} mines displayed`}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="absolute top-4 right-4 z-[1000]">
+                      <div className="bg-white/90 dark:bg-gray-900/90 p-2 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          {selectedMine
+                            ? "Selected mine highlighted on map"
+                            : selectedState
+                            ? "Click markers to select specific mine"
+                            : "Click markers to select mine and state"
+                          }
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -194,7 +260,12 @@ export default function IndiaSpecificAnalysisPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Search & Filter</CardTitle>
-                  <CardDescription>Find specific mines or ore types</CardDescription>
+                  <CardDescription>
+                    {selectedState
+                      ? `Showing mines in ${states.find(s => s.value === selectedState)?.label}. Select different state to view other regions.`
+                      : "Select a state to view mines in that region, or leave unselected to see all mines across India."
+                    }
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -243,6 +314,42 @@ export default function IndiaSpecificAnalysisPage() {
                                 selectedMine === mine.id ? "ring-2 ring-primary" : ""
                               }`}
                               onClick={() => setSelectedMine(mine.id)}
+                            >
+                              <CardContent className="p-4">
+                                <div className="flex items-start justify-between mb-2">
+                                  <h5 className="font-semibold text-sm">{mine.name}</h5>
+                                  <Badge variant="outline" className="text-xs">
+                                    {mine.type}
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-muted-foreground mb-1">{mine.location}</p>
+                                <p className="text-xs text-muted-foreground">{mine.coordinates}</p>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Show all mines when no state selected */}
+                    {!selectedState && currentMines.length > 0 && (
+                      <div className="space-y-3">
+                        <h4 className="font-semibold">All Mines Across India</h4>
+                        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                          {currentMines.map((mine) => (
+                            <Card
+                              key={mine.id}
+                              className={`cursor-pointer transition-all hover:shadow-md ${
+                                selectedMine === mine.id ? "ring-2 ring-primary" : ""
+                              }`}
+                              onClick={() => {
+                                // When clicking a mine from all mines view, also select the state
+                                const mineState = Object.keys(mines).find(state =>
+                                  mines[state as keyof typeof mines]?.some(m => m.id === mine.id)
+                                );
+                                if (mineState) setSelectedState(mineState);
+                                setSelectedMine(mine.id);
+                              }}
                             >
                               <CardContent className="p-4">
                                 <div className="flex items-start justify-between mb-2">
@@ -381,10 +488,14 @@ export default function IndiaSpecificAnalysisPage() {
                 <Card>
                   <CardContent className="p-8 text-center">
                     <MapPin className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h4 className="font-semibold mb-2">Select a Mine Location</h4>
+                    <h4 className="font-semibold mb-2">
+                      {selectedState ? "Select a Mine Location" : "Select a State or Mine"}
+                    </h4>
                     <p className="text-sm text-muted-foreground">
-                      Choose a mine from the map or search results to view location-specific data and proceed with
-                      analysis
+                      {selectedState
+                        ? "Choose a mine from the map or search results to view location-specific data and proceed with analysis"
+                        : "Choose a state to view mines in that region, or click any mine marker on the map to get started"
+                      }
                     </p>
                   </CardContent>
                 </Card>
