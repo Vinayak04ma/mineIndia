@@ -659,12 +659,12 @@ export default function WhiteboardPage() {
                   const fromScale = getNodeScale(zoomLevel)
                   const toScale = getNodeScale(zoomLevel)
                   
-                  const fromX = connection.fromSide === 'left' 
-                    ? fromNode.x 
-                    : fromNode.x + BASE_NODE_WIDTH * fromScale
-                  const toX = connection.toSide === 'right' 
-                    ? toNode.x + BASE_NODE_WIDTH * toScale 
-                    : toNode.x
+                  // Always start from right side (blue dot) of source node
+                  const fromX = fromNode.x + BASE_NODE_WIDTH * fromScale
+                  // Always end at left side (green dot) of target node
+                  const toX = toNode.x
+                  
+                  // Center vertically on the nodes
                   const fromY = fromNode.y + BASE_NODE_HEIGHT * fromScale / 2
                   const toY = toNode.y + BASE_NODE_HEIGHT * toScale / 2
                   
@@ -687,13 +687,15 @@ export default function WhiteboardPage() {
                     <g key={connection.id} className="connection-group">
                       {/* Connection line with gradient */}
                       <path
+                        key={connection.id}
                         d={path}
                         fill="none"
                         stroke="url(#flowGradient)"
-                        strokeWidth="3"
+                        strokeWidth="2.5"
                         strokeLinecap="round"
+                        strokeLinejoin="round"
                         markerEnd="url(#arrowheadPrimary)"
-                        className="flow-line"
+                        className="flow-line opacity-90"
                       />
                       
                       {/* Animated flow effect */}
@@ -701,7 +703,7 @@ export default function WhiteboardPage() {
                         d={path}
                         fill="none"
                         stroke="url(#flowGradient)"
-                        strokeWidth="3"
+                        strokeWidth="2.5"
                         strokeLinecap="round"
                         strokeDasharray="10 15"
                         strokeDashoffset="0"
@@ -709,25 +711,17 @@ export default function WhiteboardPage() {
                         opacity="0.7"
                       />
                       
-                      {/* Connection label with background */}
-                      <g transform={`translate(${midX}, ${midY}) rotate(${angle > 90 || angle < -90 ? angle + 180 : angle})`}>
-                        <rect
-                          x="-40"
-                          y="-15"
-                          width="80"
+                      {/* Connection label with improved styling */}
+                      <g transform={`translate(${midX}, ${midY})`}>
+                        <foreignObject 
+                          x="-40" 
+                          y="-12" 
+                          width="80" 
                           height="24"
-                          rx="12"
-                          fill="hsl(var(--primary))"
-                          className="connection-badge"
-                        />
-                        <text
-                          x="0"
-                          y="4"
-                          textAnchor="middle"
-                          className="connection-label text-xs font-medium"
+                          className="pointer-events-none"
                         >
-                          {connection.material} • {connection.quantity} {connection.unit}
-                        </text>
+                          
+                        </foreignObject>
                       </g>
                     </g>
                   )
@@ -742,7 +736,7 @@ export default function WhiteboardPage() {
                     x2={tempConnection.x}
                     y2={tempConnection.y}
                     stroke="url(#flowGradient)"
-                    strokeWidth="3"
+                    strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeDasharray="8,8"
                     opacity="0.7"
@@ -754,14 +748,18 @@ export default function WhiteboardPage() {
                 <defs>
                   <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="#06B6D4" />
-                    <stop offset="100%" stopColor="#6366F1" />
+                    <stop offset="50%" stopColor="#8B5CF6" />
+                    <stop offset="100%" stopColor="#EC4899" />
                   </linearGradient>
-                  
-                  <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
-                    <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                    <feComposite in="SourceGraphic" in2="coloredBlur" operator="over" />
+                  <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="2" result="blur" />
+                    <feFlood floodColor="#3B82F6" floodOpacity="0.5" result="glowColor" />
+                    <feComposite in="glowColor" in2="blur" operator="in" result="softGlow" />
+                    <feMerge>
+                      <feMergeNode in="softGlow" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
                   </filter>
-                  
                   <filter id="glowHover" x="-100%" y="-100%" width="300%" height="300%">
                     <feGaussianBlur stdDeviation="5" result="blur" />
                     <feFlood floodColor="#38BDF8" floodOpacity="0.8" result="glowColor" />
@@ -771,20 +769,16 @@ export default function WhiteboardPage() {
                       <feMergeNode in="SourceGraphic" />
                     </feMerge>
                   </filter>
-                  
                   <marker
                     id="arrowheadPrimary"
-                    markerWidth="10"
-                    markerHeight="7"
-                    refX="9"
-                    refY="3.5"
+                    markerWidth="12"
+                    markerHeight="8"
+                    refX="10"
+                    refY="4"
                     orient="auto"
                     markerUnits="strokeWidth"
                   >
-                    <polygon points="0 0, 10 3.5, 0 7" fill="url(#flowGradient)" />
-                  </marker>
-                  <marker id="arrowheadPrimary" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" markerUnits="strokeWidth">
-                    <polygon points="0 0, 10 3.5, 0 7" fill="#6366F1" />
+                    <path d="M0,0 L12,4 L0,8 Z" fill="url(#flowGradient)" />
                   </marker>
                 </defs>
               </svg>
@@ -833,54 +827,67 @@ export default function WhiteboardPage() {
                     }}
                   >
                     <Card
-                      className={`w-[192px] h-[120px] relative ${
-                        isConnecting && connectionStart === node.id ? "ring-2 ring-primary" : ""
-                      }`}
+                      className={`relative w-64 transition-all duration-200 ease-out ${
+                        isConnecting && connectionStart === node.id 
+                          ? "ring-2 ring-primary shadow-lg" 
+                          : selectedNode === node.id 
+                            ? "ring-2 ring-primary shadow-lg" 
+                            : "hover:shadow-lg border border-gray-200 dark:border-gray-700"
+                      } bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-xl overflow-hidden`}
+                      style={{
+                        boxShadow: selectedNode === node.id 
+                          ? '0 0 0 2px #3b82f6, 0 4px 20px -5px rgba(0,0,0,0.1)' 
+                          : '0 4px 20px -5px rgba(0,0,0,0.05)'
+                      }}
                     >
-                      {/* Connection handles */}
+                      {/* Left connection handle (green) - for incoming connections */}
                       <button
-                        title="Start/End connection"
-                        className="absolute -left-2 top-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-primary shadow border border-white/50 hover:scale-110 transition-transform"
+                        title="Connect to this node"
+                        className="absolute -left-2 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-green-500 shadow-md border-2 border-white dark:border-gray-800 hover:scale-110 transition-all duration-200 ease-out z-10"
+                        style={{
+                          boxShadow: '0 2px 10px -2px rgba(34, 197, 94, 0.5)'
+                        }}
                         onMouseDown={(e) => {
                           e.preventDefault()
                           e.stopPropagation()
-                          if (!isConnecting || !connectionStart) {
-                            setIsConnecting(true)
-                            setConnectionStart(node.id)
-                          } else {
-                            // if already connecting, clicking another handle ends connection
-                            if (connectionStart !== node.id) {
-                              handleEndConnection(node.id, e as unknown as React.MouseEvent)
-                            }
+                          if (isConnecting && connectionStart && connectionStart !== node.id) {
+                            // Only allow connecting to this node's left handle (incoming connection)
+                            handleEndConnection(node.id, e as unknown as React.MouseEvent)
                           }
                         }}
                       />
+                      
+                      {/* Right connection handle (blue) - for outgoing connections */}
                       <button
-                        title="Start/End connection"
-                        className="absolute -right-2 top-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-accent shadow border border-white/50 hover:scale-110 transition-transform"
+                        title="Start connection from this node"
+                        className="absolute -right-2 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 shadow-md border-2 border-white dark:border-gray-800 hover:scale-110 transition-all duration-200 ease-out z-10"
+                        style={{
+                          boxShadow: '0 2px 10px -2px rgba(14, 165, 233, 0.5)'
+                        }}
                         onMouseDown={(e) => {
                           e.preventDefault()
                           e.stopPropagation()
-                          if (!isConnecting || !connectionStart) {
+                          if (!isConnecting) {
+                            // Start a new connection from this node's right handle
                             setIsConnecting(true)
                             setConnectionStart(node.id)
-                          } else {
-                            if (connectionStart !== node.id) {
-                              handleEndConnection(node.id, e as unknown as React.MouseEvent)
-                            }
                           }
                         }}
                       />
 
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center space-x-3">
-                            <div className={`p-2 rounded-lg ${getNodeColor(node.type)}`}>
-                              <Icon className="h-4 w-4" />
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start space-x-3">
+                            <div className={`p-2 rounded-lg ${getNodeColor(node.type)} shadow-inner`}>
+                              <Icon className="h-4 w-4 text-white" />
                             </div>
-                            <div>
-                              <h4 className="font-semibold text-sm">{node.label}</h4>
-                              <p className="text-xs text-muted-foreground">{node.category}</p>
+                            <div className="space-y-0.5">
+                              <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                                {node.label}
+                              </h4>
+                              <p className="text-xs text-muted-foreground font-medium">
+                                {node.category}
+                              </p>
                             </div>
                           </div>
                           {!INITIAL_NODES.some((n) => n.id === node.id) && (
@@ -899,25 +906,40 @@ export default function WhiteboardPage() {
                           )}
                         </div>
 
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-xs">
-                            <span>Environmental Impact</span>
-                            <Badge
-                              variant={node.impact > 80 ? "destructive" : node.impact > 50 ? "secondary" : "default"}
-                              className="text-xs"
-                            >
-                              {node.impact}%
-                            </Badge>
-                          </div>
-
-                          <div className="text-xs">
-                            <div className="flex justify-between mb-1">
-                              <span className="text-muted-foreground">Inputs:</span>
-                              <span>{node.inputs.length}</span>
+                        <div className="space-y-3 pt-2 border-t border-gray-100 dark:border-gray-800">
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-muted-foreground font-medium">Impact Score</span>
+                              <Badge
+                                variant={node.impact > 80 ? "destructive" : node.impact > 50 ? "secondary" : "default"}
+                                className="text-xs font-mono font-bold px-2 py-0.5"
+                              >
+                                {node.impact}%
+                              </Badge>
                             </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Outputs:</span>
-                              <span>{node.outputs.length}</span>
+                            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
+                              <div 
+                                className={`h-full rounded-full ${
+                                  node.impact > 80 ? 'bg-red-500' : 
+                                  node.impact > 50 ? 'bg-yellow-500' : 'bg-green-500'
+                                }`}
+                                style={{ width: `${node.impact}%` }}
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
+                              <div className="text-muted-foreground font-medium">Inputs</div>
+                              <div className="text-lg font-bold text-cyan-600 dark:text-cyan-400">
+                                {node.inputs.length}
+                              </div>
+                            </div>
+                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
+                              <div className="text-muted-foreground font-medium">Outputs</div>
+                              <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                                {node.outputs.length}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -931,7 +953,7 @@ export default function WhiteboardPage() {
         </div>
 
         {/* Right Sidebar - Properties & Results */}
-        <div className="w-80 border-l bg-muted/20">
+        <div className="w-80 border-l bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
           <Tabs defaultValue="properties" className="h-full">
             <TabsList className="grid w-full grid-cols-2 m-4">
               <TabsTrigger value="properties">Properties</TabsTrigger>
