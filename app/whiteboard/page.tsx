@@ -59,9 +59,16 @@ interface Connection {
 
 export default function WhiteboardPage() {
   // Node visual constants (match styles): w-48 => 192px; approx height ~120px
-  const NODE_WIDTH = 192
-  const NODE_HEIGHT = 120
+  const CANVAS_WIDTH = 10000
+  const CANVAS_HEIGHT = 5000
+  const BASE_NODE_WIDTH = 192
+  const BASE_NODE_HEIGHT = 120
   const BASE_UI_ZOOM = 0.8
+  
+  // Calculate node scale based on zoom level (0.5 to 2.0)
+  const getNodeScale = (zoom: number) => {
+    return Math.max(0.5, Math.min(2, zoom));
+  }
   const INITIAL_NODES: ProcessNode[] = [
     {
       id: "1",
@@ -131,7 +138,9 @@ export default function WhiteboardPage() {
   const [draggedNodeType, setDraggedNodeType] = useState<string | null>(null)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [isDraggingNode, setIsDraggingNode] = useState<string | null>(null)
+  const [potentialDragNode, setPotentialDragNode] = useState<string | null>(null)
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
   // Canvas (content) zoom. Base UI is already at 80% via CSS zoom
   const [zoomLevel, setZoomLevel] = useState(1)
   const [isConnecting, setIsConnecting] = useState(false)
@@ -190,6 +199,11 @@ export default function WhiteboardPage() {
       event.preventDefault()
       const delta = event.deltaY > 0 ? -0.1 : 0.1
       setZoomLevel((prev) => Math.max(0.5, Math.min(2, prev + delta)))
+    } else if (event.shiftKey) {
+      // Allow horizontal scrolling with shift + wheel
+      event.preventDefault()
+      const container = event.currentTarget as HTMLElement
+      container.scrollLeft += event.deltaY
     }
   }
 
@@ -224,24 +238,43 @@ export default function WhiteboardPage() {
   }
 
   const handleCanvasMouseMove = (event: React.MouseEvent) => {
-    if (isConnecting && canvasRef.current) {
+    // Handle node dragging with requestAnimationFrame for smoother updates
+    if (isDraggingNode) {
+      const node = nodes.find((n) => n.id === isDraggingNode)
+      if (!node) return
+
+      const scale = getNodeScale(zoomLevel)
+      // Allow nodes to be dragged anywhere within the canvas bounds
+      const newX = Math.max(0, Math.min(event.clientX - dragOffset.x * scale, CANVAS_WIDTH - BASE_NODE_WIDTH * scale))
+      const newY = Math.max(0, Math.min(event.clientY - dragOffset.y * scale, CANVAS_HEIGHT - BASE_NODE_HEIGHT * scale))
+
+      // Use requestAnimationFrame for smoother updates
+      requestAnimationFrame(() => {
+        setNodes((prev) =>
+          prev.map((n) =>
+            n.id === isDraggingNode
+              ? { ...n, x: newX, y: newY }
+              : n
+          )
+        )
+      })
+    }
+    // Handle connection preview
+    else if (isConnecting && canvasRef.current) {
       const canvasRect = canvasRef.current.getBoundingClientRect()
       setTempConnection({
-        x: (event.clientX - canvasRect.left) / zoomLevel,
-        y: (event.clientY - canvasRect.top - 80) / zoomLevel,
+        x: event.clientX - canvasRect.left,
+        y: event.clientY - canvasRect.top,
       })
     }
 
     if (!isDraggingNode || !canvasRef.current) return
 
     const canvasRect = canvasRef.current.getBoundingClientRect()
-    const newX = Math.max(0, Math.min((event.clientX - dragStartPos.x) / zoomLevel, canvasRect.width / zoomLevel - 200))
-    const newY = Math.max(
-      0,
-      Math.min((event.clientY - dragStartPos.y - canvasRect.top - 80) / zoomLevel, canvasRect.height / zoomLevel - 150),
-    )
+    const x = event.clientX - canvasRect.left - dragOffset.x
+    const y = event.clientY - canvasRect.top - dragOffset.y
 
-    setNodes((prev) => prev.map((node) => (node.id === isDraggingNode ? { ...node, x: newX, y: newY } : node)))
+    setNodes((prev) => prev.map((node) => (node.id === isDraggingNode ? { ...node, x: Math.max(0, x), y: Math.max(0, y) } : node)))
   }
 
   const handleRunCalculation = () => {
@@ -266,24 +299,74 @@ export default function WhiteboardPage() {
     const node = nodes.find((n) => n.id === nodeId)
     if (!node) return
 
-    setIsDraggingNode(nodeId)
-    setDragStartPos({
-      x: event.clientX - node.x * zoomLevel,
-      y: event.clientY - node.y * zoomLevel,
-    })
-    setSelectedNode(nodeId)
+    // Only set dragging if it's a left click
+    if (event.button === 0) { // Left mouse button
+      // Clear any existing drag states
+      setIsDraggingNode(null)
+      setPotentialDragNode(null)
+      
+      // Store initial position for drag detection
+      const startPos = { x: event.clientX, y: event.clientY }
+      setDragStartPos(startPos)
+      
+      // Set the node as selected
+      setSelectedNode(nodeId)
+      
+      // Store the node ID for potential drag start
+      setPotentialDragNode(nodeId)
+      
+      const scale = getNodeScale(zoomLevel)
+      setDragOffset({
+        x: (event.clientX - node.x) / scale,
+        y: (event.clientY - node.y) / scale,
+      })
+      
+      // Add document-wide event listeners for better drag handling
+      const onMouseMove = (e: MouseEvent) => {
+        const dx = e.clientX - startPos.x
+        const dy = e.clientY - startPos.y
+        const dragThreshold = 4 // pixels
+        
+        if (!isDragging && (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold)) {
+          setIsDragging(true)
+          document.body.style.cursor = 'grabbing'
+        }
+        
+        const canvasRect = canvasRef.current?.getBoundingClientRect()
+        if (canvasRect) {
+          const x = e.clientX - canvasRect.left - dragOffset.x
+          const y = e.clientY - canvasRect.top - dragOffset.y
+          setNodes((prev) => prev.map((node) => (node.id === nodeId ? { ...node, x: Math.max(0, x), y: Math.max(0, y) } : node)))
+        }
+      }
+      
+      const onMouseUp = () => {
+        document.removeEventListener('mousemove', onMouseMove)
+        document.removeEventListener('mouseup', onMouseUp)
+        handleNodeMouseUp()
+      }
+      
+      document.addEventListener('mousemove', onMouseMove)
+      document.addEventListener('mouseup', onMouseUp, { once: true })
+    }  
   }
 
-  const handleNodeMouseUp = () => {
+  const handleNodeMouseUp = (event?: React.MouseEvent) => {
+    event?.stopPropagation?.()
+    // Reset all drag states
     setIsDraggingNode(null)
+    setPotentialDragNode(null)
+    setIsDragging(false)
+    document.body.style.cursor = ''
+    document.body.style.userSelect = ''
   }
 
   const handleCanvasDrop = (event: React.MouseEvent) => {
     if (!draggedNodeType || !canvasRef.current) return
 
     const canvasRect = canvasRef.current.getBoundingClientRect()
-    const x = (event.clientX - canvasRect.left - dragOffset.x) / zoomLevel
-    const y = (event.clientY - canvasRect.top - dragOffset.y - 80) / zoomLevel
+    const x = event.clientX - canvasRect.left - dragOffset.x
+    const y = event.clientY - canvasRect.top - dragOffset.y
 
     const nodeTypeInfo = nodeTypes.find((nt) => nt.type === draggedNodeType)
     if (!nodeTypeInfo) return
@@ -468,7 +551,10 @@ export default function WhiteboardPage() {
                 <Button size="sm" variant="outline" onClick={handleZoomIn} disabled={zoomLevel >= 2}>
                   <ZoomIn className="h-3 w-3" />
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setZoomLevel(1)}>Reset</Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setZoomLevel(1)}>Reset</Button>
                 <Button
                   size="sm"
                   variant={isConnecting ? "default" : "outline"}
@@ -527,47 +613,122 @@ export default function WhiteboardPage() {
               }}
               onMouseMove={handleCanvasMouseMove}
               onWheel={handleWheel}
-              style={{ transform: `scale(${zoomLevel})`, transformOrigin: "top left" }}
             >
               <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
                 <style>{`
                   @keyframes dash {
-                    to { stroke-dashoffset: -28; }
+                    to { stroke-dashoffset: -56; }
                   }
-                  .flow-line { stroke-dasharray: 14 14; stroke-dashoffset: 0; animation: dash 2s linear infinite; }
+                  @keyframes pulse {
+                    0% { opacity: 0.6; }
+                    50% { opacity: 1; }
+                    100% { opacity: 0.6; }
+                  }
+                  .flow-line {
+                    stroke-dasharray: 12 12;
+                    stroke-dashoffset: 0;
+                    animation: dash 3s linear infinite;
+                    transition: all 0.3s ease;
+                  }
+                  .flow-line:hover {
+                    stroke-width: 4px;
+                    filter: url(#glowHover);
+                  }
+                  .connection-label {
+                    font-size: 12px;
+                    font-weight: 500;
+                    fill: #fff;
+                    paint-order: stroke;
+                    stroke: rgba(0,0,0,0.5);
+                    stroke-width: 3px;
+                    stroke-linecap: butt;
+                    stroke-linejoin: miter;
+                    pointer-events: none;
+                  }
+                  .connection-badge {
+                    animation: pulse 2s ease-in-out infinite;
+                  }
                 `}</style>
                 {/* Render connections */}
                 {connections.map((connection) => {
                   const fromNode = nodes.find((n) => n.id === connection.from)
                   const toNode = nodes.find((n) => n.id === connection.to)
                   if (!fromNode || !toNode) return null
-                  const fromX = connection.fromSide === 'left' ? fromNode.x : fromNode.x + NODE_WIDTH
-                  const toX = connection.toSide === 'right' ? toNode.x + NODE_WIDTH : toNode.x
-                  const fromY = fromNode.y + NODE_HEIGHT / 2
-                  const toY = toNode.y + NODE_HEIGHT / 2
-
+                  
+                  // Calculate control points for a curved path
+                  const fromScale = getNodeScale(zoomLevel)
+                  const toScale = getNodeScale(zoomLevel)
+                  
+                  const fromX = connection.fromSide === 'left' 
+                    ? fromNode.x 
+                    : fromNode.x + BASE_NODE_WIDTH * fromScale
+                  const toX = connection.toSide === 'right' 
+                    ? toNode.x + BASE_NODE_WIDTH * toScale 
+                    : toNode.x
+                  const fromY = fromNode.y + BASE_NODE_HEIGHT * fromScale / 2
+                  const toY = toNode.y + BASE_NODE_HEIGHT * toScale / 2
+                  
+                  // Calculate control points for a smooth curve
+                  const dx = Math.abs(toX - fromX)
+                  const dy = toY - fromY
+                  const curveIntensity = Math.min(dx * 0.5, 100)
+                  const controlX1 = fromX + curveIntensity
+                  const controlX2 = toX - curveIntensity
+                  
+                  // Create a smooth curve path
+                  const path = `M${fromX},${fromY} C${controlX1},${fromY} ${controlX2},${toY} ${toX},${toY}`
+                  
+                  // Calculate position for the label
+                  const midX = (fromX + toX) / 2
+                  const midY = (fromY + toY) / 2
+                  const angle = Math.atan2(toY - fromY, toX - fromX) * (180 / Math.PI)
+                  
                   return (
-                    <g key={connection.id}>
-                      <line
-                        x1={fromX}
-                        y1={fromY}
-                        x2={toX}
-                        y2={toY}
+                    <g key={connection.id} className="connection-group">
+                      {/* Connection line with gradient */}
+                      <path
+                        d={path}
+                        fill="none"
                         stroke="url(#flowGradient)"
                         strokeWidth="3"
                         strokeLinecap="round"
                         markerEnd="url(#arrowheadPrimary)"
-                        filter="url(#glow)"
                         className="flow-line"
                       />
-                      <text
-                        x={(fromX + toX) / 2}
-                        y={(fromY + toY) / 2 + 20}
-                        textAnchor="middle"
-                        className="fill-muted-foreground text-xs"
-                      >
-                        {connection.material}
-                      </text>
+                      
+                      {/* Animated flow effect */}
+                      <path
+                        d={path}
+                        fill="none"
+                        stroke="url(#flowGradient)"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeDasharray="10 15"
+                        strokeDashoffset="0"
+                        style={{ animation: 'dash 1.5s linear infinite' }}
+                        opacity="0.7"
+                      />
+                      
+                      {/* Connection label with background */}
+                      <g transform={`translate(${midX}, ${midY}) rotate(${angle > 90 || angle < -90 ? angle + 180 : angle})`}>
+                        <rect
+                          x="-40"
+                          y="-15"
+                          width="80"
+                          height="24"
+                          rx="12"
+                          fill="hsl(var(--primary))"
+                          className="connection-badge"
+                        />
+                        <text
+                          x="0"
+                          y="4"
+                          textAnchor="middle"
+                          className="connection-label text-xs font-medium"
+                        >
+                          {connection.material} • {connection.quantity} {connection.unit}
+                        </text>
+                      </g>
                     </g>
                   )
                 })}
@@ -576,8 +737,8 @@ export default function WhiteboardPage() {
                   <line
                     x1={(connectionStartSide === 'left'
                       ? nodes.find((n) => n.id === connectionStart)!.x
-                      : nodes.find((n) => n.id === connectionStart)!.x + NODE_WIDTH)}
-                    y1={nodes.find((n) => n.id === connectionStart)!.y + NODE_HEIGHT / 2}
+                      : nodes.find((n) => n.id === connectionStart)!.x + BASE_NODE_WIDTH)}
+                    y1={nodes.find((n) => n.id === connectionStart)!.y + BASE_NODE_HEIGHT / 2}
                     x2={tempConnection.x}
                     y2={tempConnection.y}
                     stroke="url(#flowGradient)"
@@ -595,13 +756,33 @@ export default function WhiteboardPage() {
                     <stop offset="0%" stopColor="#06B6D4" />
                     <stop offset="100%" stopColor="#6366F1" />
                   </linearGradient>
-                  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                  
+                  <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                    <feComposite in="SourceGraphic" in2="coloredBlur" operator="over" />
+                  </filter>
+                  
+                  <filter id="glowHover" x="-100%" y="-100%" width="300%" height="300%">
+                    <feGaussianBlur stdDeviation="5" result="blur" />
+                    <feFlood floodColor="#38BDF8" floodOpacity="0.8" result="glowColor" />
+                    <feComposite in="glowColor" in2="blur" operator="in" result="softGlow" />
                     <feMerge>
-                      <feMergeNode in="coloredBlur" />
+                      <feMergeNode in="softGlow" />
                       <feMergeNode in="SourceGraphic" />
                     </feMerge>
                   </filter>
+                  
+                  <marker
+                    id="arrowheadPrimary"
+                    markerWidth="10"
+                    markerHeight="7"
+                    refX="9"
+                    refY="3.5"
+                    orient="auto"
+                    markerUnits="strokeWidth"
+                  >
+                    <polygon points="0 0, 10 3.5, 0 7" fill="url(#flowGradient)" />
+                  </marker>
                   <marker id="arrowheadPrimary" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" markerUnits="strokeWidth">
                     <polygon points="0 0, 10 3.5, 0 7" fill="#6366F1" />
                   </marker>
@@ -615,20 +796,31 @@ export default function WhiteboardPage() {
                   <div
                     key={node.id}
                     className={`absolute select-none ${
-                      isDraggingNode === node.id ? "transition-none" : "transition-transform duration-150 ease-out"
-                    } hover:shadow-lg ${
-                      selectedNode === node.id ? "ring-2 ring-primary" : ""
-                    } ${isDraggingNode === node.id ? "cursor-grabbing z-10" : "cursor-grab"}
-                    ${isConnecting ? "cursor-pointer" : ""}`}
+                      isDraggingNode === node.id 
+                        ? "transition-none shadow-xl z-50" 
+                        : "transition-all duration-150 ease-out"
+                    } ${
+                      isDraggingNode === node.id 
+                        ? "ring-2 ring-primary scale-105" 
+                        : selectedNode === node.id 
+                          ? "ring-2 ring-primary" 
+                          : "hover:shadow-lg"
+                    } ${isDraggingNode === node.id ? "cursor-grabbing z-50" : "cursor-grab"}
+                    ${isConnecting ? "cursor-pointer" : ""}
+                    transform-gpu will-change-transform`}
                     style={{
                       left: 0,
                       top: 0,
-                      transform: `translate(${node.x}px, ${node.y}px)`,
+                      transform: `translate(${node.x}px, ${node.y}px) scale(${getNodeScale(zoomLevel)})`,
+                      transformOrigin: 'top left',
+                      width: `${BASE_NODE_WIDTH}px`,
+                      height: `${BASE_NODE_HEIGHT}px`,
                       willChange: "transform",
                     }}
+                    // Removed onClick handler as we're handling selection in onMouseDown
                     onMouseDown={(e) => {
                       // prevent text selection on drag start
-                      e.preventDefault()
+                      e.stopPropagation()
                       if (isConnecting) {
                         if (!connectionStart) {
                           handleStartConnection(node.id, e)
@@ -641,7 +833,7 @@ export default function WhiteboardPage() {
                     }}
                   >
                     <Card
-                      className={`w-48 relative ${
+                      className={`w-[192px] h-[120px] relative ${
                         isConnecting && connectionStart === node.id ? "ring-2 ring-primary" : ""
                       }`}
                     >
@@ -754,7 +946,20 @@ export default function WhiteboardPage() {
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="node-label">Label</Label>
-                        <Input id="node-label" value={nodes.find((n) => n.id === selectedNode)?.label || ""} />
+                        <Input 
+                          id="node-label" 
+                          value={nodes.find((n) => n.id === selectedNode)?.label || ""} 
+                          onChange={(e) => {
+                            const newLabel = e.target.value
+                            setNodes(prev => 
+                              prev.map(node => 
+                                node.id === selectedNode 
+                                  ? { ...node, label: newLabel } 
+                                  : node
+                              )
+                            )
+                          }}
+                        />
                       </div>
                       <div>
                         <Label htmlFor="node-category">Category</Label>

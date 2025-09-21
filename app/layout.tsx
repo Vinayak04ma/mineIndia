@@ -20,9 +20,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <Suspense fallback={null}>{children}</Suspense>
-        <Analytics />
+      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} min-h-screen w-full overflow-x-hidden`}>
+        <div className="flex min-h-screen w-full flex-col items-center">
+          <div className="w-full max-w-[2000px] px-4 sm:px-6 lg:px-22">
+            <Suspense fallback={null}>{children}</Suspense>
+            <Analytics />
+          </div>
+        </div>
       </body>
     </html>
   )
