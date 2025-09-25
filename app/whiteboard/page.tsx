@@ -161,6 +161,9 @@ export default function WhiteboardPage() {
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(true)
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true)
+  const [expandedSection, setExpandedSection] = useState<'inputs' | 'outputs' | null>(null)
+  const [newInput, setNewInput] = useState('')
+  const [newOutput, setNewOutput] = useState('')
 
 
   const deleteNode = (nodeId: string) => {
@@ -1138,22 +1141,20 @@ export default function WhiteboardPage() {
                             </div>
                           </div>
                           
-                          <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="bg-gray-50/80 dark:bg-gray-800/40 rounded-lg p-2.5 backdrop-blur-sm border border-gray-100/80 dark:border-gray-700/50 hover:border-cyan-500/20 hover:bg-cyan-50/50 dark:hover:bg-cyan-900/10 transition-colors duration-200 group/input">
-                              <div className="text-muted-foreground font-medium flex items-center">
-                                <span className="w-2 h-2 rounded-full bg-cyan-500 mr-1.5 group-hover/input:scale-125 transition-transform"></span>
-                                Inputs
+                          <div className="grid grid-cols-2 gap-2 text-xs opacity-0 h-0 pointer-events-none">
+                            <div className="invisible">
+                              <div className="invisible">
+                                <span className="invisible"></span>
                               </div>
-                              <div className="text-lg font-bold text-cyan-600 dark:text-cyan-400 mt-1">
+                              <div className="invisible">
                                 {node.inputs.length}
                               </div>
                             </div>
-                            <div className="bg-gray-50/80 dark:bg-gray-800/40 rounded-lg p-2.5 backdrop-blur-sm border border-gray-100/80 dark:border-gray-700/50 hover:border-purple-500/20 hover:bg-purple-50/50 dark:hover:bg-purple-900/10 transition-colors duration-200 group/output">
-                              <div className="text-muted-foreground font-medium flex items-center">
-                                <span className="w-2 h-2 rounded-full bg-purple-500 mr-1.5 group-hover/output:scale-125 transition-transform"></span>
-                                Outputs
+                            <div className="invisible">
+                              <div className="invisible">
+                                <span className="invisible"></span>
                               </div>
-                              <div className="text-lg font-bold text-purple-600 dark:text-purple-400 mt-1">
+                              <div className="invisible">
                                 {node.outputs.length}
                               </div>
                             </div>
@@ -1233,48 +1234,143 @@ export default function WhiteboardPage() {
 
                   <Separator />
 
-                  <div>
-                    <h4 className="font-semibold mb-3">Input/Output Management</h4>
-                    <div className="space-y-4">
-                      <div>
-                        <Label className="text-sm">Inputs</Label>
-                        <div className="space-y-2 mt-2">
-                          {nodes
-                            .find((n) => n.id === selectedNode)
-                            ?.inputs.map((input, index) => (
-                              <div key={index} className="flex items-center justify-between p-2 rounded border">
+                  <div className="space-y-4">
+                    <div className="border rounded-lg overflow-hidden">
+                      <button 
+                        className="w-full flex items-center justify-between p-3 text-left font-medium bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
+                        onClick={() => setExpandedSection(expandedSection === 'inputs' ? null : 'inputs')}
+                      >
+                        <div className="flex items-center">
+                          <ChevronRight className={`h-4 w-4 mr-2 transition-transform ${expandedSection === 'inputs' ? 'rotate-90' : ''}`} />
+                          <span>Inputs</span>
+                          <Badge variant="outline" className="ml-2">
+                            {nodes.find(n => n.id === selectedNode)?.inputs.length || 0}
+                          </Badge>
+                        </div>
+                        <Plus className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                      
+                      {expandedSection === 'inputs' && (
+                        <div className="p-3 border-t space-y-3">
+                          <div className="space-y-2">
+                            {nodes.find(n => n.id === selectedNode)?.inputs.map((input, index) => (
+                              <div key={index} className="flex items-center justify-between p-2 rounded border bg-white dark:bg-gray-800">
                                 <span className="text-sm">{input}</span>
-                                <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  className="h-6 w-6 p-0 text-destructive"
+                                  onClick={() => {
+                                    setNodes(prev => 
+                                      prev.map(node => 
+                                        node.id === selectedNode
+                                          ? { ...node, inputs: node.inputs.filter((_, i) => i !== index) }
+                                          : node
+                                      )
+                                    )
+                                  }}
+                                >
                                   ×
                                 </Button>
                               </div>
                             ))}
-                          <Button size="sm" variant="outline" className="w-full bg-transparent">
-                            <Plus className="mr-2 h-3 w-3" />
-                            Add Input
-                          </Button>
+                          </div>
+                          <div className="flex gap-2">
+                            <Input 
+                              value={newInput}
+                              onChange={(e) => setNewInput(e.target.value)}
+                              placeholder="New input name"
+                              className="flex-1"
+                            />
+                            <Button 
+                              size="sm" 
+                              onClick={() => {
+                                if (newInput.trim()) {
+                                  setNodes(prev => 
+                                    prev.map(node => 
+                                      node.id === selectedNode
+                                        ? { ...node, inputs: [...node.inputs, newInput.trim()] }
+                                        : node
+                                    )
+                                  )
+                                  setNewInput('')
+                                }
+                              }}
+                            >
+                              Add
+                            </Button>
+                          </div>
                         </div>
-                      </div>
+                      )}
+                    </div>
 
-                      <div>
-                        <Label className="text-sm">Outputs</Label>
-                        <div className="space-y-2 mt-2">
-                          {nodes
-                            .find((n) => n.id === selectedNode)
-                            ?.outputs.map((output, index) => (
-                              <div key={index} className="flex items-center justify-between p-2 rounded border">
+                    <div className="border rounded-lg overflow-hidden">
+                      <button 
+                        className="w-full flex items-center justify-between p-3 text-left font-medium bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
+                        onClick={() => setExpandedSection(expandedSection === 'outputs' ? null : 'outputs')}
+                      >
+                        <div className="flex items-center">
+                          <ChevronRight className={`h-4 w-4 mr-2 transition-transform ${expandedSection === 'outputs' ? 'rotate-90' : ''}`} />
+                          <span>Outputs</span>
+                          <Badge variant="outline" className="ml-2">
+                            {nodes.find(n => n.id === selectedNode)?.outputs.length || 0}
+                          </Badge>
+                        </div>
+                        <Plus className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                      
+                      {expandedSection === 'outputs' && (
+                        <div className="p-3 border-t space-y-3">
+                          <div className="space-y-2">
+                            {nodes.find(n => n.id === selectedNode)?.outputs.map((output, index) => (
+                              <div key={index} className="flex items-center justify-between p-2 rounded border bg-white dark:bg-gray-800">
                                 <span className="text-sm">{output}</span>
-                                <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  className="h-6 w-6 p-0 text-destructive"
+                                  onClick={() => {
+                                    setNodes(prev => 
+                                      prev.map(node => 
+                                        node.id === selectedNode
+                                          ? { ...node, outputs: node.outputs.filter((_, i) => i !== index) }
+                                          : node
+                                      )
+                                    )
+                                  }}
+                                >
                                   ×
                                 </Button>
                               </div>
                             ))}
-                          <Button size="sm" variant="outline" className="w-full bg-transparent">
-                            <Plus className="mr-2 h-3 w-3" />
-                            Add Output
-                          </Button>
+                          </div>
+                          <div className="flex gap-2">
+                            <Input 
+                              value={newOutput}
+                              onChange={(e) => setNewOutput(e.target.value)}
+                              placeholder="New output name"
+                              className="flex-1"
+                            />
+                            <Button 
+                              size="sm" 
+                              onClick={() => {
+                                if (newOutput.trim()) {
+                                  setNodes(prev => 
+                                    prev.map(node => 
+                                      node.id === selectedNode
+                                        ? { ...node, outputs: [...node.outputs, newOutput.trim()] }
+                                        : node
+                                    )
+                                  )
+                                  setNewOutput('')
+                                }
+                              }}
+                            >
+                              Add
+                            </Button>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>
