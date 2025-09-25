@@ -40,6 +40,51 @@ export default function EWasteServicePage() {
     { metal: "Rare Earth", amount: "12g", value: "₹960", percentage: 5 },
   ]
 
+  const hazardElements = [
+    { 
+      name: "Lead (Pb)", 
+      source: "Solder, CRT glass, batteries", 
+      risk: "High",
+      amount: "1.2g",
+      healthImpact: "Neurological damage, kidney failure"
+    },
+    { 
+      name: "Mercury (Hg)", 
+      source: "Switches, flat screens", 
+      risk: "Critical",
+      amount: "0.15g",
+      healthImpact: "Brain and kidney damage"
+    },
+    { 
+      name: "Cadmium (Cd)", 
+      source: "Batteries, chip resistors", 
+      risk: "High",
+      amount: "0.05g",
+      healthImpact: "Lung damage, kidney disease"
+    },
+    { 
+      name: "Beryllium (Be)", 
+      source: "Motherboards, connectors", 
+      risk: "Medium",
+      amount: "0.02g",
+      healthImpact: "Lung cancer, chronic beryllium disease"
+    },
+    { 
+      name: "Brominated Flame Retardants (BFRs)", 
+      source: "Plastic casings, circuit boards", 
+      risk: "Medium",
+      amount: "4.5g",
+      healthImpact: "Hormone disruption, developmental issues"
+    },
+    { 
+      name: "Hexavalent Chromium (Cr-VI)", 
+      source: "Metal coatings", 
+      risk: "High",
+      amount: "0.3g",
+      healthImpact: "DNA damage, lung cancer"
+    }
+  ]
+
   const totalValue = preciousMetals.reduce(
     (sum, metal) => sum + Number.parseInt(metal.value.replace("₹", "").replace(",", "")),
     0,
@@ -211,8 +256,9 @@ export default function EWasteServicePage() {
               </Card>
 
               <Tabs defaultValue="breakdown" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="breakdown">Value Breakdown</TabsTrigger>
+                  <TabsTrigger value="hazards">Hazards</TabsTrigger>
                   <TabsTrigger value="environmental">Environmental Impact</TabsTrigger>
                   <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
                 </TabsList>
@@ -411,6 +457,68 @@ export default function EWasteServicePage() {
                           <Button variant="outline" className="flex-1 bg-transparent">
                             Download Report
                           </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="hazards">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle>Hazardous Elements</CardTitle>
+                          <CardDescription>Potentially dangerous substances detected in your e-waste</CardDescription>
+                        </div>
+                        <Badge variant="destructive" className="px-3 py-1">
+                          Handle with Care
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-6 text-sm font-medium text-muted-foreground pb-2 border-b">
+                          <div>Element</div>
+                          <div>Source</div>
+                          <div>Risk Level</div>
+                          <div>Amount</div>
+                          <div className="col-span-2">Health Impact</div>
+                        </div>
+                        {hazardElements.map((element, index) => (
+                          <div key={index} className="grid grid-cols-6 items-center text-sm">
+                            <div className="font-medium">{element.name}</div>
+                            <div className="text-muted-foreground">{element.source}</div>
+                            <div>
+                              <Badge 
+                                variant={
+                                  element.risk === 'Critical' ? 'destructive' : 
+                                  element.risk === 'High' ? 'default' : 'secondary'
+                                }
+                                className={
+                                  element.risk === 'Critical' ? 'bg-red-600' :
+                                  element.risk === 'High' ? 'bg-orange-500' : 'bg-yellow-500'
+                                }
+                              >
+                                {element.risk}
+                              </Badge>
+                            </div>
+                            <div>{element.amount}</div>
+                            <div className="col-span-2 text-muted-foreground">{element.healthImpact}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                        <div className="flex">
+                          <svg className="h-5 w-5 text-yellow-500 mt-0.5 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                          <div>
+                            <h4 className="font-medium text-yellow-800 dark:text-yellow-200">Safety Notice</h4>
+                            <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                              This e-waste contains hazardous materials. Please handle with appropriate protective equipment and dispose of at authorized e-waste recycling facilities only.
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
