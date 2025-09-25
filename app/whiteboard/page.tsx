@@ -32,6 +32,14 @@ import {
   Link,
   RefreshCcw,
   Trash2,
+  Link2,
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  Users,
+  Shield,
+  HeartHandshake,
 } from "lucide-react"
 
 interface ProcessNode {
@@ -63,7 +71,7 @@ export default function WhiteboardPage() {
   const CANVAS_HEIGHT = 5000
   const BASE_NODE_WIDTH = 192
   const BASE_NODE_HEIGHT = 120
-  const BASE_UI_ZOOM = 0.8
+  const BASE_UI_ZOOM = 0.9
   
   // Calculate node scale based on zoom level (0.5 to 2.0)
   const getNodeScale = (zoom: number) => {
@@ -151,6 +159,8 @@ export default function WhiteboardPage() {
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 })
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
+  const [leftSidebarOpen, setLeftSidebarOpen] = useState(true)
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(true)
 
 
   const deleteNode = (nodeId: string) => {
@@ -164,18 +174,215 @@ export default function WhiteboardPage() {
   }
 
   const nodeTypes = [
+    // Raw Material Extraction
     {
-      type: "extraction",
-      label: "Raw Material Extraction",
+      type: "iron_ore_mine",
+      label: "Iron Ore Mine",
       icon: Factory,
-      color: "bg-destructive/10 text-destructive",
+      color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+      category: "Raw Material Extraction"
     },
-    { type: "processing", label: "Processing & Manufacturing", icon: Settings, color: "bg-primary/10 text-primary" },
-    { type: "transport", label: "Transportation", icon: Truck, color: "bg-secondary/10 text-secondary" },
-    { type: "use", label: "Use Phase", icon: CheckCircle, color: "bg-accent/10 text-accent" },
-    { type: "eol", label: "End-of-Life", icon: Recycle, color: "bg-muted/50 text-muted-foreground" },
-    { type: "energy", label: "Energy Systems", icon: Zap, color: "bg-yellow-100 text-yellow-700" },
-    { type: "waste", label: "Waste Treatment", icon: AlertTriangle, color: "bg-orange-100 text-orange-700" },
+    {
+      type: "bauxite_mine",
+      label: "Bauxite Mine",
+      icon: Factory,
+      color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+      category: "Raw Material Extraction"
+    },
+    {
+      type: "copper_ore_mine",
+      label: "Copper Ore Mine",
+      icon: Factory,
+      color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+      category: "Raw Material Extraction"
+    },
+    {
+      type: "coal_coke_supplier",
+      label: "Coal / Coke Supplier",
+      icon: Factory,
+      color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+      category: "Raw Material Extraction"
+    },
+    {
+      type: "flux_supplier",
+      label: "Flux Supplier (limestone, dolomite, quartz)",
+      icon: Factory,
+      color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+      category: "Raw Material Extraction"
+    },
+    {
+      type: "alloying_material_supplier",
+      label: "Alloying Material Supplier (Ni, Cr, Zn)",
+      icon: Factory,
+      color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+      category: "Raw Material Extraction"
+    },
+    
+    // Material Processing / Smelting
+    {
+      type: "smelting_plant",
+      label: "Blast Furnace / Electric Arc Furnace / Hydrometallurgical Plant",
+      icon: Settings,
+      color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+      category: "Material Processing / Smelting"
+    },
+    {
+      type: "secondary_refining",
+      label: "Secondary Refining (alloying, purification)",
+      icon: Settings,
+      color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+      category: "Material Processing / Smelting"
+    },
+    {
+      type: "casting_furnace",
+      label: "Casting / Forming Furnace",
+      icon: Settings,
+      color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+      category: "Material Processing / Smelting"
+    },
+    
+    // Shaping / Forming
+    {
+      type: "rolling_mill",
+      label: "Rolling Mill",
+      icon: Settings,
+      color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+      category: "Shaping / Forming"
+    },
+    {
+      type: "extrusion_forging",
+      label: "Extrusion / Forging / Casting Unit",
+      icon: Settings,
+      color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+      category: "Shaping / Forming"
+    },
+    {
+      type: "finishing_unit",
+      label: "Finishing / Machining Unit",
+      icon: Settings,
+      color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+      category: "Shaping / Forming"
+    },
+    
+    // Waste & Emissions
+    {
+      type: "air_emission",
+      label: "Air Emission Node",
+      icon: AlertTriangle,
+      color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+      category: "Waste & Emissions"
+    },
+    {
+      type: "water_effluent",
+      label: "Water Effluent Node",
+      icon: AlertTriangle,
+      color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+      category: "Waste & Emissions"
+    },
+    {
+      type: "solid_waste",
+      label: "Solid Waste Node",
+      icon: AlertTriangle,
+      color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+      category: "Waste & Emissions"
+    },
+    {
+      type: "hazardous_waste",
+      label: "Hazardous Waste Node",
+      icon: AlertTriangle,
+      color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+      category: "Waste & Emissions"
+    },
+    
+    // Circularity & End-of-Life
+    {
+      type: "scrap_collection",
+      label: "Scrap Collection",
+      icon: Recycle,
+      color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+      category: "Circularity & End-of-Life"
+    },
+    {
+      type: "product_recycling",
+      label: "Product Recycling / EAF Feed",
+      icon: Recycle,
+      color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+      category: "Circularity & End-of-Life"
+    },
+    {
+      type: "industrial_symbiosis",
+      label: "Industrial Symbiosis Partner (slag → cement, fly ash → bricks)",
+      icon: Recycle,
+      color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+      category: "Circularity & End-of-Life"
+    },
+    {
+      type: "landfill_incineration",
+      label: "Landfill / Incineration",
+      icon: Recycle,
+      color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+      category: "Circularity & End-of-Life"
+    },
+    
+    // Energy & Policy Compliance
+    {
+      type: "grid_electricity",
+      label: "Grid Electricity Node (state-specific)",
+      icon: Zap,
+      color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+      category: "Energy & Policy Compliance"
+    },
+    {
+      type: "renewable_energy",
+      label: "Onsite Renewable Energy Node",
+      icon: Zap,
+      color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+      category: "Energy & Policy Compliance"
+    },
+    {
+      type: "epr_compliance",
+      label: "EPR Compliance Node",
+      icon: FileText,
+      color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+      category: "Energy & Policy Compliance"
+    },
+    {
+      type: "carbon_credit",
+      label: "Carbon Credit Node",
+      icon: FileText,
+      color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+      category: "Energy & Policy Compliance"
+    },
+    {
+      type: "rpo_compliance",
+      label: "RPO Compliance Node",
+      icon: FileText,
+      color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+      category: "Energy & Policy Compliance"
+    },
+    
+    // Socio-Economic & Human Health
+    {
+      type: "employment",
+      label: "Employment Node",
+      icon: Users,
+      color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",
+      category: "Socio-Economic & Human Health"
+    },
+    {
+      type: "workplace_safety",
+      label: "Workplace Safety / Exposure Node",
+      icon: Shield,
+      color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",
+      category: "Socio-Economic & Human Health"
+    },
+    {
+      type: "csr_impact",
+      label: "CSR & Community Impact Node",
+      icon: HeartHandshake,
+      color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",
+      category: "Socio-Economic & Human Health"
+    }
   ]
 
   const impactCategories = [
@@ -409,17 +616,29 @@ export default function WhiteboardPage() {
   }
 
   return (
-    <div
-      className="min-h-screen bg-background"
-      style={{ transform: `scale(${BASE_UI_ZOOM})`, transformOrigin: "top left", width: `${100 / BASE_UI_ZOOM}%` }}
-    >
+    <div className="min-h-screen bg-background overflow-hidden">
       <Navigation />
 
-      <div className="flex h-[calc(100vh-4rem)]">
+      <div className="flex h-[calc(100vh-4rem)] relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950">
+        {/* Left Sidebar Toggle Button */}
+        <button 
+          onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
+          className={`absolute left-0 top-1/2 z-20 -translate-y-1/2 bg-white dark:bg-gray-800 border border-l-0 border-gray-200 dark:border-gray-700 rounded-r-lg p-2 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 ${leftSidebarOpen ? 'ml-64' : 'ml-0'}`}
+        >
+          {leftSidebarOpen ? (
+            <ChevronLeft className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
+          <span className="sr-only">{leftSidebarOpen ? 'Collapse' : 'Expand'} left sidebar</span>
+        </button>
         {/* Left Sidebar - Node Palette */}
-        <div className="w-80 border-r bg-muted/20 p-4">
-          <div className="space-y-6">
-            <div>
+        <div 
+          className={`w-80 border-r bg-muted/10 dark:bg-gray-900/50 p-4 flex flex-col h-full transition-all duration-200 ease-in-out ${leftSidebarOpen ? 'translate-x-0' : '-translate-x-full absolute'}`}
+          style={{ zIndex: 10 }}
+        >
+          <div className="space-y-6 flex-1 overflow-y-auto pr-2 -mr-2 py-1">
+            <div className="bg-background/50 dark:bg-gray-800/30 rounded-lg p-4 border">
               <h2 className="text-lg font-semibold mb-4">Process Nodes</h2>
               <p className="text-xs text-muted-foreground mb-3">Drag nodes to canvas or click to add</p>
               <ScrollArea className="h-64">
@@ -429,7 +648,7 @@ export default function WhiteboardPage() {
                     return (
                       <Card
                         key={nodeType.type}
-                        className="cursor-grab hover:shadow-sm transition-shadow p-3 active:cursor-grabbing"
+                        className="cursor-grab hover:shadow-md transition-all p-3 active:cursor-grabbing border border-transparent hover:border-primary/20 bg-card/50 backdrop-blur-sm"
                         onMouseDown={(e) => handleNodeDragStart(nodeType.type, e)}
                         onClick={() => {
                           const newNodeData: ProcessNode = {
@@ -464,10 +683,11 @@ export default function WhiteboardPage() {
 
             <div>
               <h3 className="font-semibold mb-3">Scenario Management</h3>
-              <div className="space-y-3">
+              <div className="space-y-4 bg-background/50 dark:bg-gray-800/30 rounded-lg p-4 border">
+                <h3 className="font-semibold text-sm">Scenario Management</h3>
                 <Select defaultValue="scenario1">
-                  <SelectTrigger>
-                    <SelectValue />
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select scenario" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="scenario1">Conventional Process</SelectItem>
@@ -475,12 +695,12 @@ export default function WhiteboardPage() {
                     <SelectItem value="scenario3">Circular Economy</SelectItem>
                   </SelectContent>
                 </Select>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="flex-1 bg-transparent">
+                <div className="flex gap-2 pt-2">
+                  <Button size="sm" variant="outline" className="flex-1 bg-background hover:bg-muted/50">
                     <Save className="mr-2 h-3 w-3" />
                     Save
                   </Button>
-                  <Button size="sm" variant="outline" className="flex-1 bg-transparent">
+                  <Button size="sm" variant="outline" className="flex-1 bg-background hover:bg-muted/50">
                     <Download className="mr-2 h-3 w-3" />
                     Export
                   </Button>
@@ -490,9 +710,9 @@ export default function WhiteboardPage() {
 
             <Separator />
 
-            <div>
-              <h3 className="font-semibold mb-3">Real-time Calculation</h3>
-              <div className="space-y-3">
+            <div className="bg-background/50 dark:bg-gray-800/30 rounded-lg p-4 border">
+              <h3 className="font-semibold text-sm mb-3">Real-time Calculation</h3>
+              <div className="space-y-4">
                 <Button className="w-full" onClick={handleRunCalculation} disabled={isCalculating}>
                   {isCalculating ? (
                     <>
@@ -521,66 +741,121 @@ export default function WhiteboardPage() {
           </div>
         </div>
 
+        {/* Right Sidebar Toggle Button */}
+        <button 
+          onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+          className={`absolute right-0 top-1/2 z-20 -translate-y-1/2 bg-white dark:bg-gray-800 border border-r-0 border-gray-200 dark:border-gray-700 rounded-l-lg p-2 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 ${rightSidebarOpen ? 'mr-80' : 'mr-0'}`}
+        >
+          {rightSidebarOpen ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
+          <span className="sr-only">{rightSidebarOpen ? 'Collapse' : 'Expand'} right sidebar</span>
+        </button>
+
         {/* Main Canvas Area */}
-        <div className="flex-1 relative overflow-hidden"> {/* CHANGED: overflow-hidden on the parent */}
-          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div className={`flex-1 relative overflow-hidden transition-all duration-200 ${leftSidebarOpen ? 'ml-0' : 'ml-0'} ${rightSidebarOpen ? 'mr-0' : 'mr-0'}`}>
+          <div className="absolute inset-0 bg-grid-pattern opacity-10 dark:opacity-5"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-gray-50/30 dark:to-gray-900/30 pointer-events-none"></div>
 
           {/* Canvas Header */}
           <div className="absolute top-4 left-4 right-4 z-10">
-            <div className="flex items-center justify-between bg-background/95 backdrop-blur rounded-lg p-3 border">
-              <div className="flex items-center space-x-4">
-                <Badge variant="secondary">
-                  <Palette className="mr-2 h-3 w-3" />
-                  Interactive LCA Mapping
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  {nodes.length} nodes • {connections.length} connections • {Math.round(zoomLevel * BASE_UI_ZOOM * 100)}%
-                </span>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg rounded-xl p-2 border border-gray-200/80 dark:border-gray-700/80 shadow-xl shadow-black/5 dark:shadow-black/20">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex-shrink-0 flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/20 border border-blue-100/50 dark:border-blue-800/30">
+                  <Palette className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 mr-2" />
+                  <span className="text-sm font-medium text-blue-700 dark:text-blue-300 whitespace-nowrap">Interactive LCA Mapping</span>
+                </div>
+                <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1" />
+                <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800/50 whitespace-nowrap">
+                    <span className="font-medium text-foreground">{nodes.length}</span> nodes
+                  </span>
+                  <span className="px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800/50 whitespace-nowrap">
+                    <span className="font-medium text-foreground">{connections.length}</span> connections
+                  </span>
+                  <span className="px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800/50 whitespace-nowrap">
+                    <span className="font-medium text-foreground">{Math.round(zoomLevel * BASE_UI_ZOOM * 100)}%</span> zoom
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Button size="sm" variant="outline" onClick={handleZoomOut} disabled={zoomLevel <= 0.5}>
-                  <ZoomOut className="h-3 w-3" />
+              <div className="flex flex-wrap items-center justify-end gap-1 bg-gray-50/80 dark:bg-gray-800/50 rounded-lg p-1 border border-gray-100 dark:border-gray-700/50">
+                <Button 
+                  size="sm" 
+                  variant="ghost"
+                  onClick={handleZoomOut} 
+                  disabled={zoomLevel <= 0.5}
+                  className="h-8 w-8 p-0 flex-shrink-0 rounded-md hover:bg-gray-200/60 dark:hover:bg-gray-700/50 text-muted-foreground hover:text-foreground"
+                  title="Zoom Out"
+                >
+                  <ZoomOut className="h-4 w-4" />
+                  <span className="sr-only">Zoom Out</span>
                 </Button>
-                <Button size="sm" variant="outline" onClick={handleZoomIn} disabled={zoomLevel >= 2}>
-                  <ZoomIn className="h-3 w-3" />
+                <div className="relative flex items-center justify-center w-16">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {Math.round(zoomLevel * 100)}%
+                  </span>
+                </div>
+                <Button 
+                  size="sm" 
+                  variant="ghost"
+                  onClick={handleZoomIn} 
+                  disabled={zoomLevel >= 2}
+                  className="h-8 w-8 p-0 flex-shrink-0 rounded-md hover:bg-gray-200/60 dark:hover:bg-gray-700/50 text-muted-foreground hover:text-foreground"
+                  title="Zoom In"
+                >
+                  <ZoomIn className="h-4 w-4" />
+                  <span className="sr-only">Zoom In</span>
                 </Button>
                 {/* CHANGED: Reset View button now resets pan as well */}
+                <div className="h-5 w-px bg-gray-200 dark:bg-gray-700 mx-1" />
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => { setZoomLevel(1); setPanOffset({ x: 0, y: 0 }); }}
+                  className="h-8 px-3 text-xs font-medium flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-gray-200/60 dark:hover:bg-gray-700/50"
                 >
+                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
                   Reset View
                 </Button>
                 <Button
                   size="sm"
-                  variant={isConnecting ? "default" : "outline"}
+                  variant={isConnecting ? "default" : "ghost"}
                   onClick={() => {
                     setIsConnecting(!isConnecting)
                     setConnectionStart(null)
                     setTempConnection(null)
                   }}
+                  className={`h-8 px-3 text-xs font-medium flex-shrink-0 ${isConnecting ? 'bg-blue-600 hover:bg-blue-700' : 'text-muted-foreground hover:text-foreground hover:bg-gray-200/60 dark:hover:bg-gray-700/50'}`}
                 >
-                  <Link className="mr-2 h-3 w-3" />
-                  {isConnecting ? "Cancel" : "Connect"}
+                  <Link2 className={`h-3.5 w-3.5 mr-1.5 ${isConnecting ? 'text-white' : 'text-current'}`} />
+                  {isConnecting ? "Connecting..." : "Connect"}
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => {
                     const newNodeData: ProcessNode = {
-                      id: `node_${Date.now()}`, type: "processing", label: "New Process", x: 0, y: 0,
-                      inputs: ["Input 1"], outputs: ["Output 1"], impact: 50, category: "Processing & Manufacturing"
+                      id: `node_${Date.now()}`, 
+                      type: "processing", 
+                      label: "New Process", 
+                      x: 0, y: 0,
+                      inputs: ["Input 1"], 
+                      outputs: ["Output 1"], 
+                      impact: 50, 
+                      category: "Processing & Manufacturing"
                     }
                     addNodeToView(newNodeData)
                   }}
+                  className="h-8 px-3 text-xs font-medium flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-gray-200/60 dark:hover:bg-gray-700/50"
                 >
-                  <Plus className="mr-2 h-3 w-3" />
+                  <Plus className="h-3.5 w-3.5 mr-1.5" />
                   Add Node
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => {
                     setNodes(INITIAL_NODES.map((n) => ({ ...n, inputs: [...n.inputs], outputs: [...n.outputs] })))
                     setConnections(INITIAL_CONNECTIONS.map((c) => ({ ...c })))
@@ -588,20 +863,25 @@ export default function WhiteboardPage() {
                     setZoomLevel(1)
                     setPanOffset({ x: 0, y: 0 })
                   }}
+                  className="h-8 px-3 text-xs font-medium flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-gray-200/60 dark:hover:bg-gray-700/50"
                 >
-                  <RefreshCcw className="mr-2 h-3 w-3" />
+                  <RefreshCcw className="h-3.5 w-3.5 mr-1.5" />
                   Reset All
                 </Button>
-                <Button size="sm" variant="outline">
-                  <Settings className="mr-2 h-3 w-3" />
-                  Settings
+                <Button 
+                  size="sm" 
+                  variant="ghost"
+                  className="h-8 w-8 p-0 rounded-md hover:bg-gray-200/60 dark:hover:bg-gray-700/50 text-muted-foreground hover:text-foreground"
+                >
+                  <Settings className="h-4 w-4" />
+                  <span className="sr-only">Settings</span>
                 </Button>
               </div>
             </div>
           </div>
 
           {/* Canvas Content */}
-          <div className="absolute inset-0 pt-20 pb-4">
+          <div className="absolute inset-0 pt-24 pb-4 sm:pt-20">
             <div
               ref={canvasRef}
               className={`relative w-full h-full cursor-grab ${isPanning ? 'cursor-grabbing' : ''}`}
@@ -759,7 +1039,16 @@ export default function WhiteboardPage() {
                     }}
                   >
                     <Card
-                      className={`relative w-full transition-all duration-200 ease-out ${selectedNode === node.id ? "ring-2 ring-primary shadow-lg" : "hover:shadow-lg border border-gray-200 dark:border-gray-700"} bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-xl overflow-hidden`}
+                      className={`relative w-full transition-all duration-300 ease-out ${
+                        selectedNode === node.id 
+                          ? "ring-2 ring-primary shadow-xl scale-[1.02]" 
+                          : "hover:shadow-lg border border-gray-200/80 dark:border-gray-700/80 hover:border-primary/30"
+                      } bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-xl overflow-hidden border-t-0 relative group`}
+                      style={{
+                        boxShadow: '0 4px 20px -5px rgba(0, 0, 0, 0.05)',
+                        borderTop: '3px solid ' + (node.impact > 80 ? '#ef4444' : node.impact > 50 ? '#eab308' : '#22c55e'),
+                        transform: selectedNode === node.id ? 'translateY(-1px)' : 'none'
+                      }}
                     >
                       {/* Left connection handle (green) */}
                       <button
@@ -814,27 +1103,57 @@ export default function WhiteboardPage() {
 
                         <div className="space-y-3 pt-2 border-t border-gray-100 dark:border-gray-800">
                           <div className="space-y-1">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-muted-foreground font-medium">Impact Score</span>
-                              <Badge variant={node.impact > 80 ? "destructive" : node.impact > 50 ? "secondary" : "default"} className="text-xs font-mono font-bold px-2 py-0.5">
-                                {node.impact}%
-                              </Badge>
-                            </div>
-                            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
-                              <div className={`h-full rounded-full ${node.impact > 80 ? 'bg-red-500' : node.impact > 50 ? 'bg-yellow-500' : 'bg-green-500'}`} style={{ width: `${node.impact}%` }} />
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-muted-foreground font-medium">Impact Score</span>
+                                <div className="flex items-center space-x-1">
+                                  <span className="text-xs text-muted-foreground">
+                                    {node.impact > 80 ? 'High' : node.impact > 50 ? 'Medium' : 'Low'}
+                                  </span>
+                                  <Badge 
+                                    variant={node.impact > 80 ? "destructive" : node.impact > 50 ? "secondary" : "default"} 
+                                    className="text-xs font-mono font-bold px-2 py-0.5 h-5 min-w-[36px] flex items-center justify-center"
+                                  >
+                                    {node.impact}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <div className="w-full bg-gray-100 dark:bg-gray-800/60 rounded-full h-2 overflow-hidden">
+                                <div 
+                                  className={`h-full rounded-full transition-all duration-500 ease-out ${
+                                    node.impact > 80 ? 'bg-red-500' : node.impact > 50 ? 'bg-yellow-500' : 'bg-green-500'
+                                  }`} 
+                                  style={{ 
+                                    width: `${node.impact}%`,
+                                    boxShadow: `0 0 8px ${
+                                      node.impact > 80 
+                                        ? 'rgba(239, 68, 68, 0.5)' 
+                                        : node.impact > 50 
+                                          ? 'rgba(234, 179, 8, 0.5)' 
+                                          : 'rgba(34, 197, 94, 0.5)'
+                                    }`
+                                  }} 
+                                />
+                              </div>
                             </div>
                           </div>
                           
                           <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
-                              <div className="text-muted-foreground font-medium">Inputs</div>
-                              <div className="text-lg font-bold text-cyan-600 dark:text-cyan-400">
+                            <div className="bg-gray-50/80 dark:bg-gray-800/40 rounded-lg p-2.5 backdrop-blur-sm border border-gray-100/80 dark:border-gray-700/50 hover:border-cyan-500/20 hover:bg-cyan-50/50 dark:hover:bg-cyan-900/10 transition-colors duration-200 group/input">
+                              <div className="text-muted-foreground font-medium flex items-center">
+                                <span className="w-2 h-2 rounded-full bg-cyan-500 mr-1.5 group-hover/input:scale-125 transition-transform"></span>
+                                Inputs
+                              </div>
+                              <div className="text-lg font-bold text-cyan-600 dark:text-cyan-400 mt-1">
                                 {node.inputs.length}
                               </div>
                             </div>
-                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
-                              <div className="text-muted-foreground font-medium">Outputs</div>
-                              <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                            <div className="bg-gray-50/80 dark:bg-gray-800/40 rounded-lg p-2.5 backdrop-blur-sm border border-gray-100/80 dark:border-gray-700/50 hover:border-purple-500/20 hover:bg-purple-50/50 dark:hover:bg-purple-900/10 transition-colors duration-200 group/output">
+                              <div className="text-muted-foreground font-medium flex items-center">
+                                <span className="w-2 h-2 rounded-full bg-purple-500 mr-1.5 group-hover/output:scale-125 transition-transform"></span>
+                                Outputs
+                              </div>
+                              <div className="text-lg font-bold text-purple-600 dark:text-purple-400 mt-1">
                                 {node.outputs.length}
                               </div>
                             </div>
@@ -851,14 +1170,27 @@ export default function WhiteboardPage() {
         </div>
 
         {/* Right Sidebar - Properties & Results */}
-        <div className="w-80 border-l bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
+        <div 
+          className={`w-80 border-l bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-lg flex flex-col h-full transition-all duration-200 ease-in-out ${rightSidebarOpen ? 'translate-x-0' : 'translate-x-full absolute right-0'}`}
+          style={{ zIndex: 10 }}
+        >
           <Tabs defaultValue="properties" className="h-full">
-            <TabsList className="grid w-full grid-cols-2 m-4">
-              <TabsTrigger value="properties">Properties</TabsTrigger>
-              <TabsTrigger value="results">Results</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 m-4 bg-muted/50 p-1 h-10">
+              <TabsTrigger 
+                value="properties" 
+                className="text-xs font-medium data-[state=active]:shadow-sm data-[state=active]:bg-background"
+              >
+                Properties
+              </TabsTrigger>
+              <TabsTrigger 
+                value="results" 
+                className="text-xs font-medium data-[state=active]:shadow-sm data-[state=active]:bg-background"
+              >
+                Results
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="properties" className="p-4 space-y-6">
+            <TabsContent value="properties" className="p-4 space-y-6 flex-1 overflow-y-auto">
               {selectedNode ? (
                 <div className="space-y-6">
                   <div>
@@ -955,7 +1287,7 @@ export default function WhiteboardPage() {
               )}
             </TabsContent>
 
-            <TabsContent value="results" className="p-4 space-y-6">
+            <TabsContent value="results" className="p-4 space-y-6 flex-1 overflow-y-auto">
               <div>
                 <h3 className="font-semibold mb-4">Impact Assessment</h3>
                 {showResults ? (
