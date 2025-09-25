@@ -327,6 +327,55 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Video Demo Section */}
+      <section className="py-20 bg-background">
+        <div className="container">
+          <div className="mx-auto max-w-4xl text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl lg:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
+              See It In Action
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Watch our quick demo to see how MineIndia AI can transform your sustainability efforts
+            </p>
+          </div>
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="relative mx-auto max-w-4xl aspect-video bg-muted rounded-2xl overflow-hidden shadow-xl border border-border/50"
+          >
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="relative w-full h-full">
+                <iframe 
+                  src="https://www.youtube.com/embed/bXISlqXpTi8?si=mI8szpjT3-nRZhnz" 
+                  title="MineIndia AI Platform Demo" 
+                  className="w-full h-full" 
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </div>
+          </motion.div>
+          
+          <div className="mt-8 text-center">
+            <p className="text-muted-foreground text-sm">
+              Can't see the video?{' '}
+              <a 
+                href="https://www.youtube.com/watch?v=bXISlqXpTi8" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                Watch on YouTube
+              </a>
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="relative py-24 overflow-hidden">
         <div className="absolute inset-0 -z-10">
@@ -338,7 +387,6 @@ export default function HomePage() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
             viewport={{ once: true }}
             className="mx-auto max-w-4xl rounded-2xl bg-gradient-to-r from-primary/5 via-background to-primary/5 p-8 md:p-12 backdrop-blur-sm border border-border/50 shadow-xl"
           >
