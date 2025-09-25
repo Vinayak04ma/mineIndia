@@ -25,7 +25,7 @@ type NavItem = {
 
 export function Navigation() {
   const pathname = usePathname()
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({})
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const navRef = useRef<HTMLDivElement>(null)
 
@@ -33,7 +33,7 @@ export function Navigation() {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (navRef.current && !navRef.current.contains(event.target as Node)) {
-        setOpenDropdown(null)
+        setOpenDropdowns({})
         setMobileMenuOpen(false)
       }
     }
@@ -44,47 +44,38 @@ export function Navigation() {
 
   const navItems: NavItem[] = [
     {
-      name: "Analysis",
+      name: " Analysis",
       icon: <BarChart3 className="h-4 w-4" />,
       children: [
         { 
-          name: "Generate LCA Analysis", 
+          name: "General LCA Analysis", 
           href: "/analysis/generate",
           icon: null
         },
         { 
-          name: "View Reports", 
-          href: "/analysis/reports",
+          name: "India Specific LCA Analysis", 
+          href: "/analysis/india-specific",
           icon: null
         },
       ],
     },
     {
-      name: "Map",
-      href: "/map",
-      icon: <MapPin className="h-4 w-4" />,
+      name: " Whiteboard",
+      href: "/whiteboard",
+      icon: <Palette className="h-4 w-4" />,
     },
     {
-      name: "Marketplace",
+      name: " Marketplace",
       icon: <Palette className="h-4 w-4" />,
       children: [
         { 
-          name: "Scrap Metal", 
-          children: [
-            { 
-              name: "Buyer", 
-              href: "/marketplace/scrap/buyer",
-              icon: null
-            },
-            { 
-              name: "Seller", 
-              href: "/marketplace/scrap/seller",
-              icon: null
-            },
-          ]
+          name: " E-Waste (Urban Mining)", 
+          href: "/marketplace/ewaste",
+          icon: null
         },
         { 
-          name: "Junkyard", 
+          name: " Junkyard",
+          icon: null,
           children: [
             { 
               name: "Buyer", 
@@ -107,14 +98,25 @@ export function Navigation() {
     return pathname === href || pathname.startsWith(`${href}/`)
   }
 
-  const toggleDropdown = (e: React.MouseEvent, name: string) => {
+  const toggleDropdown = (e: React.MouseEvent, name: string, parentPath: string = '') => {
     e.preventDefault()
     e.stopPropagation()
-    setOpenDropdown(openDropdown === name ? null : name)
+    
+    const dropdownId = parentPath ? `${parentPath}-${name}` : name
+    
+    setOpenDropdowns(prev => ({
+      ...prev,
+      [dropdownId]: !prev[dropdownId]
+    }))
+  }
+
+  const isDropdownOpen = (name: string, parentPath: string = '') => {
+    const dropdownId = parentPath ? `${parentPath}-${name}` : name
+    return !!openDropdowns[dropdownId]
   }
 
   const closeAllDropdowns = () => {
-    setOpenDropdown(null)
+    setOpenDropdowns({})
     setMobileMenuOpen(false)
   }
 
@@ -139,35 +141,40 @@ export function Navigation() {
               <Button
                 variant={isItemActive ? 'default' : 'ghost'}
                 className={itemClass}
-                onClick={(e) => toggleDropdown(e, item.name)}
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setOpenDropdowns(prev => ({
+                    ...prev,
+                    [item.name]: !prev[item.name]
+                  }))
+                }}
               >
                 <div className="flex items-center gap-2">
                   {item.icon}
                   <span>{item.name}</span>
                 </div>
                 <ChevronDown 
-                  className={`h-4 w-4 transition-transform ${openDropdown === item.name ? 'rotate-180' : ''}`} 
+                  className={`h-4 w-4 transition-transform ${isDropdownOpen(item.name) ? 'rotate-180' : ''}`} 
                 />
               </Button>
               
-              {(openDropdown === item.name || isMobile) && (
+              {(isDropdownOpen(item.name) || isMobile) && (
                 <div 
                   className={`${isMobile ? 'pl-6' : 'absolute left-0 mt-1 w-56 rounded-md border bg-popover p-1 shadow-md z-50'}`}
-                  onClick={(e) => e.stopPropagation()}
                 >
-                  {item.children.map((child) => (
+                  {item.children?.map((child) => (
                     <div key={child.name} className="relative">
                       {child.children ? (
                         <div className="relative">
                           <button
                             className="flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
-                            onClick={(e) => toggleDropdown(e, `${item.name}-${child.name}`)}
+                            onClick={(e) => toggleDropdown(e, child.name, item.name)}
                           >
                             <span>{child.name}</span>
-                            <ChevronDown className="h-4 w-4 opacity-50" />
+                            <ChevronDown className={`h-4 w-4 opacity-50 ${isDropdownOpen(child.name, item.name) ? 'rotate-180' : ''}`} />
                           </button>
-                          
-                          {openDropdown === `${item.name}-${child.name}` && (
+                          {isDropdownOpen(child.name, item.name) && !isMobile && (
                             <div 
                               className="absolute left-full top-0 ml-1 w-48 rounded-md border bg-popover p-1 shadow-md z-50"
                               onClick={(e) => e.stopPropagation()}
