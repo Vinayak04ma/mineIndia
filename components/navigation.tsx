@@ -70,7 +70,7 @@ export function Navigation() {
       children: [
         { 
           name: " E-Waste (Urban Mining)", 
-          href: "/marketplace/ewaste",
+          href: "/marketplace/e-waste",
           icon: null
         },
         { 

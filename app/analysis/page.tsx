@@ -1,17 +1,26 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { Navigation } from "@/components/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowRight, FileText, MapPin, Settings, Zap } from "lucide-react"
 
 export default function AnalysisPage() {
+  const router = useRouter()
+  
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
 
       <div className="container py-8">
+      <Button variant="outline" asChild className="mb-6">
+        <Link href="/">
+          &larr; Back to Home
+        </Link>
+      </Button>
         <div className="mx-auto max-w-4xl">
           {/* Header */}
           <div className="text-center mb-12">
@@ -28,7 +37,7 @@ export default function AnalysisPage() {
           {/* Analysis Options */}
           <div className="grid gap-8 md:grid-cols-2 mb-12">
             <Card className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
-              <Link href="/analysis/manual">
+              <Link href="/analysis/generate">
                 <CardHeader>
                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
                     <Settings className="h-6 w-6 text-primary" />
