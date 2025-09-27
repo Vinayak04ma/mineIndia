@@ -135,9 +135,20 @@ export default function AnalysisReportPage() {
     return null;
   };
 
+  const handleBack = () => {
+    window.history.back();
+  };
+
   return (
     <div className="container mx-auto py-8" style={{ fontFamily: 'Inter, sans-serif' }}>
       <div className="flex justify-between items-center mb-8">
+        <Button variant="outline" onClick={handleBack}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                        <path d="m12 19-7-7 7-7"/>
+                        <path d="M19 12H5"/>
+                      </svg>
+                      Back
+                    </Button>
         <div className="space-y-2">
           <h1 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/70">
             LCA Analysis Report
