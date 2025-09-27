@@ -351,9 +351,9 @@ export default function GenerateLCAPage() {
             </div>
           </div>
 
-          <form id="lca-form" onSubmit={handleSubmit} className="space-y-6">
+          <form id="lca-form" onSubmit={handleSubmit} className="space-y-6 bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-gray-100 shadow-sm">
             {/* Section 1: Mineral Selection */}
-            <Card className={`${currentSection === 'mineral' ? 'block' : 'hidden'}`}>
+            <Card className={`${currentSection === 'mineral' ? 'block' : 'hidden'} border-2 border-gray-100 shadow-md`}>
               <CardHeader>
                 <CardTitle>1. Select Mineral</CardTitle>
                 <CardDescription>Choose the primary mineral for your LCA analysis.</CardDescription>
@@ -380,22 +380,86 @@ export default function GenerateLCAPage() {
             </Card>
 
             {/* Section 2: Production Data */}
-            <Card className={`${currentSection === 'production' ? 'block' : 'hidden'}`}>
+            <Card className={`${currentSection === 'production' ? 'block' : 'hidden'} border-2 border-gray-100 shadow-md`}>
                 <CardHeader>
                     <CardTitle>2. Production & Operational Data</CardTitle>
                     <CardDescription>Enter details about your production volume, process, and technology.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <div className="space-y-2"><Label htmlFor="annualProduction">Annual production volume (t/yr)</Label><Input id="annualProduction" type="number" value={formData.annualProduction} onChange={(e) => handleInputChange('annualProduction', e.target.value)} placeholder="e.g., 100000" /></div>
-                         <div className="space-y-2"><Label htmlFor="operatingHours">Plant operating hours (h/yr)</Label><Input id="operatingHours" type="number" value={formData.operatingHours} onChange={(e) => handleInputChange('operatingHours', e.target.value)} placeholder="e.g., 8000" /></div>
-                         <div className="space-y-2"><Label htmlFor="yieldEfficiency">Yield/Efficiency (%)</Label><Input id="yieldEfficiency" type="number" value={formData.yieldEfficiency} onChange={(e) => handleInputChange('yieldEfficiency', e.target.value)} placeholder="e.g., 95" /></div>
-                         <div className="space-y-2"><Label htmlFor="oreGrade">Ore grade (%)</Label><Input id="oreGrade" type="number" value={formData.oreGrade} onChange={(e) => handleInputChange('oreGrade', e.target.value)} placeholder="e.g., 62" /></div>
-                         <div className="space-y-2"><Label htmlFor="technologyType">Technology type</Label><Select value={formData.technologyType} onValueChange={(value) => handleInputChange('technologyType', value)}><SelectTrigger><SelectValue placeholder="Select technology" /></SelectTrigger><SelectContent><SelectItem value="blast-furnace">Blast Furnace</SelectItem><SelectItem value="electric-arc">Electric Arc Furnace</SelectItem><SelectItem value="basic-oxygen">Basic Oxygen Furnace</SelectItem><SelectItem value="other">Other</SelectItem></SelectContent></Select></div>
-                         <div className="space-y-2"><Label htmlFor="functionalUnit">Functional unit</Label><Input id="functionalUnit" value={formData.functionalUnit} onChange={(e) => handleInputChange('functionalUnit', e.target.value)} /></div>
+                         <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                            <Label htmlFor="annualProduction" className="text-sm font-medium text-gray-700">Annual production volume (t/yr)</Label>
+                            <Input 
+                                id="annualProduction" 
+                                type="number" 
+                                value={formData.annualProduction} 
+                                onChange={(e) => handleInputChange('annualProduction', e.target.value)} 
+                                placeholder="e.g., 100000"
+                                className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            />
+                         </div>
+                         <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                            <Label htmlFor="operatingHours" className="text-sm font-medium text-gray-700">Plant operating hours (h/yr)</Label>
+                            <Input 
+                                id="operatingHours" 
+                                type="number" 
+                                value={formData.operatingHours} 
+                                onChange={(e) => handleInputChange('operatingHours', e.target.value)} 
+                                placeholder="e.g., 8000"
+                                className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            />
+                         </div>
+                         <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                            <Label htmlFor="yieldEfficiency" className="text-sm font-medium text-gray-700">Yield/Efficiency (%)</Label>
+                            <Input 
+                                id="yieldEfficiency" 
+                                type="number" 
+                                value={formData.yieldEfficiency} 
+                                onChange={(e) => handleInputChange('yieldEfficiency', e.target.value)} 
+                                placeholder="e.g., 95"
+                                className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            />
+                         </div>
+                         <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                            <Label htmlFor="oreGrade" className="text-sm font-medium text-gray-700">Ore grade (%)</Label>
+                            <Input 
+                                id="oreGrade" 
+                                type="number" 
+                                value={formData.oreGrade} 
+                                onChange={(e) => handleInputChange('oreGrade', e.target.value)} 
+                                placeholder="e.g., 62"
+                                className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            />
+                         </div>
+                         <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                            <Label htmlFor="technologyType" className="text-sm font-medium text-gray-700">Technology type</Label>
+                            <Select 
+                                value={formData.technologyType} 
+                                onValueChange={(value) => handleInputChange('technologyType', value)}
+                            >
+                                <SelectTrigger className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                    <SelectValue placeholder="Select technology" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="blast-furnace">Blast Furnace</SelectItem>
+                                    <SelectItem value="electric-arc">Electric Arc Furnace</SelectItem>
+                                    <SelectItem value="basic-oxygen">Basic Oxygen Furnace</SelectItem>
+                                    <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                            </Select>
+                         </div>
+                         <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                            <Label htmlFor="functionalUnit" className="text-sm font-medium text-gray-700">Functional unit</Label>
+                            <Input 
+                                id="functionalUnit" 
+                                value={formData.functionalUnit} 
+                                onChange={(e) => handleInputChange('functionalUnit', e.target.value)}
+                                className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            />
+                         </div>
                     </div>
                 </CardContent>
-                <CardFooter className="flex justify-between">
+                <CardFooter className="flex justify-between py-4 ">
                     <Button type="button" variant="outline" onClick={goToPrevSection}><ArrowLeft className="h-4 w-4 mr-2" /> Previous</Button>
                     <Button type="button" onClick={goToNextSection}>Next <ArrowRight className="h-4 w-4 ml-2" /></Button>
                 </CardFooter>
@@ -405,16 +469,97 @@ export default function GenerateLCAPage() {
             <Card className={`${currentSection === 'energy' ? 'block' : 'hidden'}`}>
                 <CardHeader><CardTitle>3. Energy Inputs</CardTitle><CardDescription>Provide data on energy consumption from various sources.</CardDescription></CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2"><Label htmlFor="gridElectricity">Grid electricity consumption (kWh/t product)</Label><Input id="gridElectricity" type="number" value={formData.gridElectricity} onChange={(e) => handleInputChange('gridElectricity', e.target.value)} placeholder="e.g., 500" /></div>
-                    <div className="space-y-2"><Label htmlFor="gridEmissionFactor">Grid emission factor (kg CO₂/kWh)</Label><Input id="gridEmissionFactor" type="number" step="0.01" value={formData.gridEmissionFactor} onChange={(e) => handleInputChange('gridEmissionFactor', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="fuelOilConsumption">Fuel oil consumption (L or MJ/t product)</Label><Input id="fuelOilConsumption" type="number" value={formData.fuelOilConsumption} onChange={(e) => handleInputChange('fuelOilConsumption', e.target.value)} placeholder="e.g., 100" /></div>
-                    <div className="space-y-2"><Label htmlFor="coalCokeInput">Coal/coke input (kg/t product)</Label><Input id="coalCokeInput" type="number" value={formData.coalCokeInput} onChange={(e) => handleInputChange('coalCokeInput', e.target.value)} placeholder="e.g., 400" /></div>
-                    <div className="space-y-2"><Label htmlFor="naturalGasInput">Natural gas input (Nm³/t product)</Label><Input id="naturalGasInput" type="number" value={formData.naturalGasInput} onChange={(e) => handleInputChange('naturalGasInput', e.target.value)} placeholder="e.g., 80" /></div>
-                    <div className="space-y-2"><Label htmlFor="renewableEnergyShare">Renewable energy share (%)</Label><Input id="renewableEnergyShare" type="number" max="100" value={formData.renewableEnergyShare} onChange={(e) => handleInputChange('renewableEnergyShare', e.target.value)} placeholder="e.g., 10" /></div>
-                    <div className="space-y-2"><Label htmlFor="onsiteElectricity">On-site generated electricity (MWh/yr)</Label><Input id="onsiteElectricity" type="number" value={formData.onsiteElectricity} onChange={(e) => handleInputChange('onsiteElectricity', e.target.value)} placeholder="e.g., 5000" /></div>
-                    <div className="space-y-2"><Label htmlFor="energyRecovery">Energy recovery from waste gases (MJ/yr)</Label><Input id="energyRecovery" type="number" value={formData.energyRecovery} onChange={(e) => handleInputChange('energyRecovery', e.target.value)} placeholder="e.g., 10000" /></div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="gridElectricity" className="text-sm font-medium text-gray-700">Grid electricity consumption (kWh/t product)</Label>
+                        <Input 
+                            id="gridElectricity" 
+                            type="number" 
+                            value={formData.gridElectricity} 
+                            onChange={(e) => handleInputChange('gridElectricity', e.target.value)} 
+                            placeholder="e.g., 500"
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="gridEmissionFactor" className="text-sm font-medium text-gray-700">Grid emission factor (kg CO₂/kWh)</Label>
+                        <Input 
+                            id="gridEmissionFactor" 
+                            type="number" 
+                            step="0.01" 
+                            value={formData.gridEmissionFactor} 
+                            onChange={(e) => handleInputChange('gridEmissionFactor', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="fuelOilConsumption" className="text-sm font-medium text-gray-700">Fuel oil consumption (L or MJ/t product)</Label>
+                        <Input 
+                            id="fuelOilConsumption" 
+                            type="number" 
+                            value={formData.fuelOilConsumption} 
+                            onChange={(e) => handleInputChange('fuelOilConsumption', e.target.value)} 
+                            placeholder="e.g., 100"
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="coalCokeInput" className="text-sm font-medium text-gray-700">Coal/coke input (kg/t product)</Label>
+                        <Input 
+                            id="coalCokeInput" 
+                            type="number" 
+                            value={formData.coalCokeInput} 
+                            onChange={(e) => handleInputChange('coalCokeInput', e.target.value)} 
+                            placeholder="e.g., 400"
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="naturalGasInput" className="text-sm font-medium text-gray-700">Natural gas input (Nm³/t product)</Label>
+                        <Input 
+                            id="naturalGasInput" 
+                            type="number" 
+                            value={formData.naturalGasInput} 
+                            onChange={(e) => handleInputChange('naturalGasInput', e.target.value)} 
+                            placeholder="e.g., 80"
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="renewableEnergyShare" className="text-sm font-medium text-gray-700">Renewable energy share (%)</Label>
+                        <Input 
+                            id="renewableEnergyShare" 
+                            type="number" 
+                            max="100" 
+                            value={formData.renewableEnergyShare} 
+                            onChange={(e) => handleInputChange('renewableEnergyShare', e.target.value)} 
+                            placeholder="e.g., 10"
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="onsiteElectricity" className="text-sm font-medium text-gray-700">On-site generated electricity (MWh/yr)</Label>
+                        <Input 
+                            id="onsiteElectricity" 
+                            type="number" 
+                            value={formData.onsiteElectricity} 
+                            onChange={(e) => handleInputChange('onsiteElectricity', e.target.value)} 
+                            placeholder="e.g., 5000"
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="energyRecovery" className="text-sm font-medium text-gray-700">Energy recovery from waste gases (MJ/yr)</Label>
+                        <Input 
+                            id="energyRecovery" 
+                            type="number" 
+                            value={formData.energyRecovery} 
+                            onChange={(e) => handleInputChange('energyRecovery', e.target.value)} 
+                            placeholder="e.g., 10000"
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
                 </CardContent>
-                <CardFooter className="flex justify-between">
+                <CardFooter className="flex justify-between py-4">
                     <Button type="button" variant="outline" onClick={goToPrevSection}><ArrowLeft className="h-4 w-4 mr-2" /> Previous</Button>
                     <Button type="button" onClick={goToNextSection}>Next <ArrowRight className="h-4 w-4 ml-2" /></Button>
                 </CardFooter>
@@ -424,15 +569,79 @@ export default function GenerateLCAPage() {
             <Card className={`${currentSection === 'materials' ? 'block' : 'hidden'}`}>
                 <CardHeader><CardTitle>4. Raw Material Inputs</CardTitle><CardDescription>Detail the raw materials used in the process.</CardDescription></CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2"><Label htmlFor="oreMined">Ore mined/processed (t/yr)</Label><Input id="oreMined" type="number" value={formData.oreMined} onChange={(e) => handleInputChange('oreMined', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="concentratesUsed">Concentrates used (t/yr)</Label><Input id="concentratesUsed" type="number" value={formData.concentratesUsed} onChange={(e) => handleInputChange('concentratesUsed', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="fluxes">Fluxes (kg/t product)</Label><Input id="fluxes" type="number" value={formData.fluxes} onChange={(e) => handleInputChange('fluxes', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="scrapRecycledInput">Scrap/recycled metal input (%)</Label><Input id="scrapRecycledInput" type="number" max="100" value={formData.scrapRecycledInput} onChange={(e) => handleInputChange('scrapRecycledInput', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="alloyingElements">Alloying elements (kg/t product)</Label><Input id="alloyingElements" type="number" value={formData.alloyingElements} onChange={(e) => handleInputChange('alloyingElements', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="chemicalReductants">Chemical reductants (kg/t product)</Label><Input id="chemicalReductants" type="number" value={formData.chemicalReductants} onChange={(e) => handleInputChange('chemicalReductants', e.target.value)} /></div>
-                    <div className="space-y-2 md:col-span-2"><Label htmlFor="additives">Additives (list with quantities)</Label><Textarea id="additives" value={formData.additives} onChange={(e) => handleInputChange('additives', e.target.value)} placeholder="e.g., Limestone: 50 kg/t, Dolomite: 30 kg/t" /></div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="oreMined" className="text-sm font-medium text-gray-700">Ore mined/processed (t/yr)</Label>
+                        <Input 
+                            id="oreMined" 
+                            type="number" 
+                            value={formData.oreMined} 
+                            onChange={(e) => handleInputChange('oreMined', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="concentratesUsed" className="text-sm font-medium text-gray-700">Concentrates used (t/yr)</Label>
+                        <Input 
+                            id="concentratesUsed" 
+                            type="number" 
+                            value={formData.concentratesUsed} 
+                            onChange={(e) => handleInputChange('concentratesUsed', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="fluxes" className="text-sm font-medium text-gray-700">Fluxes (kg/t product)</Label>
+                        <Input 
+                            id="fluxes" 
+                            type="number" 
+                            value={formData.fluxes} 
+                            onChange={(e) => handleInputChange('fluxes', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="scrapRecycledInput" className="text-sm font-medium text-gray-700">Scrap/recycled metal input (%)</Label>
+                        <Input 
+                            id="scrapRecycledInput" 
+                            type="number" 
+                            max="100" 
+                            value={formData.scrapRecycledInput} 
+                            onChange={(e) => handleInputChange('scrapRecycledInput', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="alloyingElements" className="text-sm font-medium text-gray-700">Alloying elements (kg/t product)</Label>
+                        <Input 
+                            id="alloyingElements" 
+                            type="number" 
+                            value={formData.alloyingElements} 
+                            onChange={(e) => handleInputChange('alloyingElements', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="chemicalReductants" className="text-sm font-medium text-gray-700">Chemical reductants (kg/t product)</Label>
+                        <Input 
+                            id="chemicalReductants" 
+                            type="number" 
+                            value={formData.chemicalReductants} 
+                            onChange={(e) => handleInputChange('chemicalReductants', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors md:col-span-2">
+                        <Label htmlFor="additives" className="text-sm font-medium text-gray-700">Additives (list with quantities)</Label>
+                        <Textarea 
+                            id="additives" 
+                            value={formData.additives} 
+                            onChange={(e) => handleInputChange('additives', e.target.value)} 
+                            placeholder="e.g., Limestone: 50 kg/t, Dolomite: 30 kg/t"
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 min-h-[100px]"
+                        />
+                    </div>
                 </CardContent>
-                <CardFooter className="flex justify-between">
+                <CardFooter className="flex justify-between py-4">
                     <Button type="button" variant="outline" onClick={goToPrevSection}><ArrowLeft className="h-4 w-4 mr-2" /> Previous</Button>
                     <Button type="button" onClick={goToNextSection}>Next <ArrowRight className="h-4 w-4 ml-2" /></Button>
                 </CardFooter>
@@ -442,19 +651,119 @@ export default function GenerateLCAPage() {
             <Card className={`${currentSection === 'airEmissions' ? 'block' : 'hidden'}`}>
                 <CardHeader><CardTitle>5. Air Emissions</CardTitle><CardDescription>Quantify emissions released into the atmosphere.</CardDescription></CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2"><Label htmlFor="co2Direct">Direct CO₂ emissions (kg CO₂/t product)</Label><Input id="co2Direct" type="number" value={formData.co2Direct} onChange={(e) => handleInputChange('co2Direct', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="co2FromFuels">CO₂ from fuel combustion (kg CO₂/t product)</Label><Input id="co2FromFuels" type="number" value={formData.co2FromFuels} onChange={(e) => handleInputChange('co2FromFuels', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="ch4Emissions">CH₄ emissions (kg CH₄/t product)</Label><Input id="ch4Emissions" type="number" value={formData.ch4Emissions} onChange={(e) => handleInputChange('ch4Emissions', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="n2oEmissions">N₂O emissions (kg N₂O/t product)</Label><Input id="n2oEmissions" type="number" value={formData.n2oEmissions} onChange={(e) => handleInputChange('n2oEmissions', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="so2Emissions">SO₂ emissions (kg SO₂/t product)</Label><Input id="so2Emissions" type="number" value={formData.so2Emissions} onChange={(e) => handleInputChange('so2Emissions', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="noxEmissions">NOₓ emissions (kg NOₓ/t product)</Label><Input id="noxEmissions" type="number" value={formData.noxEmissions} onChange={(e) => handleInputChange('noxEmissions', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="coEmissions">CO emissions (kg CO/t product)</Label><Input id="coEmissions" type="number" value={formData.coEmissions} onChange={(e) => handleInputChange('coEmissions', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="pmEmissions">Particulate matter (PM) emissions (kg PM/t product)</Label><Input id="pmEmissions" type="number" value={formData.pmEmissions} onChange={(e) => handleInputChange('pmEmissions', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="vocsEmissions">VOCs emissions (kg VOCs/t product)</Label><Input id="vocsEmissions" type="number" value={formData.vocsEmissions} onChange={(e) => handleInputChange('vocsEmissions', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="heavyMetalsAir">Heavy metals to air (kg/t product)</Label><Input id="heavyMetalsAir" type="number" value={formData.heavyMetalsAir} onChange={(e) => handleInputChange('heavyMetalsAir', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="pfcsSf6">PFCs/SF₆ emissions (kg CO₂-eq/t product)</Label><Input id="pfcsSf6" type="number" value={formData.pfcsSf6} onChange={(e) => handleInputChange('pfcsSf6', e.target.value)} /></div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="co2Direct" className="text-sm font-medium text-gray-700">Direct CO₂ emissions (kg CO₂/t product)</Label>
+                        <Input 
+                            id="co2Direct" 
+                            type="number" 
+                            value={formData.co2Direct} 
+                            onChange={(e) => handleInputChange('co2Direct', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="co2FromFuels" className="text-sm font-medium text-gray-700">CO₂ from fuel combustion (kg CO₂/t product)</Label>
+                        <Input 
+                            id="co2FromFuels" 
+                            type="number" 
+                            value={formData.co2FromFuels} 
+                            onChange={(e) => handleInputChange('co2FromFuels', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="ch4Emissions" className="text-sm font-medium text-gray-700">CH₄ emissions (kg CH₄/t product)</Label>
+                        <Input 
+                            id="ch4Emissions" 
+                            type="number" 
+                            value={formData.ch4Emissions} 
+                            onChange={(e) => handleInputChange('ch4Emissions', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="n2oEmissions" className="text-sm font-medium text-gray-700">N₂O emissions (kg N₂O/t product)</Label>
+                        <Input 
+                            id="n2oEmissions" 
+                            type="number" 
+                            value={formData.n2oEmissions} 
+                            onChange={(e) => handleInputChange('n2oEmissions', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="so2Emissions" className="text-sm font-medium text-gray-700">SO₂ emissions (kg SO₂/t product)</Label>
+                        <Input 
+                            id="so2Emissions" 
+                            type="number" 
+                            value={formData.so2Emissions} 
+                            onChange={(e) => handleInputChange('so2Emissions', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="noxEmissions" className="text-sm font-medium text-gray-700">NOₓ emissions (kg NOₓ/t product)</Label>
+                        <Input 
+                            id="noxEmissions" 
+                            type="number" 
+                            value={formData.noxEmissions} 
+                            onChange={(e) => handleInputChange('noxEmissions', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="coEmissions" className="text-sm font-medium text-gray-700">CO emissions (kg CO/t product)</Label>
+                        <Input 
+                            id="coEmissions" 
+                            type="number" 
+                            value={formData.coEmissions} 
+                            onChange={(e) => handleInputChange('coEmissions', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="pmEmissions" className="text-sm font-medium text-gray-700">Particulate matter (PM) emissions (kg PM/t product)</Label>
+                        <Input 
+                            id="pmEmissions" 
+                            type="number" 
+                            value={formData.pmEmissions} 
+                            onChange={(e) => handleInputChange('pmEmissions', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="vocsEmissions" className="text-sm font-medium text-gray-700">VOCs emissions (kg VOCs/t product)</Label>
+                        <Input 
+                            id="vocsEmissions" 
+                            type="number" 
+                            value={formData.vocsEmissions} 
+                            onChange={(e) => handleInputChange('vocsEmissions', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="heavyMetalsAir" className="text-sm font-medium text-gray-700">Heavy metals to air (kg/t product)
+                        </Label>
+                        <Input 
+                          id="heavyMetalsAir" 
+                          type="number"  
+                          value={formData.heavyMetalsAir} 
+                          onChange={(e) => handleInputChange('heavyMetalsAir', e.target.value)}
+                          className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" 
+                      />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="pfcsSf6" className="text-sm font-medium text-gray-700">PFCs/SF₆ emissions (kg CO₂-eq/t product)</Label>
+                      <Input 
+                      id="pfcsSf6" 
+                      type="number" 
+                      value={formData.pfcsSf6} 
+                      onChange={(e) => handleInputChange('pfcsSf6', e.target.value)} 
+                      className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
                 </CardContent>
-                 <CardFooter className="flex justify-between">
+                 <CardFooter className="flex justify-between py-4">
                     <Button type="button" variant="outline" onClick={goToPrevSection}><ArrowLeft className="h-4 w-4 mr-2" /> Previous</Button>
                     <Button type="button" onClick={goToNextSection}>Next <ArrowRight className="h-4 w-4 ml-2" /></Button>
                 </CardFooter>
@@ -464,16 +773,91 @@ export default function GenerateLCAPage() {
              <Card className={`${currentSection === 'water' ? 'block' : 'hidden'}`}>
                 <CardHeader><CardTitle>6. Water Inputs & Emissions</CardTitle><CardDescription>Detail water usage and wastewater discharge.</CardDescription></CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2"><Label htmlFor="waterWithdrawn">Water withdrawn (m³/t product)</Label><Input id="waterWithdrawn" type="number" value={formData.waterWithdrawn} onChange={(e) => handleInputChange('waterWithdrawn', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="waterConsumed">Water consumed (m³/t product)</Label><Input id="waterConsumed" type="number" value={formData.waterConsumed} onChange={(e) => handleInputChange('waterConsumed', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="coolingWater">Cooling water (m³/t product)</Label><Input id="coolingWater" type="number" value={formData.coolingWater} onChange={(e) => handleInputChange('coolingWater', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="wastewaterGenerated">Wastewater generated (m³/t product)</Label><Input id="wastewaterGenerated" type="number" value={formData.wastewaterGenerated} onChange={(e) => handleInputChange('wastewaterGenerated', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="wastewaterCodBod">Wastewater COD/BOD (kg/t product)</Label><Input id="wastewaterCodBod" type="number" value={formData.wastewaterCodBod} onChange={(e) => handleInputChange('wastewaterCodBod', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="heavyMetalsWater">Heavy metals to water (kg/t product)</Label><Input id="heavyMetalsWater" type="number" value={formData.heavyMetalsWater} onChange={(e) => handleInputChange('heavyMetalsWater', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="nitratesPhosphates">Nitrates/phosphates (kg/t product)</Label><Input id="nitratesPhosphates" type="number" value={formData.nitratesPhosphates} onChange={(e) => handleInputChange('nitratesPhosphates', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="phEffluent">pH of effluent</Label><Input id="phEffluent" type="number" step="0.1" min="0" max="14" value={formData.phEffluent} onChange={(e) => handleInputChange('phEffluent', e.target.value)} /></div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="waterWithdrawn" className="text-sm font-medium text-gray-700">Water withdrawn (m³/t product)</Label>
+                        <Input 
+                            id="waterWithdrawn" 
+                            type="number" 
+                            value={formData.waterWithdrawn} 
+                            onChange={(e) => handleInputChange('waterWithdrawn', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="waterConsumed" className="text-sm font-medium text-gray-700">Water consumed (m³/t product)</Label>
+                        <Input 
+                            id="waterConsumed" 
+                            type="number" 
+                            value={formData.waterConsumed} 
+                            onChange={(e) => handleInputChange('waterConsumed', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="coolingWater" className="text-sm font-medium text-gray-700">Cooling water (m³/t product)</Label>
+                        <Input 
+                            id="coolingWater" 
+                            type="number" 
+                            value={formData.coolingWater} 
+                            onChange={(e) => handleInputChange('coolingWater', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="wastewaterGenerated" className="text-sm font-medium text-gray-700">Wastewater generated (m³/t product)</Label>
+                        <Input 
+                            id="wastewaterGenerated" 
+                            type="number" 
+                            value={formData.wastewaterGenerated} 
+                            onChange={(e) => handleInputChange('wastewaterGenerated', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="wastewaterCodBod" className="text-sm font-medium text-gray-700">Wastewater COD/BOD (kg/t product)</Label>
+                        <Input 
+                            id="wastewaterCodBod" 
+                            type="number" 
+                            value={formData.wastewaterCodBod} 
+                            onChange={(e) => handleInputChange('wastewaterCodBod', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="heavyMetalsWater" className="text-sm font-medium text-gray-700">Heavy metals to water (kg/t product)</Label>
+                        <Input 
+                            id="heavyMetalsWater" 
+                            type="number" 
+                            value={formData.heavyMetalsWater} 
+                            onChange={(e) => handleInputChange('heavyMetalsWater', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="nitratesPhosphates" className="text-sm font-medium text-gray-700">Nitrates/phosphates (kg/t product)</Label>
+                        <Input 
+                            id="nitratesPhosphates" 
+                            type="number" 
+                            value={formData.nitratesPhosphates} 
+                            onChange={(e) => handleInputChange('nitratesPhosphates', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="phEffluent" className="text-sm font-medium text-gray-700">pH of effluent</Label>
+                        <Input 
+                            id="phEffluent" 
+                            type="number" 
+                            step="0.1" 
+                            min="0" 
+                            max="14" 
+                            value={formData.phEffluent} 
+                            onChange={(e) => handleInputChange('phEffluent', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
                 </CardContent>
-                <CardFooter className="flex justify-between">
+                <CardFooter className="flex justify-between py-4">
                     <Button type="button" variant="outline" onClick={goToPrevSection}><ArrowLeft className="h-4 w-4 mr-2" /> Previous</Button>
                     <Button type="button" onClick={goToNextSection}>Next <ArrowRight className="h-4 w-4 ml-2" /></Button>
                 </CardFooter>
@@ -483,15 +867,78 @@ export default function GenerateLCAPage() {
             <Card className={`${currentSection === 'waste' ? 'block' : 'hidden'}`}>
                 <CardHeader><CardTitle>7. Solid Waste & By-products</CardTitle><CardDescription>Provide data on waste generation and by-product creation.</CardDescription></CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2"><Label htmlFor="overburdenWasteRock">Overburden/waste rock (t/t product)</Label><Input id="overburdenWasteRock" type="number" value={formData.overburdenWasteRock} onChange={(e) => handleInputChange('overburdenWasteRock', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="tailingsGenerated">Tailings generated (t/t product)</Label><Input id="tailingsGenerated" type="number" value={formData.tailingsGenerated} onChange={(e) => handleInputChange('tailingsGenerated', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="slagGeneration">Slag generation (kg/t product)</Label><Input id="slagGeneration" type="number" value={formData.slagGeneration} onChange={(e) => handleInputChange('slagGeneration', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="redMud">Red mud/bauxite residue (t/t product)</Label><Input id="redMud" type="number" value={formData.redMud} onChange={(e) => handleInputChange('redMud', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="dustCollected">Dust collected (kg/t product)</Label><Input id="dustCollected" type="number" value={formData.dustCollected} onChange={(e) => handleInputChange('dustCollected', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="hazardousWaste">Hazardous waste (kg/t product)</Label><Input id="hazardousWaste" type="number" value={formData.hazardousWaste} onChange={(e) => handleInputChange('hazardousWaste', e.target.value)} /></div>
-                    <div className="space-y-2 md:col-span-2"><Label htmlFor="recyclableByProducts">Recyclable by-products (list with quantities)</Label><Textarea id="recyclableByProducts" value={formData.recyclableByProducts} onChange={(e) => handleInputChange('recyclableByProducts', e.target.value)} placeholder="Example: Steel slag: 200 kg/t, Fly ash: 50 kg/t" /></div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="overburdenWasteRock">Overburden/waste rock (t/t product)</Label>
+                        <Input 
+                          id="overburdenWasteRock" 
+                          type="number"  
+                          value={formData.overburdenWasteRock} 
+                          onChange={(e) => handleInputChange('overburdenWasteRock', e.target.value)} 
+                          className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="tailingsGenerated" className="text-sm font-medium text-gray-700">Tailings generated (t/t product)</Label>
+                        <Input 
+                            id="tailingsGenerated" 
+                            type="number" 
+                            value={formData.tailingsGenerated} 
+                            onChange={(e) => handleInputChange('tailingsGenerated', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="slagGeneration" className="text-sm font-medium text-gray-700">Slag generation (kg/t product)</Label>
+                        <Input 
+                            id="slagGeneration" 
+                            type="number" 
+                            value={formData.slagGeneration} 
+                            onChange={(e) => handleInputChange('slagGeneration', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="redMud" className="text-sm font-medium text-gray-700">Red mud/bauxite residue (t/t product)</Label>
+                        <Input 
+                            id="redMud" 
+                            type="number" 
+                            value={formData.redMud} 
+                            onChange={(e) => handleInputChange('redMud', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="dustCollected" className="text-sm font-medium text-gray-700">Dust collected (kg/t product)</Label>
+                        <Input 
+                            id="dustCollected" 
+                            type="number" 
+                            value={formData.dustCollected} 
+                            onChange={(e) => handleInputChange('dustCollected', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="hazardousWaste" className="text-sm font-medium text-gray-700">Hazardous waste (kg/t product)</Label>
+                        <Input 
+                            id="hazardousWaste" 
+                            type="number" 
+                            value={formData.hazardousWaste} 
+                            onChange={(e) => handleInputChange('hazardousWaste', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 md:col-span-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="recyclableByProducts" className="text-sm font-medium text-gray-700">Recyclable by-products (list with quantities)</Label>
+                        <Textarea 
+                            id="recyclableByProducts" 
+                            value={formData.recyclableByProducts} 
+                            onChange={(e) => handleInputChange('recyclableByProducts', e.target.value)} 
+                            placeholder="Example: Steel slag: 200 kg/t, Fly ash: 50 kg/t"
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 min-h-[100px]"
+                        />
+                    </div>
                 </CardContent>
-                <CardFooter className="flex justify-between">
+                <CardFooter className="flex justify-between py-4">
                     <Button type="button" variant="outline" onClick={goToPrevSection}><ArrowLeft className="h-4 w-4 mr-2" /> Previous</Button>
                     <Button type="button" onClick={goToNextSection}>Next <ArrowRight className="h-4 w-4 ml-2" /></Button>
                 </CardFooter>
@@ -501,14 +948,75 @@ export default function GenerateLCAPage() {
             <Card className={`${currentSection === 'resource' ? 'block' : 'hidden'}`}>
                 <CardHeader><CardTitle>8. Resource Use & Land</CardTitle><CardDescription>Information on land occupation and resource depletion.</CardDescription></CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     <div className="space-y-2"><Label htmlFor="landAreaOccupied">Land area occupied (m²/t product)</Label><Input id="landAreaOccupied" type="number" value={formData.landAreaOccupied} onChange={(e) => handleInputChange('landAreaOccupied', e.target.value)} /></div>
-                     <div className="space-y-2"><Label htmlFor="landDisturbed">Land disturbed (m²/t product)</Label><Input id="landDisturbed" type="number" value={formData.landDisturbed} onChange={(e) => handleInputChange('landDisturbed', e.target.value)} /></div>
-                     <div className="space-y-2"><Label htmlFor="biodiversityImpact">Biodiversity impact (species affected)</Label><Input id="biodiversityImpact" type="number" value={formData.biodiversityImpact} onChange={(e) => handleInputChange('biodiversityImpact', e.target.value)} /></div>
-                     <div className="space-y-2"><Label htmlFor="waterSourceType">Water source type</Label><Select value={formData.waterSourceType} onValueChange={(value) => handleInputChange('waterSourceType', value)}><SelectTrigger><SelectValue placeholder="Select water source" /></SelectTrigger><SelectContent><SelectItem value="surface">Surface water</SelectItem><SelectItem value="groundwater">Groundwater</SelectItem><SelectItem value="recycled">Recycled water</SelectItem><SelectItem value="seawater">Seawater</SelectItem></SelectContent></Select></div>
-                     <div className="space-y-2"><Label htmlFor="mineralDepletion">Mineral depletion (kg Sb-eq/t product)</Label><Input id="mineralDepletion" type="number" value={formData.mineralDepletion} onChange={(e) => handleInputChange('mineralDepletion', e.target.value)} /></div>
-                     <div className="space-y-2"><Label htmlFor="fossilFuelDepletion">Fossil fuel depletion (MJ/t product)</Label><Input id="fossilFuelDepletion" type="number" value={formData.fossilFuelDepletion} onChange={(e) => handleInputChange('fossilFuelDepletion', e.target.value)} /></div>
+                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                         <Label htmlFor="landAreaOccupied" className="text-sm font-medium text-gray-700">Land area occupied (m²/t product)</Label>
+                         <Input 
+                             id="landAreaOccupied" 
+                             type="number" 
+                             value={formData.landAreaOccupied} 
+                             onChange={(e) => handleInputChange('landAreaOccupied', e.target.value)}
+                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                         />
+                     </div>
+                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                         <Label htmlFor="landDisturbed" className="text-sm font-medium text-gray-700">Land disturbed (m²/t product)</Label>
+                         <Input 
+                             id="landDisturbed" 
+                             type="number" 
+                             value={formData.landDisturbed} 
+                             onChange={(e) => handleInputChange('landDisturbed', e.target.value)}
+                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                         />
+                     </div>
+                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                         <Label htmlFor="biodiversityImpact" className="text-sm font-medium text-gray-700">Biodiversity impact (species affected)</Label>
+                         <Input 
+                             id="biodiversityImpact" 
+                             type="number" 
+                             value={formData.biodiversityImpact} 
+                             onChange={(e) => handleInputChange('biodiversityImpact', e.target.value)}
+                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                         />
+                     </div>
+                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                         <Label htmlFor="waterSourceType" className="text-sm font-medium text-gray-700">Water source type</Label>
+                         <Select 
+                             value={formData.waterSourceType} 
+                             onValueChange={(value) => handleInputChange('waterSourceType', value)}
+                         >
+                             <SelectTrigger className="mt-1 bg-gray-50 border-gray-300 focus:ring-2 focus:ring-blue-100">
+                                 <SelectValue placeholder="Select water source" />
+                             </SelectTrigger>
+                             <SelectContent>
+                                 <SelectItem value="surface">Surface water</SelectItem>
+                                 <SelectItem value="groundwater">Groundwater</SelectItem>
+                                 <SelectItem value="recycled">Recycled water</SelectItem>
+                                 <SelectItem value="seawater">Seawater</SelectItem>
+                             </SelectContent>
+                         </Select>
+                     </div>
+                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                         <Label htmlFor="mineralDepletion" className="text-sm font-medium text-gray-700">Mineral depletion (kg Sb-eq/t product)</Label>
+                         <Input 
+                             id="mineralDepletion" 
+                             type="number" 
+                             value={formData.mineralDepletion} 
+                             onChange={(e) => handleInputChange('mineralDepletion', e.target.value)}
+                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                         />
+                     </div>
+                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                         <Label htmlFor="fossilFuelDepletion" className="text-sm font-medium text-gray-700">Fossil fuel depletion (MJ/t product)</Label>
+                         <Input 
+                             id="fossilFuelDepletion" 
+                             type="number" 
+                             value={formData.fossilFuelDepletion} 
+                             onChange={(e) => handleInputChange('fossilFuelDepletion', e.target.value)}
+                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                         />
+                     </div>
                 </CardContent>
-                <CardFooter className="flex justify-between">
+                <CardFooter className="flex justify-between py-4">
                     <Button type="button" variant="outline" onClick={goToPrevSection}><ArrowLeft className="h-4 w-4 mr-2" /> Previous</Button>
                     <Button type="button" onClick={goToNextSection}>Next <ArrowRight className="h-4 w-4 ml-2" /></Button>
                 </CardFooter>
@@ -518,12 +1026,48 @@ export default function GenerateLCAPage() {
             <Card className={`${currentSection === 'toxicity' ? 'block' : 'hidden'}`}>
                  <CardHeader><CardTitle>9. Toxicity & Human Health</CardTitle><CardDescription>Data related to workplace exposure and toxic emissions.</CardDescription></CardHeader>
                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2"><Label htmlFor="workplaceDust">Workplace dust exposure (mg/m³)</Label><Input id="workplaceDust" type="number" value={formData.workplaceDust} onChange={(e) => handleInputChange('workplaceDust', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="workplaceHeavyMetals">Workplace heavy metals (mg/m³)</Label><Input id="workplaceHeavyMetals" type="number" value={formData.workplaceHeavyMetals} onChange={(e) => handleInputChange('workplaceHeavyMetals', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="toxicAirPollutants">Toxic air pollutants (CTUh/t product)</Label><Input id="toxicAirPollutants" type="number" value={formData.toxicAirPollutants} onChange={(e) => handleInputChange('toxicAirPollutants', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="toxicEffluents">Toxic effluents (CTUe/t product)</Label><Input id="toxicEffluents" type="number" value={formData.toxicEffluents} onChange={(e) => handleInputChange('toxicEffluents', e.target.value)} /></div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="workplaceDust" className="text-sm font-medium text-gray-700">Workplace dust exposure (mg/m³)</Label>
+                        <Input 
+                            id="workplaceDust" 
+                            type="number" 
+                            value={formData.workplaceDust} 
+                            onChange={(e) => handleInputChange('workplaceDust', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="workplaceHeavyMetals" className="text-sm font-medium text-gray-700">Workplace heavy metals (mg/m³)</Label>
+                        <Input 
+                            id="workplaceHeavyMetals" 
+                            type="number" 
+                            value={formData.workplaceHeavyMetals} 
+                            onChange={(e) => handleInputChange('workplaceHeavyMetals', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="toxicAirPollutants" className="text-sm font-medium text-gray-700">Toxic air pollutants (CTUh/t product)</Label>
+                        <Input 
+                            id="toxicAirPollutants" 
+                            type="number" 
+                            value={formData.toxicAirPollutants} 
+                            onChange={(e) => handleInputChange('toxicAirPollutants', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="toxicEffluents" className="text-sm font-medium text-gray-700">Toxic effluents (CTUe/t product)</Label>
+                        <Input 
+                            id="toxicEffluents" 
+                            type="number" 
+                            value={formData.toxicEffluents} 
+                            onChange={(e) => handleInputChange('toxicEffluents', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
                  </CardContent>
-                 <CardFooter className="flex justify-between">
+                 <CardFooter className="flex justify-between py-4">
                     <Button type="button" variant="outline" onClick={goToPrevSection}><ArrowLeft className="h-4 w-4 mr-2" /> Previous</Button>
                     <Button type="button" onClick={goToNextSection}>Next <ArrowRight className="h-4 w-4 ml-2" /></Button>
                 </CardFooter>
@@ -533,15 +1077,82 @@ export default function GenerateLCAPage() {
             <Card className={`${currentSection === 'circularity' ? 'block' : 'hidden'}`}>
                  <CardHeader><CardTitle>10. Circularity & End-of-Life</CardTitle><CardDescription>Information about recycling, reuse, and product lifecycle.</CardDescription></CardHeader>
                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2"><Label htmlFor="recycledInputShare">Recycled input share (%)</Label><Input id="recycledInputShare" type="number" max="100" value={formData.recycledInputShare} onChange={(e) => handleInputChange('recycledInputShare', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="byProductsReuse">By-products reuse rate (%)</Label><Input id="byProductsReuse" type="number" max="100" value={formData.byProductsReuse} onChange={(e) => handleInputChange('byProductsReuse', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="wasteDiverted">Waste diverted from landfill (%)</Label><Input id="wasteDiverted" type="number" max="100" value={formData.wasteDiverted} onChange={(e) => handleInputChange('wasteDiverted', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="recyclingCredit">Recycling credit (kg CO₂-eq/t product)</Label><Input id="recyclingCredit" type="number" value={formData.recyclingCredit} onChange={(e) => handleInputChange('recyclingCredit', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="productLifetime">Product lifetime (years)</Label><Input id="productLifetime" type="number" value={formData.productLifetime} onChange={(e) => handleInputChange('productLifetime', e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="productRecyclability">Product recyclability (%)</Label><Input id="productRecyclability" type="number" max="100" value={formData.productRecyclability} onChange={(e) => handleInputChange('productRecyclability', e.target.value)} /></div>
-                    <div className="space-y-2 md:col-span-2"><Label htmlFor="industrialSymbiosis">Industrial symbiosis partnerships</Label><Textarea id="industrialSymbiosis" value={formData.industrialSymbiosis} onChange={(e) => handleInputChange('industrialSymbiosis', e.target.value)} placeholder="Describe partnerships and material exchanges..." /></div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="recycledInputShare" className="text-sm font-medium text-gray-700">Recycled input share (%)</Label>
+                        <Input 
+                            id="recycledInputShare" 
+                            type="number" 
+                            max="100" 
+                            value={formData.recycledInputShare} 
+                            onChange={(e) => handleInputChange('recycledInputShare', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="byProductsReuse" className="text-sm font-medium text-gray-700">By-products reuse rate (%)</Label>
+                        <Input 
+                            id="byProductsReuse" 
+                            type="number" 
+                            max="100" 
+                            value={formData.byProductsReuse} 
+                            onChange={(e) => handleInputChange('byProductsReuse', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="wasteDiverted" className="text-sm font-medium text-gray-700">Waste diverted from landfill (%)</Label>
+                        <Input 
+                            id="wasteDiverted" 
+                            type="number" 
+                            max="100" 
+                            value={formData.wasteDiverted} 
+                            onChange={(e) => handleInputChange('wasteDiverted', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="recyclingCredit" className="text-sm font-medium text-gray-700">Recycling credit (kg CO₂-eq/t product)</Label>
+                        <Input 
+                            id="recyclingCredit" 
+                            type="number" 
+                            value={formData.recyclingCredit} 
+                            onChange={(e) => handleInputChange('recyclingCredit', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="productLifetime" className="text-sm font-medium text-gray-700">Product lifetime (years)</Label>
+                        <Input 
+                            id="productLifetime" 
+                            type="number" 
+                            value={formData.productLifetime} 
+                            onChange={(e) => handleInputChange('productLifetime', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                        <Label htmlFor="productRecyclability" className="text-sm font-medium text-gray-700">Product recyclability (%)</Label>
+                        <Input 
+                            id="productRecyclability" 
+                            type="number" 
+                            max="100" 
+                            value={formData.productRecyclability} 
+                            onChange={(e) => handleInputChange('productRecyclability', e.target.value)}
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors md:col-span-2">
+                        <Label htmlFor="industrialSymbiosis" className="text-sm font-medium text-gray-700">Industrial symbiosis partnerships</Label>
+                        <Textarea 
+                            id="industrialSymbiosis" 
+                            value={formData.industrialSymbiosis} 
+                            onChange={(e) => handleInputChange('industrialSymbiosis', e.target.value)} 
+                            placeholder="Describe partnerships and material exchanges..."
+                            className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 min-h-[100px]"
+                        />
+                    </div>
                  </CardContent>
-                 <CardFooter className="flex justify-between">
+                 <CardFooter className="flex justify-between py-4">
                     <Button type="button" variant="outline" onClick={goToPrevSection}><ArrowLeft className="h-4 w-4 mr-2" /> Previous</Button>
                     <Button type="button" onClick={goToNextSection}>Next <ArrowRight className="h-4 w-4 ml-2" /></Button>
                 </CardFooter>
@@ -551,23 +1162,151 @@ export default function GenerateLCAPage() {
             <Card className={`${currentSection === 'circularityMetrics' ? 'block' : 'hidden'}`}>
                  <CardHeader><CardTitle>11. Circularity Metrics</CardTitle><CardDescription>Advanced metrics for a detailed circularity assessment.</CardDescription></CardHeader>
                  <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="space-y-2"><Label htmlFor="mVirgin">M_virgin (kg)</Label><Input id="mVirgin" type="number" value={formData.mVirgin} onChange={(e) => handleInputChange('mVirgin', e.target.value)} placeholder="Virgin material input" /></div>
-                    <div className="space-y-2"><Label htmlFor="mRecycledIn">M_recycled_in (kg)</Label><Input id="mRecycledIn" type="number" value={formData.mRecycledIn} onChange={(e) => handleInputChange('mRecycledIn', e.target.value)} placeholder="Recycled material input" /></div>
-                    <div className="space-y-2"><Label htmlFor="mEol">M_EoL (kg)</Label><Input id="mEol" type="number" value={formData.mEol} onChange={(e) => handleInputChange('mEol', e.target.value)} placeholder="End-of-life material" /></div>
-                    <div className="space-y-2"><Label htmlFor="mRecoverable">M_recoverable (kg)</Label><Input id="mRecoverable" type="number" value={formData.mRecoverable} onChange={(e) => handleInputChange('mRecoverable', e.target.value)} placeholder="Recoverable material" /></div>
-                    <div className="space-y-2"><Label htmlFor="mReused">M_reused (kg)</Label><Input id="mReused" type="number" value={formData.mReused} onChange={(e) => handleInputChange('mReused', e.target.value)} placeholder="Reused material" /></div>
-                    <div className="space-y-2"><Label htmlFor="mRecycledOutput">M_recycled_out (kg)</Label><Input id="mRecycledOutput" type="number" value={formData.mRecycledOutput} onChange={(e) => handleInputChange('mRecycledOutput', e.target.value)} placeholder="Recycled material output" /></div>
-                    <div className="space-y-2"><Label htmlFor="mLandfill">M_landfill (kg)</Label><Input id="mLandfill" type="number" value={formData.mLandfill} onChange={(e) => handleInputChange('mLandfill', e.target.value)} placeholder="Material to landfill" /></div>
-                    <div className="space-y-2"><Label htmlFor="ePrimary">E_primary (MJ)</Label><Input id="ePrimary" type="number" value={formData.ePrimary} onChange={(e) => handleInputChange('ePrimary', e.target.value)} placeholder="Primary energy" /></div>
-                    <div className="space-y-2"><Label htmlFor="eRecycled">E_recycled (MJ)</Label><Input id="eRecycled" type="number" value={formData.eRecycled} onChange={(e) => handleInputChange('eRecycled', e.target.value)} placeholder="Recycled energy" /></div>
-                    <div className="space-y-2"><Label htmlFor="gwpPrimary">GWP_primary (kg CO₂-eq)</Label><Input id="gwpPrimary" type="number" value={formData.gwpPrimary} onChange={(e) => handleInputChange('gwpPrimary', e.target.value)} placeholder="Primary GWP" /></div>
-                    <div className="space-y-2"><Label htmlFor="gwpSecondary">GWP_secondary (kg CO₂-eq)</Label><Input id="gwpSecondary" type="number" value={formData.gwpSecondary} onChange={(e) => handleInputChange('gwpSecondary', e.target.value)} placeholder="Secondary GWP" /></div>
-                    <div className="space-y-2"><Label htmlFor="v">V (utility factor)</Label><Input id="v" type="number" step="0.01" value={formData.v} onChange={(e) => handleInputChange('v', e.target.value)} placeholder="e.g., 0.95" /></div>
-                    <div className="space-y-2"><Label htmlFor="w">W (quality factor)</Label><Input id="w" type="number" step="0.01" value={formData.w} onChange={(e) => handleInputChange('w', e.target.value)} placeholder="e.g., 0.9" /></div>
-                    <div className="space-y-2"><Label htmlFor="tActual">T_actual (years)</Label><Input id="tActual" type="number" value={formData.tActual} onChange={(e) => handleInputChange('tActual', e.target.value)} placeholder="Actual lifetime" /></div>
-                    <div className="space-y-2"><Label htmlFor="tRef">T_ref (years)</Label><Input id="tRef" type="number" value={formData.tRef} onChange={(e) => handleInputChange('tRef', e.target.value)} placeholder="Reference lifetime" /></div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="mRecoverable" className="text-sm font-medium text-gray-700">M_recoverable (kg)</Label>
+                      <Input 
+                        id="mRecoverable" 
+                        type="number" 
+                        value={formData.mRecoverable} 
+                        onChange={(e) => handleInputChange('mRecoverable', e.target.value)} 
+                        placeholder="Recoverable material"
+                        className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="mReused" className="text-sm font-medium text-gray-700">M_reused (kg)</Label>
+                      <Input 
+                        id="mReused" 
+                        type="number" 
+                        value={formData.mReused} 
+                        onChange={(e) => handleInputChange('mReused', e.target.value)} 
+                        placeholder="Reused material"
+                        className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="mRecycledOutput" className="text-sm font-medium text-gray-700">M_recycled_out (kg)</Label>
+                      <Input 
+                        id="mRecycledOutput" 
+                        type="number" 
+                        value={formData.mRecycledOutput} 
+                        onChange={(e) => handleInputChange('mRecycledOutput', e.target.value)} 
+                        placeholder="Recycled material output"
+                        className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="mLandfill" className="text-sm font-medium text-gray-700">M_landfill (kg)</Label>
+                      <Input 
+                        id="mLandfill" 
+                        type="number" 
+                        value={formData.mLandfill} 
+                        onChange={(e) => handleInputChange('mLandfill', e.target.value)} 
+                        placeholder="Material to landfill"
+                        className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="ePrimary" className="text-sm font-medium text-gray-700">E_primary (MJ)</Label>
+                      <Input 
+                        id="ePrimary" 
+                        type="number" 
+                        value={formData.ePrimary} 
+                        onChange={(e) => handleInputChange('ePrimary', e.target.value)} 
+                        placeholder="Primary energy"
+                        className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="eRecycled" className="text-sm font-medium text-gray-700">E_recycled (MJ)</Label>
+                      <Input 
+                        id="eRecycled" 
+                        type="number" 
+                        value={formData.eRecycled} 
+                        onChange={(e) => handleInputChange('eRecycled', e.target.value)} 
+                        placeholder="Recycled energy"
+                        className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="gwpPrimary" className="text-sm font-medium text-gray-700">GWP_primary (kg CO₂-eq)</Label>
+                      <Input 
+                        id="gwpPrimary" 
+                        type="number" 
+                        value={formData.gwpPrimary} 
+                        onChange={(e) => handleInputChange('gwpPrimary', e.target.value)} 
+                        placeholder="Primary GWP"
+                        className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="gwpSecondary" className="text-sm font-medium text-gray-700">GWP_secondary (kg CO₂-eq)</Label>
+                      <Input 
+                        id="gwpSecondary" 
+                        type="number" 
+                        value={formData.gwpSecondary} 
+                        onChange={(e) => handleInputChange('gwpSecondary', e.target.value)} 
+                        placeholder="Secondary GWP"
+                        className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="v" className="text-sm font-medium text-gray-700">V (utility factor)</Label>
+                      <Input 
+                        id="v" 
+                        type="number" 
+                        step="0.01" 
+                        value={formData.v} 
+                        onChange={(e) => handleInputChange('v', e.target.value)} 
+                        placeholder="e.g., 0.95"
+                        className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="w" className="text-sm font-medium text-gray-700">W (quality factor)</Label>
+                      <Input 
+                        id="w" 
+                        type="number" 
+                        step="0.01" 
+                        value={formData.w} 
+                        onChange={(e) => handleInputChange('w', e.target.value)} 
+                        placeholder="e.g., 0.9"
+                        className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="tActual" className="text-sm font-medium text-gray-700">T_actual (years)</Label>
+                      <Input 
+                        id="tActual" 
+                        type="number" 
+                        value={formData.tActual} 
+                        onChange={(e) => handleInputChange('tActual', e.target.value)} 
+                        placeholder="Actual lifetime"
+                        className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+
+                    <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
+                      <Label htmlFor="tRef" className="text-sm font-medium text-gray-700">T_ref (years)</Label>
+                      <Input 
+                        id="tRef" 
+                        type="number" 
+                        value={formData.tRef} 
+                        onChange={(e) => handleInputChange('tRef', e.target.value)} 
+                        placeholder="Reference lifetime"
+                        className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
                  </CardContent>
-                 <CardFooter className="flex justify-between">
+                 <CardFooter className="flex justify-between py-4">
                     <Button type="button" variant="outline" onClick={goToPrevSection}><ArrowLeft className="h-4 w-4 mr-2" /> Previous</Button>
                     <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={isLoading}>
                         {isLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Submitting...</> : 'Submit & Generate Report'}
