@@ -243,9 +243,11 @@ export function Navigation() {
           </button>
           
           <Link href="/" className="flex items-center space-x-2" onClick={closeAllDropdowns}>
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <HardHat className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img 
+              src="/logo.jpg" 
+              alt="Logo" 
+              className="w-10 h-8 object-cover rounded-lg border"
+            />
             <span className="text-xl font-bold">Minecare</span>
           </Link>
         </div>

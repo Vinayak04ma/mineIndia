@@ -80,18 +80,6 @@ export default function AnalysisReportPage() {
     { name: "End-of-Life Strategy", conventional: 30, sustainable: 85 },
   ]
 
-  const handleDownload = () => {
-    // Implement download functionality
-    console.log("Downloading report...")
-  }
-
-  const handlePrint = () => {
-    window.print()
-  }
-
-  // Color palette for charts
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
-  
   // Data for radar chart
   const radarData = [
     { subject: 'Carbon', A: 85, B: 45, fullMark: 100 },
@@ -111,22 +99,34 @@ export default function AnalysisReportPage() {
     { year: '2027', impact: 45, target: 30 },
   ];
   
-  // Circular metrics for cards
-  const circularMetrics = [
+  // **FIXED**: Renamed this constant to `circularProgressMetrics` to avoid conflict with the `circularityMetrics: Metric[]` array defined earlier.
+  const circularProgressMetrics = [
     { name: 'Material Circularity', value: '42', unit: '%' },
     { name: 'Energy Recovery', value: '65', unit: '%' },
     { name: 'Recycling Rate', value: '78', unit: '%' },
   ];
+
+  const handleDownload = () => {
+    // Implement download functionality
+    console.log("Downloading report...")
+  }
+
+  const handlePrint = () => {
+    window.print()
+  }
+
+  // Color palette for charts
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
   
   // Custom tooltip for charts
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-4 border rounded-lg shadow-lg">
-          <p className="font-medium">{label}</p>
+          <p className="font-bold mb-2">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={`tooltip-${index}`} style={{ color: entry.color }}>
-              {entry.name}: {entry.value} {entry.payload.unit || ''}
+              {entry.name}: {entry.value}{entry.unit || ''}
             </p>
           ))}
         </div>
@@ -135,17 +135,16 @@ export default function AnalysisReportPage() {
     return null;
   };
 
-  // Custom legend formatter
-  const renderColorfulLegendText = (value: string, entry: any) => {
-    return <span style={{ color: '#666' }}>{value}</span>;
-  };
-
   return (
     <div className="container mx-auto py-8" style={{ fontFamily: 'Inter, sans-serif' }}>
       <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">LCA Analysis Report</h1>
-          <p className="text-muted-foreground">Generated on {new Date().toLocaleDateString()}</p>
+        <div className="space-y-2">
+          <h1 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/70">
+            LCA Analysis Report
+          </h1>
+          <p className="text-muted-foreground text-sm font-medium">
+            Generated on {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleDownload}>
@@ -160,22 +159,34 @@ export default function AnalysisReportPage() {
       </div>
 
       <Tabs defaultValue="conventional" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
-          <TabsTrigger value="conventional" className="flex items-center gap-2">
-            <BarChart2 className="h-4 w-4" />
-            <span>Conventional</span>
+        <TabsList className="grid w-full h-14 grid-cols-4 gap-2 p-1.5 rounded-xl bg-muted/50 mb-8 shadow-sm">
+          <TabsTrigger 
+            value="conventional" 
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:shadow-primary/10 data-[state=active]:border data-[state=active]:border-primary/10 hover:bg-muted/30"
+          >
+            <BarChart2 className="h-4 w-4 text-primary" />
+            <span className="font-medium">Conventional</span>
           </TabsTrigger>
-          <TabsTrigger value="circularity" className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4" />
-            <span>Circularity</span>
+          <TabsTrigger 
+            value="circularity" 
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:shadow-primary/10 data-[state=active]:border data-[state=active]:border-primary/10 hover:bg-muted/30"
+          >
+            <RefreshCw className="h-4 w-4 text-primary" />
+            <span className="font-medium">Circularity</span>
           </TabsTrigger>
-          <TabsTrigger value="waste" className="flex items-center gap-2">
-            <Trash2 className="h-4 w-4" />
-            <span>Waste Analysis</span>
+          <TabsTrigger 
+            value="waste" 
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:shadow-primary/10 data-[state=active]:border data-[state=active]:border-primary/10 hover:bg-muted/30"
+          >
+            <Trash2 className="h-4 w-4 text-primary" />
+            <span className="font-medium">Waste</span>
           </TabsTrigger>
-          <TabsTrigger value="comparison" className="flex items-center gap-2">
-            <GitCompare className="h-4 w-4" />
-            <span>Comparison</span>
+          <TabsTrigger 
+            value="comparison" 
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:shadow-primary/10 data-[state=active]:border data-[state=active]:border-primary/10 hover:bg-muted/30"
+          >
+            <GitCompare className="h-4 w-4 text-primary" />
+            <span className="font-medium">Compare</span>
           </TabsTrigger>
         </TabsList>
 
@@ -183,8 +194,8 @@ export default function AnalysisReportPage() {
         <TabsContent value="conventional">
           <Card>
             <CardHeader>
-              <CardTitle>Conventional LCA Metrics</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary/90 to-primary/60 bg-clip-text text-transparent">Conventional LCA Metrics</CardTitle>
+              <CardDescription className="text-base">
                 Environmental impact metrics for conventional production methods
               </CardDescription>
             </CardHeader>
@@ -207,32 +218,50 @@ export default function AnalysisReportPage() {
         <TabsContent value="circularity">
           <Card>
             <CardHeader>
-              <CardTitle>Circularity Metrics</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary/90 to-primary/60 bg-clip-text text-transparent">Circularity Metrics</CardTitle>
+              <CardDescription className="text-base">
                 Indicators of material circularity and resource efficiency
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {circularMetrics.map((metric, index) => (
+                  {/* **FIXED**: Using the corrected `circularProgressMetrics` constant here */}
+                  {circularProgressMetrics.map((metric, index) => (
                     <div key={`metric-${index}`} className="border rounded-lg p-4 bg-gradient-to-br from-background to-muted/10">
-                      <div className="flex flex-col items-center justify-center h-32">
+                      <div className="flex flex-col items-center justify-center h-40">
                         <h3 className="text-sm font-medium text-muted-foreground mb-2 text-center">
                           {metric.name}
                         </h3>
-                        <div className="relative w-24 h-24 rounded-full border-4 border-muted-foreground/20 flex items-center justify-center">
-                          <div className="absolute inset-0 rounded-full" 
-                            style={{
-                              background: `conic-gradient(#8884d8 0% ${metric.value}%, transparent ${metric.value}% 100%)`,
-                              clipPath: 'circle(50% at 50% 50%)'
-                            }}
-                          />
-                          <div className="absolute inset-2 rounded-full bg-background flex items-center justify-center">
-                            <span className="text-2xl font-bold">
+                        <div className="relative w-24 h-24">
+                          <svg className="w-full h-full" viewBox="0 0 100 100">
+                            {/* Background circle */}
+                            <circle
+                              className="text-gray-200"
+                              strokeWidth="10"
+                              stroke="currentColor"
+                              fill="transparent"
+                              r="45"
+                              cx="50"
+                              cy="50"
+                            />
+                            {/* Progress circle */}
+                            <circle
+                              className="text-primary"
+                              strokeWidth="10"
+                              strokeDasharray={`${(parseFloat(metric.value) / 100) * 2 * Math.PI * 45}, ${2 * Math.PI * 45}`}
+                              strokeLinecap="round"
+                              stroke="currentColor"
+                              fill="transparent"
+                              r="45"
+                              cx="50"
+                              cy="50"
+                              transform="rotate(-90 50 50)"
+                            />
+                            <text x="50" y="52" fontFamily="Verdana" fontSize="20" textAnchor="middle" alignmentBaseline="middle" className="font-bold fill-current text-foreground">
                               {metric.value}{metric.unit}
-                            </span>
-                          </div>
+                            </text>
+                          </svg>
                         </div>
                       </div>
                     </div>
@@ -240,7 +269,10 @@ export default function AnalysisReportPage() {
                 </div>
                 
                 <div className="mt-8">
-                  <h3 className="text-lg font-medium mb-4">Circular Performance Radar</h3>
+                  <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
+                    <span className="h-1 w-6 bg-primary/70 mr-2 rounded-full"></span>
+                    Circular Performance Radar
+                  </h3>
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
@@ -262,14 +294,17 @@ export default function AnalysisReportPage() {
                           fillOpacity={0.6}
                         />
                         <Legend />
-                        <Tooltip />
+                        <Tooltip content={<CustomTooltip />} />
                       </RadarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
                 
                 <div>
-                  <h3 className="text-lg font-medium mb-4">Circular Metrics</h3>
+                  <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
+                    <span className="h-1 w-6 bg-primary/70 mr-2 rounded-full"></span>
+                    Detailed Circularity Metrics
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {circularityMetrics.map((metric, index) => (
                       <div key={index} className="rounded-lg border p-4 hover:bg-accent/10 transition-colors">
@@ -290,14 +325,17 @@ export default function AnalysisReportPage() {
         <TabsContent value="waste">
           <Card>
             <CardHeader>
-              <CardTitle>Waste Analysis</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary/90 to-primary/60 bg-clip-text text-transparent">Waste Analysis</CardTitle>
+              <CardDescription className="text-base">
                 Comprehensive waste generation and management analysis
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h3 className="text-lg font-medium mb-4">Waste Generation Analysis</h3>
+                <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
+                  <span className="h-1 w-6 bg-primary/70 mr-2 rounded-full"></span>
+                  Waste Generation Analysis
+                </h3>
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="rounded-lg border p-4">
                     <h4 className="text-sm font-medium text-muted-foreground">Total Waste Generated</h4>
@@ -315,8 +353,11 @@ export default function AnalysisReportPage() {
               </div>
 
               <div>
-                <h3 className="text-lg font-medium mb-4">Waste Composition</h3>
-                <div className="h-80 w-full">
+              <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
+                <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
+                  Waste Composition
+              </h3>
+                <div className="h-86 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -334,14 +375,17 @@ export default function AnalysisReportPage() {
                         ))}
                       </Pie>
                       <Tooltip content={<CustomTooltip />} />
-                      <Legend formatter={renderColorfulLegendText} />
+                      <Legend />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-medium mb-4">Waste Management Recommendations</h3>
+              <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
+                <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
+                  Waste Management Recommendations
+              </h3>
                 <div className="space-y-4">
                   <div className="p-4 border rounded-lg">
                     <h4 className="font-medium">1. Implement Waste Segregation</h4>
@@ -371,33 +415,23 @@ export default function AnalysisReportPage() {
         <TabsContent value="comparison">
           <Card>
             <CardHeader>
-              <CardTitle>Conventional vs Sustainable Methods</CardTitle>
-              <CardDescription>
-                Comparative analysis of conventional and sustainable production methods
+              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                Conventional vs Sustainable Methods
+              </CardTitle>
+              <CardDescription className="text-base mt-2 text-muted-foreground">
+                Comparative analysis of environmental impact across key metrics
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-12 mb-8">
+            <CardContent className="pt-6">
+              <div className="space-y-12">
                 <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <h4 className="text-md font-medium">Environmental Impact Comparison</h4>
-                    <div className="flex items-center space-x-2 text-sm">
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 rounded-full bg-[#8884d8] mr-1"></div>
-                        <span>Conventional</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 rounded-full bg-[#82ca9d] mr-1"></div>
-                        <span>Sustainable</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="h-80 w-full">
+                  <h4 className="text-xl font-semibold mb-4 text-foreground/90 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Environmental Impact Comparison</h4>
+                  <div className="h-[400px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
                         data={comparisonData}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
                         layout="vertical"
+                        margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis type="number" />
@@ -405,7 +439,7 @@ export default function AnalysisReportPage() {
                           dataKey="name" 
                           type="category" 
                           scale="band" 
-                          width={200}
+                          width={150}
                           tick={{ fontSize: 12 }}
                         />
                         <Tooltip content={<CustomTooltip />} />
@@ -417,20 +451,23 @@ export default function AnalysisReportPage() {
                   </div>
                 </div>
 
-                <div>
-                  <h4 className="text-md font-medium mb-4">Improvement Potential</h4>
+                <div className="pt-8">
+                  <h4 className="text-xl font-semibold text-center mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
+                    Improvement Potential Analysis
+                  </h4>
                   <div className="h-80 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart
                         data={comparisonData}
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        margin={{ top: 5, right: 30, left: 20, bottom: 60 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis 
                           dataKey="name" 
                           angle={-45} 
                           textAnchor="end" 
-                          height={70}
+                          interval={0}
+                          height={80}
                           tick={{ fontSize: 12 }}
                         />
                         <YAxis />
@@ -441,6 +478,7 @@ export default function AnalysisReportPage() {
                           dataKey={data => Math.round((1 - data.sustainable / data.conventional) * 100)}
                           name="Improvement %"
                           stroke="#ff7300"
+                          strokeWidth={2}
                           activeDot={{ r: 8 }}
                           unit="%"
                         />
@@ -448,85 +486,94 @@ export default function AnalysisReportPage() {
                     </ResponsiveContainer>
                   </div>
                 </div>
-              </div>
-              
-              <div className="mt-12">
-                <h3 className="text-lg font-medium mb-4">Impact Reduction Timeline</h3>
-                <div className="h-80 mb-8">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={timelineData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="year" />
-                      <YAxis label={{ value: 'Impact Score', angle: -90, position: 'insideLeft' }} />
-                      <Tooltip />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="impact"
-                        name="Actual Impact"
-                        stroke="#8884d8"
-                        strokeWidth={2}
-                        dot={{ r: 6 }}
-                        activeDot={{ r: 8 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="target"
-                        name="Target Impact"
-                        stroke="#82ca9d"
-                        strokeWidth={2}
-                        strokeDasharray="5 5"
-                        dot={{ r: 6 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-              
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-medium mb-4">Key Findings</h3>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="rounded-lg border p-4">
-                      <h4 className="text-sm font-medium text-muted-foreground">Carbon Footprint Reduction</h4>
-                      <p className="text-2xl font-bold text-green-600">45%</p>
-                      <p className="text-sm text-muted-foreground">Potential reduction with sustainable methods</p>
-                    </div>
-                    <div className="rounded-lg border p-4">
-                      <h4 className="text-sm font-medium text-muted-foreground">Material Efficiency</h4>
-                      <p className="text-2xl font-bold text-green-600">+35%</p>
-                      <p className="text-sm text-muted-foreground">Improvement in material utilization</p>
-                    </div>
+                
+                <div className="pt-8">
+                  <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
+                    <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
+                    Impact Reduction Timeline
+                  </h3>
+                  <div className="h-88 py-4 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={timelineData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="year" />
+                        <YAxis label={{ value: 'Impact Score', angle: -90, position: 'insideLeft' }} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend />
+                        <Line
+                          type="monotone"
+                          dataKey="impact"
+                          name="Actual Impact"
+                          stroke="#8884d8"
+                          strokeWidth={2}
+                          dot={{ r: 6 }}
+                          activeDot={{ r: 8 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="target"
+                          name="Target Impact"
+                          stroke="#82ca9d"
+                          strokeWidth={2}
+                          strokeDasharray="5 5"
+                          dot={{ r: 6 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
+                
+                <div className="space-y-6 pt-8 ">
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
+                      <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
+                      Key Findings
+                    </h3>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="rounded-lg border p-4">
+                        <h4 className="text-sm font-medium text-muted-foreground">Carbon Footprint Reduction</h4>
+                        <p className="text-2xl font-bold text-green-600">45%</p>
+                        <p className="text-sm text-muted-foreground">Potential reduction with sustainable methods</p>
+                      </div>
+                      <div className="rounded-lg border p-4">
+                        <h4 className="text-sm font-medium text-muted-foreground">Material Efficiency</h4>
+                        <p className="text-2xl font-bold text-green-600">+35%</p>
+                        <p className="text-sm text-muted-foreground">Improvement in material utilization</p>
+                      </div>
+                    </div>
+                  </div>
 
-                <div>
-                  <h3 className="text-lg font-medium mb-4">Detailed Comparison</h3>
-                  <div className="border rounded-lg overflow-hidden">
-                    <table className="w-full">
-                      <thead className="bg-muted/50">
-                        <tr>
-                          <th className="text-left p-3 font-medium">Parameter</th>
-                          <th className="text-right p-3 font-medium">Conventional</th>
-                          <th className="text-right p-3 font-medium">Sustainable</th>
-                          <th className="text-right p-3 font-medium">Improvement</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {comparisonData.map((item, index) => (
-                          <tr key={index} className="border-t">
-                            <td className="p-3">{item.name}</td>
-                            <td className="text-right p-3">{item.conventional}</td>
-                            <td className="text-right p-3">{item.sustainable}</td>
-                            <td className="text-right p-3">
-                              <span className="text-green-600">
-                                {Math.round((1 - item.sustainable / item.conventional) * 100)}%
-                              </span>
-                            </td>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
+                      <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
+                      Detailed Comparison
+                    </h3>
+                    <div className="border rounded-lg overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted/50">
+                          <tr>
+                            <th className="text-left p-3 font-medium">Parameter</th>
+                            <th className="text-right p-3 font-medium">Conventional</th>
+                            <th className="text-right p-3 font-medium">Sustainable</th>
+                            <th className="text-right p-3 font-medium">Improvement</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {comparisonData.map((item, index) => (
+                            <tr key={index} className="border-t">
+                              <td className="p-3 font-medium">{item.name}</td>
+                              <td className="text-right p-3">{item.conventional}</td>
+                              <td className="text-right p-3">{item.sustainable}</td>
+                              <td className="text-right p-3">
+                                <span className="font-semibold text-green-600">
+                                  {Math.round((1 - item.sustainable / item.conventional) * 100)}%
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
