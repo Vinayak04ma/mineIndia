@@ -130,35 +130,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-gradient-to-b from-background to-muted/30">
-        <div className="container">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-            {[
-              { value: '10,000+', label: 'Data Points', icon: <Database className="h-8 w-8 text-primary" /> },
-              { value: '95%', label: 'Accuracy', icon: <ShieldCheck className="h-8 w-8 text-primary" /> },
-              { value: '50+', label: 'Mining Sites', icon: <MapPin className="h-8 w-8 text-primary" /> },
-              { value: '24/7', label: 'AI Analysis', icon: <Cpu className="h-8 w-8 text-primary" /> },
-            ].map((stat, i) => (
-              <motion.div 
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-card p-6 rounded-xl border text-center shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-                  {stat.icon}
-                </div>
-                <h3 className="text-3xl font-bold text-foreground">{stat.value}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{stat.label}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Features Section */}
       <section ref={featuresRef} className="py-20 bg-muted/30">
         <div className="container">
