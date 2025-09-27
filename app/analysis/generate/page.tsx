@@ -340,7 +340,7 @@ export default function GenerateLCAPage() {
                   key={section.key}
                   className={`px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap ${
                     currentSection === section.key
-                      ? 'bg-blue-100 text-blue-700 font-semibold' 
+                      ? 'bg-blue-100 font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary'
                       : 'text-gray-600 hover:bg-gray-100'
                   }`}
                   onClick={() => setCurrentSection(section.key)}
