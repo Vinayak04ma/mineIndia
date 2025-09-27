@@ -3,12 +3,12 @@
 import { useState } from "react"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, MapPin, Zap, Calculator, TrendingUp, Factory, Battery, Droplets, Cloud, Trash2, LandPlot, Activity, Recycle, ArrowRight } from "lucide-react"
+import { ArrowLeft, MapPin, Zap, Calculator, TrendingUp, Factory, Battery, Droplets, Cloud, Trash2, LandPlot, Activity, Recycle } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
@@ -829,7 +829,6 @@ export default function IndiaSpecificInputPage() {
             </div>
             <div className="pt-4 border-t">
               <h4 className="font-semibold text-sm mb-4">Circularity Metrics</h4>
-              
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-3">
                   <Label className="text-xs text-gray-700">m(virgin)</Label>
@@ -1171,63 +1170,15 @@ export default function IndiaSpecificInputPage() {
     }
   };
 
-  type SectionKey = 
-  | 'mineral' 
-  | 'production' 
-  | 'energy' 
-  | 'materials' 
-  | 'airEmissions' 
-  | 'water' 
-  | 'waste' 
-  | 'resource' 
-  | 'toxicity' 
-  | 'circularity'
-  | 'circularityMetrics'
-
-const [currentSection, setCurrentSection] = useState<SectionKey>('mineral');
-  
-  // Define section order for navigation and tabs
-  const sectionOrder: { key: SectionKey; label: string }[] = [
-    { key: 'mineral', label: 'Mineral' },
-    { key: 'production', label: 'Production' },
-    { key: 'energy', label: 'Energy' },
-    { key: 'materials', label: 'Materials' },
-    { key: 'airEmissions', label: 'Air Emissions' },
-    { key: 'water', label: 'Water' },
-    { key: 'waste', label: 'Waste' },
-    { key: 'resource', label: 'Resource Use' },
-    { key: 'toxicity', label: 'Toxicity' },
-    { key: 'circularity', label: 'Circularity' },
-    { key: 'circularityMetrics', label: 'Circularity Metrics' },
-  ];
-
-  const goToNextSection = () => {
-    const currentIndex = sectionOrder.findIndex(s => s.key === currentSection);
-    if (currentIndex < sectionOrder.length - 1) {
-      setCurrentSection(sectionOrder[currentIndex + 1].key);
-    }
-  };
-
-  const goToPrevSection = () => {
-    const currentIndex = sectionOrder.findIndex(s => s.key === currentSection);
-    if (currentIndex > 0) {
-      setCurrentSection(sectionOrder[currentIndex - 1].key);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-
       <div className="container py-8">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-center justify-between mb-6">
-            <Link href="/analysis/india-specific">
-              <Button variant="ghost" className="mr-4">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Mine Selection
-              </Button>
-            </Link>
+            <div>
+              <h1 className="text-3xl font-bold">Analysis Input Parameters</h1>
+              <p className="text-muted-foreground">Configure your LCA analysis with location-specific data</p>
+            </div>
             <Link href={reportHref}>
               <Button className="ml-auto">
                 <TrendingUp className="mr-2 h-4 w-4" />
@@ -1237,6 +1188,52 @@ const [currentSection, setCurrentSection] = useState<SectionKey>('mineral');
           </div>
 
           <div className="space-y-6">
+            {/* Header Box */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-primary to-primary px-6 py-6">
+                <div className="max-w-5xl mx-auto">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                    
+                    {/* Left Section */}
+                    <div>
+                      <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full mb-3">
+                        <span className="h-2 w-2 bg-white rounded-full animate-pulse"></span>
+                        <span className="text-xs font-medium text-white/90 tracking-wider">
+                          LIFE CYCLE ASSESSMENT
+                        </span>
+                      </div>
+                      <h2 className="text-2xl font-bold text-white mb-2">
+                        Data Collection
+                      </h2>
+                      <p className="text-white/90 text-sm max-w-2xl">
+                        Complete the following sections to generate your LCA report. 
+                        All fields are required.
+                      </p>
+                    </div>
+
+                    {/* Right Section - Progress */}
+                    <div className="flex items-center gap-4">
+                      <div className="hidden md:block bg-white/10 px-4 py-2 rounded-lg">
+                        <p className="text-xs text-white/80 mb-1">Progress</p>
+                        <div className="flex items-center gap-2">
+                          <div className="h-1.5 w-32 bg-white/20 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-white rounded-full transition-all duration-300"
+                              style={{ width: '20%' }}
+                            ></div>
+                          </div>
+                          <span className="text-sm font-medium text-white">
+                            20%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             {/* Pre-loaded Data Card */}
             <Card>
               <CardHeader>
@@ -1270,7 +1267,6 @@ const [currentSection, setCurrentSection] = useState<SectionKey>('mineral');
                   </div>
                 </div>
               </CardContent>
-             
             </Card>
 
             {/* Main Input Form with Category Navigation */}
@@ -1283,7 +1279,7 @@ const [currentSection, setCurrentSection] = useState<SectionKey>('mineral');
                       key={category.id}
                       variant="ghost"
                       onClick={() => setActiveCategory(category.id)}
-                      className={`flex-shrink-0 hover:bg-gray-100 ${
+                      className={`flex-shrink-0 hover:bg-gray-600 ${
                         isActive 
                           ? 'bg-gradient-to-r from-primary to-primary text-white hover:bg-gradient-to-r hover:from-primary hover:to-primary' 
                           : ''
@@ -1316,33 +1312,37 @@ const [currentSection, setCurrentSection] = useState<SectionKey>('mineral');
                   {renderInputFields()}
                   
                   {/* Navigation Buttons */}
-                  <div className="flex justify-between mt-6 pt-4 border-t">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        const currentIndex = inputCategories.findIndex(c => c.id === activeCategory);
-                        if (currentIndex > 0) {
+                  <div className={`flex ${inputCategories.findIndex(c => c.id === activeCategory) === 0 ? 'justify-end' : 'justify-between'} mt-6 pt-4 border-t`}>
+                    {inputCategories.findIndex(c => c.id === activeCategory) > 0 && (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          const currentIndex = inputCategories.findIndex(c => c.id === activeCategory);
                           setActiveCategory(inputCategories[currentIndex - 1].id);
-                        }
-                      }}
-                      disabled={inputCategories.findIndex(c => c.id === activeCategory) === 0}
-                      className="bg-white text-black border-black hover:bg-gray-50"
-                    >
-                      Back
-                    </Button>
+                        }}
+                        className="bg-white text-black border-black hover:bg-gray-600 "
+                      >
+                        Back
+                      </Button>
+                    )}
                     
-                    <Button
-                      onClick={() => {
-                        const currentIndex = inputCategories.findIndex(c => c.id === activeCategory);
-                        if (currentIndex < inputCategories.length - 1) {
+                    {inputCategories.findIndex(c => c.id === activeCategory) === inputCategories.length - 1 ? (
+                      <Link href={reportHref}>
+                        <Button className="bg-gradient-to-r from-primary to-primary text-white hover:from-primary hover:to-primary">
+                          Submit & Generate Report
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button
+                        onClick={() => {
+                          const currentIndex = inputCategories.findIndex(c => c.id === activeCategory);
                           setActiveCategory(inputCategories[currentIndex + 1].id);
-                        }
-                      }}
-                      disabled={inputCategories.findIndex(c => c.id === activeCategory) === inputCategories.length - 1}
-                      className="bg-gradient-to-r from-primary to-primary text-white hover:from-primary hover:to-primary"
-                    >
-                      Next
-                    </Button>
+                        }}
+                        className="bg-gradient-to-r from-primary to-primary text-white hover:from-primary hover:to-primary"
+                      >
+                        Next
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
