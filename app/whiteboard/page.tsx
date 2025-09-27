@@ -66,21 +66,19 @@ interface Connection {
 }
 
 export default function WhiteboardPage() {
-  // Node visual constants (match styles): w-48 => 192px; approx height ~120px
   const CANVAS_WIDTH = 10000
   const CANVAS_HEIGHT = 5000
   const BASE_NODE_WIDTH = 192
   const BASE_NODE_HEIGHT = 120
   const BASE_UI_ZOOM = 0.9
   
-  // Calculate node scale based on zoom level (0.5 to 2.0)
   const getNodeScale = (zoom: number) => {
     return Math.max(0.5, Math.min(2, zoom));
   }
   const INITIAL_NODES: ProcessNode[] = [
     {
       id: "1",
-      type: "extraction",
+      type: "bauxite_mine",
       label: "Bauxite Mining",
       x: 100,
       y: 200,
@@ -91,25 +89,25 @@ export default function WhiteboardPage() {
     },
     {
       id: "2",
-      type: "processing",
+      type: "smelting_plant",
       label: "Alumina Refining",
       x: 450,
       y: 200,
       inputs: ["Bauxite Ore", "Caustic Soda"],
       outputs: ["Alumina", "Red Mud"],
       impact: 78,
-      category: "Processing & Manufacturing",
+      category: "Material Processing / Smelting",
     },
     {
       id: "3",
-      type: "manufacturing",
+      type: "smelting_plant",
       label: "Aluminum Smelting",
       x: 800,
       y: 200,
       inputs: ["Alumina", "Carbon Anodes"],
       outputs: ["Primary Aluminum", "CO2"],
       impact: 92,
-      category: "Processing & Manufacturing",
+      category: "Material Processing / Smelting",
     },
   ]
 
@@ -137,25 +135,19 @@ export default function WhiteboardPage() {
   ]
 
   const [nodes, setNodes] = useState<ProcessNode[]>(() => INITIAL_NODES.map((n) => ({ ...n, inputs: [...n.inputs], outputs: [...n.outputs] })))
-
   const [connections, setConnections] = useState<Connection[]>(() => INITIAL_CONNECTIONS.map((c) => ({ ...c })))
-
   const [selectedNode, setSelectedNode] = useState<string | null>("2")
   const [isCalculating, setIsCalculating] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [draggedNodeType, setDraggedNodeType] = useState<string | null>(null)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [isDraggingNode, setIsDraggingNode] = useState<string | null>(null)
-  
-  // Canvas (content) zoom. Base UI is already at 80% via CSS zoom
   const [zoomLevel, setZoomLevel] = useState(1)
   const [isConnecting, setIsConnecting] = useState(false)
   const [connectionStart, setConnectionStart] = useState<string | null>(null)
   const [connectionStartSide, setConnectionStartSide] = useState<'left' | 'right' | null>(null)
   const [tempConnection, setTempConnection] = useState<{ x: number; y: number } | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
-
-  // NEW: State for panning the canvas
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 })
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
@@ -167,16 +159,13 @@ export default function WhiteboardPage() {
 
 
   const deleteNode = (nodeId: string, e?: React.MouseEvent) => {
-    // If called with an event, prevent default behavior
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
-    // Prevent deleting initial nodes
     const isInitial = INITIAL_NODES.some((n) => n.id === nodeId);
     if (isInitial) return;
     
-    // Remove the node and its connections
     setNodes((prev) => prev.filter((n) => n.id !== nodeId));
     setConnections((prev) => prev.filter((c) => c.from !== nodeId && c.to !== nodeId));
     if (selectedNode === nodeId) setSelectedNode(null);
@@ -184,215 +173,13 @@ export default function WhiteboardPage() {
   }
 
   const nodeTypes = [
-    // Raw Material Extraction
-    {
-      type: "iron_ore_mine",
-      label: "Iron Ore Mine",
-      icon: Factory,
-      color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-      category: "Raw Material Extraction"
-    },
-    {
-      type: "bauxite_mine",
-      label: "Bauxite Mine",
-      icon: Factory,
-      color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-      category: "Raw Material Extraction"
-    },
-    {
-      type: "copper_ore_mine",
-      label: "Copper Ore Mine",
-      icon: Factory,
-      color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-      category: "Raw Material Extraction"
-    },
-    {
-      type: "coal_coke_supplier",
-      label: "Coal / Coke Supplier",
-      icon: Factory,
-      color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-      category: "Raw Material Extraction"
-    },
-    {
-      type: "flux_supplier",
-      label: "Flux Supplier (limestone, dolomite, quartz)",
-      icon: Factory,
-      color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-      category: "Raw Material Extraction"
-    },
-    {
-      type: "alloying_material_supplier",
-      label: "Alloying Material Supplier (Ni, Cr, Zn)",
-      icon: Factory,
-      color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-      category: "Raw Material Extraction"
-    },
-    
-    // Material Processing / Smelting
-    {
-      type: "smelting_plant",
-      label: "Blast Furnace / Electric Arc Furnace / Hydrometallurgical Plant",
-      icon: Settings,
-      color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-      category: "Material Processing / Smelting"
-    },
-    {
-      type: "secondary_refining",
-      label: "Secondary Refining (alloying, purification)",
-      icon: Settings,
-      color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-      category: "Material Processing / Smelting"
-    },
-    {
-      type: "casting_furnace",
-      label: "Casting / Forming Furnace",
-      icon: Settings,
-      color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-      category: "Material Processing / Smelting"
-    },
-    
-    // Shaping / Forming
-    {
-      type: "rolling_mill",
-      label: "Rolling Mill",
-      icon: Settings,
-      color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-      category: "Shaping / Forming"
-    },
-    {
-      type: "extrusion_forging",
-      label: "Extrusion / Forging / Casting Unit",
-      icon: Settings,
-      color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-      category: "Shaping / Forming"
-    },
-    {
-      type: "finishing_unit",
-      label: "Finishing / Machining Unit",
-      icon: Settings,
-      color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-      category: "Shaping / Forming"
-    },
-    
-    // Waste & Emissions
-    {
-      type: "air_emission",
-      label: "Air Emission Node",
-      icon: AlertTriangle,
-      color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-      category: "Waste & Emissions"
-    },
-    {
-      type: "water_effluent",
-      label: "Water Effluent Node",
-      icon: AlertTriangle,
-      color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-      category: "Waste & Emissions"
-    },
-    {
-      type: "solid_waste",
-      label: "Solid Waste Node",
-      icon: AlertTriangle,
-      color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-      category: "Waste & Emissions"
-    },
-    {
-      type: "hazardous_waste",
-      label: "Hazardous Waste Node",
-      icon: AlertTriangle,
-      color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-      category: "Waste & Emissions"
-    },
-    
-    // Circularity & End-of-Life
-    {
-      type: "scrap_collection",
-      label: "Scrap Collection",
-      icon: Recycle,
-      color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-      category: "Circularity & End-of-Life"
-    },
-    {
-      type: "product_recycling",
-      label: "Product Recycling / EAF Feed",
-      icon: Recycle,
-      color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-      category: "Circularity & End-of-Life"
-    },
-    {
-      type: "industrial_symbiosis",
-      label: "Industrial Symbiosis Partner (slag → cement, fly ash → bricks)",
-      icon: Recycle,
-      color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-      category: "Circularity & End-of-Life"
-    },
-    {
-      type: "landfill_incineration",
-      label: "Landfill / Incineration",
-      icon: Recycle,
-      color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-      category: "Circularity & End-of-Life"
-    },
-    
-    // Energy & Policy Compliance
-    {
-      type: "grid_electricity",
-      label: "Grid Electricity Node (state-specific)",
-      icon: Zap,
-      color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-      category: "Energy & Policy Compliance"
-    },
-    {
-      type: "renewable_energy",
-      label: "Onsite Renewable Energy Node",
-      icon: Zap,
-      color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-      category: "Energy & Policy Compliance"
-    },
-    {
-      type: "epr_compliance",
-      label: "EPR Compliance Node",
-      icon: FileText,
-      color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-      category: "Energy & Policy Compliance"
-    },
-    {
-      type: "carbon_credit",
-      label: "Carbon Credit Node",
-      icon: FileText,
-      color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-      category: "Energy & Policy Compliance"
-    },
-    {
-      type: "rpo_compliance",
-      label: "RPO Compliance Node",
-      icon: FileText,
-      color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-      category: "Energy & Policy Compliance"
-    },
-    
-    // Socio-Economic & Human Health
-    {
-      type: "employment",
-      label: "Employment Node",
-      icon: Users,
-      color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",
-      category: "Socio-Economic & Human Health"
-    },
-    {
-      type: "workplace_safety",
-      label: "Workplace Safety / Exposure Node",
-      icon: Shield,
-      color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",
-      category: "Socio-Economic & Human Health"
-    },
-    {
-      type: "csr_impact",
-      label: "CSR & Community Impact Node",
-      icon: HeartHandshake,
-      color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",
-      category: "Socio-Economic & Human Health"
-    }
+    { type: "bauxite_mine", label: "Bauxite Mine", icon: Factory, color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300", category: "Raw Material Extraction" },
+    { type: "smelting_plant", label: "Smelting Plant", icon: Settings, color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300", category: "Material Processing / Smelting" },
+    { type: "rolling_mill", label: "Rolling Mill", icon: Settings, color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300", category: "Shaping / Forming" },
+    { type: "air_emission", label: "Air Emission", icon: AlertTriangle, color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300", category: "Waste & Emissions" },
+    { type: "scrap_collection", label: "Scrap Collection", icon: Recycle, color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300", category: "Circularity & End-of-Life" },
+    { type: "grid_electricity", label: "Grid Electricity", icon: Zap, color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300", category: "Energy & Policy Compliance" },
+    { type: "employment", label: "Employment", icon: Users, color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300", category: "Socio-Economic & Human Health" },
   ]
 
   const impactCategories = [
@@ -407,7 +194,6 @@ export default function WhiteboardPage() {
     { name: "Water Use", value: 76, unit: "m³ depriv." },
   ]
 
-  // CHANGED: Unified function to convert screen coordinates to canvas coordinates
   const screenToCanvasCoords = (screenX: number, screenY: number) => {
     if (!canvasRef.current) return { x: 0, y: 0 }
     const rect = canvasRef.current.getBoundingClientRect()
@@ -417,23 +203,13 @@ export default function WhiteboardPage() {
   }
   
   const handleZoom = (delta: number, mouseX: number, mouseY: number) => {
-    // Calculate the current mouse position in canvas coordinates
     const currentX = (mouseX - panOffset.x) / zoomLevel;
     const currentY = (mouseY - panOffset.y) / zoomLevel;
-    
-    // Calculate new zoom level with bounds
     const newZoom = Math.max(0.5, Math.min(2, zoomLevel + delta));
-    
-    // Calculate new pan offset to keep the point under the mouse stationary
     const newPanOffsetX = mouseX - currentX * newZoom;
     const newPanOffsetY = mouseY - currentY * newZoom;
-    
-    // Apply the new zoom and pan
     setZoomLevel(newZoom);
-    setPanOffset({
-      x: newPanOffsetX,
-      y: newPanOffsetY
-    });
+    setPanOffset({ x: newPanOffsetX, y: newPanOffsetY });
   }
 
   const handleZoomIn = () => {
@@ -450,22 +226,13 @@ export default function WhiteboardPage() {
   
   const handleWheel = (event: React.WheelEvent) => {
     event.preventDefault();
-    
-    // Always zoom with wheel, but at a finer control when Ctrl is held
     const zoomFactor = event.ctrlKey ? 0.05 : 0.01;
     const delta = event.deltaY > 0 ? -zoomFactor : zoomFactor;
-    
-    // Get the current mouse position relative to the canvas
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
-    
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-    
-    // Apply zoom
     handleZoom(delta, mouseX, mouseY);
-    
-    // Prevent page scrolling when zooming
     if (event.ctrlKey) {
       event.stopPropagation();
     }
@@ -501,7 +268,6 @@ export default function WhiteboardPage() {
 
   const handleCanvasMouseMove = (event: React.MouseEvent) => {
     const coords = screenToCanvasCoords(event.clientX, event.clientY)
-
     if (isPanning) {
       const dx = event.clientX - panStart.x
       const dy = event.clientY - panStart.y
@@ -509,27 +275,15 @@ export default function WhiteboardPage() {
       setPanStart({ x: event.clientX, y: event.clientY })
       return
     }
-
     if (isDraggingNode) {
       const rawX = coords.x - dragOffset.x
       const rawY = coords.y - dragOffset.y
-
-      // CHANGED: Clamp the node's position to stay within the canvas boundaries.
       const newX = Math.max(0, Math.min(rawX, CANVAS_WIDTH - BASE_NODE_WIDTH))
       const newY = Math.max(0, Math.min(rawY, CANVAS_HEIGHT - BASE_NODE_HEIGHT))
-      
-      setNodes((prev) =>
-        prev.map((n) =>
-          n.id === isDraggingNode ? { ...n, x: newX, y: newY } : n
-        )
-      )
+      setNodes((prev) => prev.map((n) => n.id === isDraggingNode ? { ...n, x: newX, y: newY } : n))
     } else if (isConnecting && canvasRef.current) {
       const canvasRect = canvasRef.current.getBoundingClientRect()
-      // Temp connection line should be in screen space, not canvas space
-      setTempConnection({
-        x: event.clientX - canvasRect.left,
-        y: event.clientY - canvasRect.top,
-      })
+      setTempConnection({ x: event.clientX - canvasRect.left, y: event.clientY - canvasRect.top, })
     }
   }
 
@@ -544,39 +298,25 @@ export default function WhiteboardPage() {
   const handleNodeDragStart = (nodeType: string, event: React.MouseEvent) => {
     setDraggedNodeType(nodeType)
     const rect = event.currentTarget.getBoundingClientRect()
-    // Offset is relative to the element, so it's independent of pan/zoom
-    setDragOffset({
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
-    })
+    setDragOffset({ x: event.clientX - rect.left, y: event.clientY - rect.top, })
   }
 
-  // NEW: Handle starting a pan
   const handleCanvasMouseDown = (event: React.MouseEvent) => {
-    // Start panning if left-clicking on the background or middle-clicking anywhere
     if (event.button === 1 || (event.button === 0 && event.target === event.currentTarget)) {
       setIsPanning(true)
       setPanStart({ x: event.clientX, y: event.clientY })
-      // Change cursor style for panning feedback
       if(canvasRef.current) canvasRef.current.style.cursor = 'grabbing';
     }
   }
   
   const handleNodeMouseDown = (nodeId: string, event: React.MouseEvent) => {
     event.stopPropagation()
-    // Only drag with the left mouse button
     if (event.button !== 0) return
-
     setSelectedNode(nodeId)
     setIsDraggingNode(nodeId)
-
     const coords = screenToCanvasCoords(event.clientX, event.clientY)
     const node = nodes.find((n) => n.id === nodeId)!
-
-    setDragOffset({
-      x: coords.x - node.x,
-      y: coords.y - node.y,
-    })
+    setDragOffset({ x: coords.x - node.x, y: coords.y - node.y, })
   }
   
   const handleMouseUp = () => {
@@ -587,20 +327,14 @@ export default function WhiteboardPage() {
     setIsPanning(false)
   }
   
-  // CHANGED: Smarter node placement on drop
   const handleCanvasDrop = (event: React.MouseEvent) => {
     if (!draggedNodeType || !canvasRef.current) return
-
     const coords = screenToCanvasCoords(event.clientX, event.clientY)
     const rawX = coords.x - dragOffset.x / zoomLevel
     const rawY = coords.y - dragOffset.y / zoomLevel
-
-    // CHANGED: Clamp the dropped node's position as well
     const x = Math.max(0, Math.min(rawX, CANVAS_WIDTH - BASE_NODE_WIDTH))
     const y = Math.max(0, Math.min(rawY, CANVAS_HEIGHT - BASE_NODE_HEIGHT))
-
     const nodeTypeInfo = nodeTypes.find((nt) => nt.type === draggedNodeType)!
-
     const newNode: ProcessNode = {
       id: `node_${Date.now()}`,
       type: draggedNodeType,
@@ -610,27 +344,19 @@ export default function WhiteboardPage() {
       inputs: ["Input 1"],
       outputs: ["Output 1"],
       impact: Math.floor(Math.random() * 100),
-      category: nodeTypeInfo.label,
+      category: nodeTypeInfo.category,
     }
-
     setNodes((prev) => [...prev, newNode])
     setDraggedNodeType(null)
   }
 
-  // CHANGED: Add node to the center of the current view
   const addNodeToView = (nodeType: ProcessNode) => {
     if (!canvasRef.current) return
     const rect = canvasRef.current.getBoundingClientRect()
     const viewCenter = screenToCanvasCoords(rect.left + rect.width / 2, rect.top + rect.height / 2)
-    
-    const newNode = {
-      ...nodeType,
-      x: viewCenter.x - (BASE_NODE_WIDTH / 2),
-      y: viewCenter.y - (BASE_NODE_HEIGHT / 2) + Math.random() * 40 - 20, // Add some jitter
-    }
+    const newNode = { ...nodeType, x: viewCenter.x - (BASE_NODE_WIDTH / 2), y: viewCenter.y - (BASE_NODE_HEIGHT / 2) + Math.random() * 40 - 20, }
     setNodes((prev) => [...prev, newNode])
   }
-
 
   const getNodeIcon = (type: string) => {
     const nodeType = nodeTypes.find((nt) => nt.type === type)
@@ -639,162 +365,87 @@ export default function WhiteboardPage() {
 
   const getNodeColor = (type: string) => {
     const nodeType = nodeTypes.find((nt) => nt.type === type)
-    return nodeType?.color || "bg-muted/50"
+    return nodeType?.color || "bg-slate-100 dark:bg-slate-800"
   }
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden">
       <Navigation />
 
-      <div className="flex h-[calc(100vh-4rem)] relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950">
-        {/* Left Sidebar Toggle Button */}
+      <div className="flex h-[calc(100vh-4rem)] relative">
         <button 
           onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
-          className={`absolute left-0 top-1/2 z-20 -translate-y-1/2 bg-white dark:bg-gray-800 border border-l-0 border-gray-200 dark:border-gray-700 rounded-r-lg p-2 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 ${leftSidebarOpen ? 'ml-64' : 'ml-0'}`}
+          className={`absolute left-0 top-1/2 z-30 -translate-y-1/2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-y border-r border-slate-200 dark:border-slate-700 rounded-r-lg p-2 shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-300 ease-in-out ${leftSidebarOpen ? 'translate-x-80' : 'translate-x-0'}`}
         >
-          {leftSidebarOpen ? (
-            <ChevronLeft className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
-          <span className="sr-only">{leftSidebarOpen ? 'Collapse' : 'Expand'} left sidebar</span>
+          {leftSidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </button>
-        {/* Left Sidebar - Node Palette */}
-        <div 
-          className={`w-80 border-r bg-muted/10 dark:bg-gray-900/50 p-4 flex flex-col h-full transition-all duration-200 ease-in-out ${leftSidebarOpen ? 'translate-x-0' : '-translate-x-full absolute'}`}
-          style={{ zIndex: 10 }}
+        
+        <aside 
+          className={`w-80 border-r border-slate-200/80 dark:border-slate-800/80 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-lg p-4 flex flex-col h-full transition-transform duration-300 ease-in-out absolute z-20 ${leftSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
           <div className="space-y-6 flex-1 overflow-y-auto pr-2 -mr-2 py-1">
-            <div className="bg-background/50 dark:bg-gray-800/30 rounded-lg p-4 border">
-              <h2 className="text-lg font-semibold mb-4">Process Nodes</h2>
-              <p className="text-xs text-muted-foreground mb-3">Drag nodes to canvas or click to add</p>
-              <ScrollArea className="h-64">
-                <div className="space-y-2">
-                  {nodeTypes.map((nodeType) => {
-                    const Icon = nodeType.icon
-                    return (
-                      <Card
-                        key={nodeType.type}
-                        className="cursor-grab hover:shadow-md transition-all p-3 active:cursor-grabbing border border-transparent hover:border-primary/20 bg-card/50 backdrop-blur-sm"
-                        onMouseDown={(e) => handleNodeDragStart(nodeType.type, e)}
-                        onClick={() => {
-                          const newNodeData: ProcessNode = {
-                            id: `node_${Date.now()}`,
-                            type: nodeType.type,
-                            label: `New ${nodeType.label}`,
-                            x: 0, y: 0, // Placeholder, will be replaced
-                            inputs: ["Input 1"], outputs: ["Output 1"],
-                            impact: Math.floor(Math.random() * 100),
-                            category: nodeType.label,
-                          }
-                          addNodeToView(newNodeData)
-                        }}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className={`p-2 rounded-lg ${nodeType.color}`}>
-                            <Icon className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-sm">{nodeType.label}</h4>
-                            <p className="text-xs text-muted-foreground">Click or drag to add</p>
-                          </div>
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold flex items-center gap-3 text-slate-800 dark:text-slate-200">
+                Process Nodes
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Drag to canvas or click to add.</p>
+            </div>
+            
+            <ScrollArea className="h-[calc(100%-4rem)]">
+              <div className="space-y-3 pr-2">
+                {nodeTypes.map((nodeType) => {
+                  const Icon = nodeType.icon
+                  return (
+                    <Card
+                      key={nodeType.type}
+                      className="cursor-grab hover:shadow-lg transition-all duration-200 p-3 active:cursor-grabbing border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-800/50 hover:border-blue-400 dark:hover:border-blue-600 hover:scale-[1.02] group"
+                      onMouseDown={(e) => handleNodeDragStart(nodeType.type, e)}
+                      onClick={() => addNodeToView({
+                        id: `node_${Date.now()}`,
+                        type: nodeType.type,
+                        label: `New ${nodeType.label}`,
+                        x: 0, y: 0,
+                        inputs: ["Input 1"], outputs: ["Output 1"],
+                        impact: Math.floor(Math.random() * 100),
+                        category: nodeType.category,
+                      })}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className={`p-2 rounded-lg ${nodeType.color} shadow-sm group-hover:shadow-md transition-all duration-200`}>
+                          <Icon className="h-5 w-5" />
                         </div>
-                      </Card>
-                    )
-                  })}
-                </div>
-              </ScrollArea>
-            </div>
-
-            <Separator />
-
-            <div>
-              <h3 className="font-semibold mb-3">Scenario Management</h3>
-              <div className="space-y-4 bg-background/50 dark:bg-gray-800/30 rounded-lg p-4 border">
-                <h3 className="font-semibold text-sm">Scenario Management</h3>
-                <Select defaultValue="scenario1">
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select scenario" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="scenario1">Conventional Process</SelectItem>
-                    <SelectItem value="scenario2">Sustainable Alternative</SelectItem>
-                    <SelectItem value="scenario3">Circular Economy</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="flex gap-2 pt-2">
-                  <Button size="sm" variant="outline" className="flex-1 bg-background hover:bg-muted/50">
-                    <Save className="mr-2 h-3 w-3" />
-                    Save
-                  </Button>
-                  <Button size="sm" variant="outline" className="flex-1 bg-background hover:bg-muted/50">
-                    <Download className="mr-2 h-3 w-3" />
-                    Export
-                  </Button>
-                </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-100">{nodeType.label}</h4>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{nodeType.category}</p>
+                        </div>
+                        <Plus className="h-4 w-4 text-slate-400 group-hover:text-blue-500 transition-colors opacity-0 group-hover:opacity-100" />
+                      </div>
+                    </Card>
+                  )
+                })}
               </div>
-            </div>
-
-            <Separator />
-
-            <div className="bg-background/50 dark:bg-gray-800/30 rounded-lg p-4 border">
-              <h3 className="font-semibold text-sm mb-3">Real-time Calculation</h3>
-              <div className="space-y-4">
-                <Button className="w-full" onClick={handleRunCalculation} disabled={isCalculating}>
-                  {isCalculating ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Calculating...
-                    </>
-                  ) : (
-                    <>
-                      <Play className="mr-2 h-4 w-4" />
-                      Run LCA Calculation
-                    </>
-                  )}
-                </Button>
-                {showResults && (
-                  <div className="p-3 rounded-lg bg-accent/10">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Total Impact</span>
-                      <Badge className="bg-accent text-accent-foreground">Updated</Badge>
-                    </div>
-                    <div className="text-lg font-bold text-accent">847 kg CO₂ eq</div>
-                    <p className="text-xs text-muted-foreground">Per tonne aluminum</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            </ScrollArea>
           </div>
-        </div>
+        </aside>
 
-        {/* Right Sidebar Toggle Button */}
         <button 
           onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
-          className={`absolute right-0 top-1/2 z-20 -translate-y-1/2 bg-white dark:bg-gray-800 border border-r-0 border-gray-200 dark:border-gray-700 rounded-l-lg p-2 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 ${rightSidebarOpen ? 'mr-80' : 'mr-0'}`}
+          className={`absolute right-0 top-1/2 z-30 -translate-y-1/2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-y border-l border-slate-200 dark:border-slate-700 rounded-l-lg p-2 shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-300 ease-in-out ${rightSidebarOpen ? '-translate-x-80' : 'translate-x-0'}`}
         >
-          {rightSidebarOpen ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
-          <span className="sr-only">{rightSidebarOpen ? 'Collapse' : 'Expand'} right sidebar</span>
+          {rightSidebarOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
 
-        {/* Main Canvas Area */}
-        <div className={`flex-1 relative overflow-hidden transition-all duration-200 ${leftSidebarOpen ? 'ml-0' : 'ml-0'} ${rightSidebarOpen ? 'mr-0' : 'mr-0'}`}>
-          <div className="absolute inset-0 bg-grid-pattern opacity-10 dark:opacity-5"></div>
-          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-gray-50/30 dark:to-gray-900/30 pointer-events-none"></div>
+        <main className="flex-1 relative overflow-hidden">
+          <div className="absolute inset-0 bg-slate-100 dark:bg-slate-950"></div>
+          <div className="absolute inset-0 opacity-40 dark:opacity-20" style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, #cbd5e1 1px, transparent 0), radial-gradient(circle at 1px 1px, #94a3b8 1px, transparent 0)`,
+            backgroundSize: '32px 32px',
+            backgroundPosition: '0 0, 16px 16px'
+          }}></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_60%,#f1f5f9)] dark:bg-[radial-gradient(ellipse_at_center,transparent_60%,#020617)] pointer-events-none"></div>
 
-          {/* Canvas Header */}
-          <div className="absolute top-4 left-4 right-4 z-10">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg rounded-xl p-2 border border-gray-200/80 dark:border-gray-700/80 shadow-xl shadow-black/5 dark:shadow-black/20">
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="flex-shrink-0 flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/20 border border-blue-100/50 dark:border-blue-800/30">
-                  <Palette className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 mr-2" />
-                  <span className="text-sm font-medium text-blue-700 dark:text-blue-300 whitespace-nowrap">Interactive LCA Mapping</span>
-                </div>
-                <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1" />
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+            <div className="flex items-center justify-center gap-1 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg p-1.5 border border-slate-200/80 dark:border-slate-700/80 shadow-lg">
                 <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                   <span className="px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800/50 whitespace-nowrap">
                     <span className="font-medium text-foreground">{nodes.length}</span> nodes
@@ -802,84 +453,15 @@ export default function WhiteboardPage() {
                   <span className="px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800/50 whitespace-nowrap">
                     <span className="font-medium text-foreground">{connections.length}</span> connections
                   </span>
-                  <span className="px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800/50 whitespace-nowrap">
-                    <span className="font-medium text-foreground">{Math.round(zoomLevel * BASE_UI_ZOOM * 100)}%</span> zoom
-                  </span>
+              
+             
                 </div>
-              </div>
-              <div className="flex flex-wrap items-center justify-end gap-1 bg-gray-50/80 dark:bg-gray-800/50 rounded-lg p-1 border border-gray-100 dark:border-gray-700/50">
-                <Button 
-                  size="sm" 
-                  variant="ghost"
-                  onClick={handleZoomOut} 
-                  disabled={zoomLevel <= 0.5}
-                  className="h-8 w-8 p-0 flex-shrink-0 rounded-md hover:bg-gray-200/60 dark:hover:bg-gray-700/50 text-muted-foreground hover:text-foreground"
-                  title="Zoom Out"
-                >
-                  <ZoomOut className="h-4 w-4" />
-                  <span className="sr-only">Zoom Out</span>
-                </Button>
-                <div className="relative flex items-center justify-center w-16">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    {Math.round(zoomLevel * 100)}%
-                  </span>
-                </div>
-                <Button 
-                  size="sm" 
-                  variant="ghost"
-                  onClick={handleZoomIn} 
-                  disabled={zoomLevel >= 2}
-                  className="h-8 w-8 p-0 flex-shrink-0 rounded-md hover:bg-gray-200/60 dark:hover:bg-gray-700/50 text-muted-foreground hover:text-foreground"
-                  title="Zoom In"
-                >
-                  <ZoomIn className="h-4 w-4" />
-                  <span className="sr-only">Zoom In</span>
-                </Button>
-                {/* CHANGED: Reset View button now resets pan as well */}
-                <div className="h-5 w-px bg-gray-200 dark:bg-gray-700 mx-1" />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => { setZoomLevel(1); setPanOffset({ x: 0, y: 0 }); }}
-                  className="h-8 px-3 text-xs font-medium flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-gray-200/60 dark:hover:bg-gray-700/50"
-                >
-                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-                  Reset View
-                </Button>
-                <Button
-                  size="sm"
-                  variant={isConnecting ? "default" : "ghost"}
-                  onClick={() => {
-                    setIsConnecting(!isConnecting)
-                    setConnectionStart(null)
-                    setTempConnection(null)
-                  }}
-                  className={`h-8 px-3 text-xs font-medium flex-shrink-0 ${isConnecting ? 'bg-blue-600 hover:bg-blue-700' : 'text-muted-foreground hover:text-foreground hover:bg-gray-200/60 dark:hover:bg-gray-700/50'}`}
-                >
-                  <Link2 className={`h-3.5 w-3.5 mr-1.5 ${isConnecting ? 'text-white' : 'text-current'}`} />
-                  {isConnecting ? "Connecting..." : "Connect"}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    const newNodeData: ProcessNode = {
-                      id: `node_${Date.now()}`, 
-                      type: "processing", 
-                      label: "New Process", 
-                      x: 0, y: 0,
-                      inputs: ["Input 1"], 
-                      outputs: ["Output 1"], 
-                      impact: 50, 
-                      category: "Processing & Manufacturing"
-                    }
-                    addNodeToView(newNodeData)
-                  }}
-                  className="h-8 px-3 text-xs font-medium flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-gray-200/60 dark:hover:bg-gray-700/50"
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1.5" />
-                  Add Node
-                </Button>
+                <Button size="icon" variant="ghost" onClick={handleZoomOut} disabled={zoomLevel <= 0.5}><ZoomOut className="h-4 w-4" /></Button>
+                <div className="text-xs font-semibold text-slate-600 dark:text-slate-300 w-16 text-center cursor-pointer" onClick={() => { setZoomLevel(1); setPanOffset({ x: 0, y: 0 }); }}>{Math.round(zoomLevel * 100)}%</div>
+                <Button size="icon" variant="ghost" onClick={handleZoomIn} disabled={zoomLevel >= 2}><ZoomIn className="h-4 w-4" /></Button>
+                <Separator orientation="vertical" className="h-6 mx-1" />
+                <Button variant={isConnecting ? "default" : "ghost"} size="sm" onClick={() => setIsConnecting(!isConnecting)}><Link2 className="h-4 w-4 mr-2" /> Connect</Button>
+                <Button variant="ghost" size="sm" onClick={() => addNodeToView({ id: `node_${Date.now()}`, type: "smelting_plant", label: "New Process", x: 0, y: 0, inputs: ["Input"], outputs: ["Output"], impact: 50, category: "Material Processing / Smelting" })}><Plus className="h-4 w-4 mr-2" /> Add</Button>
                 <Button
                   size="sm"
                   variant="ghost"
@@ -890,171 +472,90 @@ export default function WhiteboardPage() {
                     setZoomLevel(1)
                     setPanOffset({ x: 0, y: 0 })
                   }}
-                  className="h-8 px-3 text-xs font-medium flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-gray-200/60 dark:hover:bg-gray-700/50"
+                  className="h-10 px-3 text-s font-medium flex-shrink-0  "
                 >
                   <RefreshCcw className="h-3.5 w-3.5 mr-1.5" />
                   Reset All
                 </Button>
-                <Button 
-                  size="sm" 
-                  variant="ghost"
-                  className="h-8 w-8 p-0 rounded-md hover:bg-gray-200/60 dark:hover:bg-gray-700/50 text-muted-foreground hover:text-foreground"
-                >
-                  <Settings className="h-4 w-4" />
-                  <span className="sr-only">Settings</span>
-                </Button>
-              </div>
             </div>
           </div>
+          
+          <div className="absolute bottom-4 left-4 z-10 text-xs text-slate-500">
+            {nodes.length} Nodes • {connections.length} Connections
+          </div>
 
-          {/* Canvas Content */}
-          <div className="absolute inset-0 pt-24 pb-4 sm:pt-20">
-            <div
-              ref={canvasRef}
-              className={`relative w-full h-full cursor-grab ${isPanning ? 'cursor-grabbing' : ''}`}
-              onMouseDown={handleCanvasMouseDown}
-              onMouseUp={(e) => {
-                handleCanvasDrop(e)
-                handleMouseUp()
-              }}
-              onMouseLeave={() => {
-                setDraggedNodeType(null)
-                setIsConnecting(false)
-                setConnectionStart(null)
-                setTempConnection(null)
-                handleMouseUp()
-              }}
-              onMouseMove={handleCanvasMouseMove}
-              onWheel={handleWheel}
-            >
-              {/* NEW: This is the transformed container for all canvas elements */}
-              <div
-                className="absolute top-0 left-0"
-                style={{
-                  transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`,
-                  transformOrigin: 'top left',
-                  willChange: 'transform',
-                }}
-              >
-              <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ width: CANVAS_WIDTH, height: CANVAS_HEIGHT }}>
-                <style>{`
-                  @keyframes dash {
-                    to { stroke-dashoffset: -56; }
-                  }
-                  .flow-line {
-                    stroke-dasharray: 8 8;
-                    stroke-dashoffset: 0;
-                    animation: dash 2s linear infinite;
-                    transition: all 0.3s ease;
-                    marker-end: url(#arrowheadPrimary);
-                  }
-                  .flow-line:hover {
-                    stroke-width: 4px;
-                  }
-                `}</style>
-                {/* Render connections */}
+          <div
+            ref={canvasRef}
+            className={`relative w-full h-full cursor-grab ${isPanning ? 'cursor-grabbing' : ''}`}
+            onMouseDown={handleCanvasMouseDown}
+            onMouseUp={(e) => { handleCanvasDrop(e); handleMouseUp(); }}
+            onMouseLeave={() => { setDraggedNodeType(null); setIsConnecting(false); setConnectionStart(null); setTempConnection(null); handleMouseUp(); }}
+            onMouseMove={handleCanvasMouseMove}
+            onWheel={handleWheel}
+          >
+            <div className="absolute top-0 left-0" style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`, transformOrigin: 'top left', willChange: 'transform' }}>
+              <svg className="absolute inset-0 pointer-events-none" style={{ width: CANVAS_WIDTH, height: CANVAS_HEIGHT }}>
+                <defs>
+                    <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#38bdf8" />
+                        <stop offset="100%" stopColor="#818cf8" />
+                    </linearGradient>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="url(#flowGradient)" /></marker>
+                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                        <feMerge>
+                            <feMergeNode in="coloredBlur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
                 {connections.map((connection) => {
                   const fromNode = nodes.find((n) => n.id === connection.from)
                   const toNode = nodes.find((n) => n.id === connection.to)
                   if (!fromNode || !toNode) return null
-                  
                   const fromX = fromNode.x + BASE_NODE_WIDTH
                   const toX = toNode.x
                   const fromY = fromNode.y + BASE_NODE_HEIGHT / 2
                   const toY = toNode.y + BASE_NODE_HEIGHT / 2
-                  
                   const dx = Math.abs(toX - fromX)
                   const curveIntensity = Math.min(dx * 0.5, 100)
-                  const controlX1 = fromX + curveIntensity
-                  const controlX2 = toX - curveIntensity
-                  const path = `M${fromX},${fromY} C${controlX1},${fromY} ${controlX2},${toY} ${toX},${toY}`
-                  
+                  const path = `M${fromX},${fromY} C${fromX + curveIntensity},${fromY} ${toX - curveIntensity},${toY} ${toX},${toY}`
                   const midX = (fromX + toX) / 2
                   const midY = (fromY + toY) / 2
-                  
                   return (
-                    <g key={connection.id} className="connection-group">
-                      <path
-                        key={connection.id}
-                        d={path}
-                        fill="none"
-                        stroke="url(#flowGradient)"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        markerEnd="url(#arrowheadPrimary)"
-                        className="flow-line opacity-90"
-                      />
-                      <path
-                        d={path}
-                        fill="none"
-                        stroke="url(#flowGradient)"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeDasharray="10 15"
-                        strokeDashoffset="0"
-                        style={{ animation: 'dash 1.5s linear infinite' }}
-                        opacity="0.7"
-                      />
+                    <g key={connection.id} className="connection-group hover:opacity-100 opacity-80 transition-opacity">
+                      <path d={path} fill="none" stroke="url(#flowGradient)" strokeWidth="8" strokeLinecap="round" className="opacity-0" />
+                      <path d={path} fill="none" stroke="url(#flowGradient)" strokeWidth="2.5" strokeLinecap="round" markerEnd="url(#arrowhead)" style={{ filter: 'url(#glow)' }}/>
                       <g transform={`translate(${midX}, ${midY})`}>
-                        <foreignObject 
-                          x="-50" y="-16" width="100" height="64"
-                          className="pointer-events-none"
-                        >
-                          <div className="flex flex-col items-center justify-center">
-                            <div className="text-xs font-medium text-center px-3 py-1 rounded-full bg-white dark:bg-gray-800 shadow-md border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
-                              {connection.material}
-                            </div>
-                            {connection.quantity > 0 && (
-                              <div className="text-[10px] mt-0.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary dark:text-primary-foreground">
-                                {connection.quantity} {connection.unit || 'units'}
-                              </div>
-                            )}
+                        <foreignObject x="-60" y="-20" width="120" height="40" className="pointer-events-none">
+                          <div className="flex flex-col items-center justify-center p-1 rounded-md backdrop-blur-sm bg-white/70 dark:bg-slate-800/70 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
+                            <div className="text-[10px] font-semibold text-slate-700 dark:text-slate-200">{connection.material}</div>
+                            <div className="text-[9px] text-slate-500 dark:text-slate-400">{connection.quantity} {connection.unit}</div>
                           </div>
                         </foreignObject>
                       </g>
                     </g>
                   )
                 })}
-
-                {/* Arrow marker and effects */}
-                <defs>
-                  <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#06B6D4" /><stop offset="50%" stopColor="#8B5CF6" /><stop offset="100%" stopColor="#EC4899" />
-                  </linearGradient>
-                  <marker id="arrowheadPrimary" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto" markerUnits="strokeWidth">
-                    <path d="M0,0 L12,4 L0,8 Z" fill="url(#flowGradient)" />
-                  </marker>
-                </defs>
               </svg>
-
-              {/* Temp connection line - must be outside the transformed container */}
               {isConnecting && connectionStart && tempConnection && (
                 <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
                     <line
                         x1={(nodes.find(n => n.id === connectionStart)!.x * zoomLevel + panOffset.x) + (BASE_NODE_WIDTH * zoomLevel)}
                         y1={(nodes.find(n => n.id === connectionStart)!.y * zoomLevel + panOffset.y) + (BASE_NODE_HEIGHT * zoomLevel / 2)}
-                        x2={tempConnection.x}
-                        y2={tempConnection.y}
-                        stroke="url(#flowGradient)" strokeWidth="2" strokeDasharray="5,5"
-                        markerEnd="url(#arrowheadPrimary)"
+                        x2={tempConnection.x} y2={tempConnection.y}
+                        stroke="url(#flowGradient)" strokeWidth="2" strokeDasharray="5,5" markerEnd="url(#arrowhead)"
                     />
                 </svg>
-                )}
-
-              {/* Render nodes */}
+              )}
               {nodes.map((node) => {
                 const Icon = getNodeIcon(node.type)
+                const impactColor = node.impact > 80 ? '#ef4444' : node.impact > 50 ? '#f59e0b' : '#10b981';
                 return (
                   <div
                     key={node.id}
-                    className={`absolute select-none ${isDraggingNode === node.id ? "transition-none shadow-xl z-50" : "transition-transform duration-150 ease-out"} ${isDraggingNode === node.id ? "ring-2 ring-primary scale-105" : selectedNode === node.id ? "ring-2 ring-primary" : "hover:shadow-lg"} ${isDraggingNode === node.id ? "cursor-grabbing z-50" : "cursor-grab"} ${isConnecting ? "cursor-pointer" : ""} transform-gpu will-change-transform`}
-                    style={{
-                      left: 0,
-                      top: 0,
-                      transform: `translate(${node.x}px, ${node.y}px)`,
-                      width: `${BASE_NODE_WIDTH}px`,
-                    }}
+                    className={`absolute select-none group/node transition-transform duration-150 ease-out will-change-transform ${isDraggingNode === node.id ? "cursor-grabbing z-50" : "cursor-grab"} ${isConnecting ? "cursor-crosshair" : ""}`}
+                    style={{ left: 0, top: 0, transform: `translate(${node.x}px, ${node.y}px)`, width: `${BASE_NODE_WIDTH}px` }}
                     onMouseDown={(e) => {
                       e.stopPropagation()
                       if (isConnecting) {
@@ -1065,431 +566,166 @@ export default function WhiteboardPage() {
                       }
                     }}
                   >
-                    <Card
-                      className={`relative w-full transition-all duration-300 ease-out ${
-                        selectedNode === node.id 
-                          ? "ring-2 ring-primary shadow-xl scale-[1.02]" 
-                          : "hover:shadow-lg border border-gray-200/80 dark:border-gray-700/80 hover:border-primary/30"
-                      } bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-xl overflow-hidden border-t-0 relative group`}
-                      style={{
-                        boxShadow: '0 4px 20px -5px rgba(0, 0, 0, 0.05)',
-                        borderTop: '3px solid ' + (node.impact > 80 ? '#ef4444' : node.impact > 50 ? '#eab308' : '#22c55e'),
-                        transform: selectedNode === node.id ? 'translateY(-1px)' : 'none'
-                      }}
-                    >
-                      {/* Left connection handle (green) */}
-                      <button
-                        title="Connect to this node"
-                        className="absolute -left-2 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-green-500 shadow-md border-2 border-white dark:border-gray-800 hover:scale-110 transition-all z-10"
-                        onMouseDown={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          if (isConnecting && connectionStart && connectionStart !== node.id) {
-                            handleEndConnection(node.id, e as unknown as React.MouseEvent, 'left')
-                          }
-                        }}
-                      />
+                    <Card className={`relative w-full transition-all duration-300 ease-out bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg overflow-hidden border border-slate-200/80 dark:border-slate-700/80 hover:shadow-2xl hover:border-blue-400 dark:hover:border-blue-500 ${selectedNode === node.id ? "ring-2 ring-offset-2 ring-blue-500 dark:ring-offset-slate-950 shadow-2xl scale-[1.03] -translate-y-1" : "shadow-lg"}`}
+                          style={{ boxShadow: selectedNode === node.id ? `0 0 20px -5px ${impactColor}, 0 4px 6px -2px rgba(0,0,0,0.1)` : '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                      <div className="absolute top-0 left-0 right-0 h-1" style={{ background: impactColor, filter: `drop-shadow(0 0 3px ${impactColor})`}}></div>
+                      <button title="Connect input" className="absolute -left-2.5 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-slate-200 dark:bg-slate-700 border-2 border-white dark:border-slate-800 hover:scale-125 hover:bg-green-400 transition-all duration-200 z-20 group-hover/node:opacity-100 opacity-0"
+                              onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); if (isConnecting && connectionStart && connectionStart !== node.id) handleEndConnection(node.id, e as any, 'left')}} />
+                      <button title="Start connection" className="absolute -right-2.5 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-slate-200 dark:bg-slate-700 border-2 border-white dark:border-slate-800 hover:scale-125 hover:bg-blue-400 transition-all duration-200 z-20 group-hover/node:opacity-100 opacity-0"
+                              onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); if (!isConnecting) handleStartConnection(node.id, e as any, 'right') }} />
                       
-                      {/* Right connection handle (blue) */}
-                      <button
-                        title="Start connection from this node"
-                        className="absolute -right-2 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 shadow-md border-2 border-white dark:border-gray-800 hover:scale-110 transition-all z-10"
-                        onMouseDown={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          if (!isConnecting) {
-                            handleStartConnection(node.id, e as unknown as React.MouseEvent, 'right')
-                          }
-                        }}
-                      />
-
-                      <CardContent className="p-4 space-y-3">
+                      <CardContent className="p-3 space-y-2">
                         <div className="flex items-start justify-between">
-                          <div className="flex items-start space-x-3">
-                            <div className={`p-2 rounded-lg ${getNodeColor(node.type)} shadow-inner`}>
+                          <div className="flex items-start space-x-2.5">
+                            <div className={`p-2 rounded-md ${getNodeColor(node.type)} shadow-inner`}>
                               <Icon className="h-4 w-4" />
                             </div>
-                            <div className="space-y-0.5">
-                              <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
-                                {node.label}
-                              </h4>
-                              <p className="text-xs text-muted-foreground font-medium">
-                                {node.category}
-                              </p>
+                            <div className="space-y-0">
+                              <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-100 leading-tight">{node.label}</h4>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{node.category}</p>
                             </div>
                           </div>
                           {!INITIAL_NODES.some((n) => n.id === node.id) && (
-                            <div className="relative group">
-                              <button
-                                type="button"
-                                className="h-7 w-7 flex items-center justify-center text-destructive hover:bg-destructive/10 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-destructive/50 z-50"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  e.preventDefault();
-                                  if (confirm('Are you sure you want to delete this node?')) {
-                                    deleteNode(node.id);
-                                  }
-                                }}
-                                onMouseDown={(e) => e.stopPropagation()}
-                                aria-label="Delete node"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                              <div className="absolute right-0 top-full mt-1 px-2 py-1 text-xs bg-destructive text-white rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                                Delete Node
-                              </div>
-                            </div>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 text-slate-500 hover:text-red-500 opacity-0 group-hover/node:opacity-100 transition-opacity" onClick={(e) => deleteNode(node.id, e)}><Trash2 className="h-3.5 w-3.5" /></Button>
                           )}
                         </div>
-
-                        <div className="space-y-3 pt-2 border-t border-gray-100 dark:border-gray-800">
-                          <div className="space-y-1">
-                            <div className="space-y-1.5">
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground font-medium">Impact Score</span>
-                                <div className="flex items-center space-x-1">
-                                  <span className="text-xs text-muted-foreground">
-                                    {node.impact > 80 ? 'High' : node.impact > 50 ? 'Medium' : 'Low'}
-                                  </span>
-                                  <Badge 
-                                    variant={node.impact > 80 ? "destructive" : node.impact > 50 ? "secondary" : "default"} 
-                                    className="text-xs font-mono font-bold px-2 py-0.5 h-5 min-w-[36px] flex items-center justify-center"
-                                  >
-                                    {node.impact}
-                                  </Badge>
-                                </div>
-                              </div>
-                              <div className="w-full bg-gray-100 dark:bg-gray-800/60 rounded-full h-2 overflow-hidden">
-                                <div 
-                                  className={`h-full rounded-full transition-all duration-500 ease-out ${
-                                    node.impact > 80 ? 'bg-red-500' : node.impact > 50 ? 'bg-yellow-500' : 'bg-green-500'
-                                  }`} 
-                                  style={{ 
-                                    width: `${node.impact}%`,
-                                    boxShadow: `0 0 8px ${
-                                      node.impact > 80 
-                                        ? 'rgba(239, 68, 68, 0.5)' 
-                                        : node.impact > 50 
-                                          ? 'rgba(234, 179, 8, 0.5)' 
-                                          : 'rgba(34, 197, 94, 0.5)'
-                                    }`
-                                  }} 
-                                />
-                              </div>
+                        <div className="space-y-1.5 pt-2 border-t border-slate-200/80 dark:border-slate-700/80">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-slate-500 dark:text-slate-400 font-medium">Impact Score</span>
+                              <Badge style={{ backgroundColor: `${impactColor}20`, color: impactColor, borderColor: `${impactColor}40` }} className="font-mono font-bold">{node.impact}</Badge>
                             </div>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-2 text-xs opacity-0 h-0 pointer-events-none">
-                            <div className="invisible">
-                              <div className="invisible">
-                                <span className="invisible"></span>
-                              </div>
-                              <div className="invisible">
-                                {node.inputs.length}
-                              </div>
+                            <div className="w-full bg-slate-200 dark:bg-slate-700/60 rounded-full h-1.5 overflow-hidden">
+                              <div className="h-full rounded-full" style={{ width: `${node.impact}%`, background: impactColor, filter: `drop-shadow(0 0 2px ${impactColor})` }} />
                             </div>
-                            <div className="invisible">
-                              <div className="invisible">
-                                <span className="invisible"></span>
-                              </div>
-                              <div className="invisible">
-                                {node.outputs.length}
-                              </div>
-                            </div>
-                          </div>
                         </div>
                       </CardContent>
                     </Card>
                   </div>
                 )
               })}
-              </div> {/* End of transformed container */}
             </div>
           </div>
-        </div>
-
-        {/* Right Sidebar - Properties & Results */}
-        <div 
-          className={`w-80 border-l bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-lg flex flex-col h-full transition-all duration-200 ease-in-out ${rightSidebarOpen ? 'translate-x-0' : 'translate-x-full absolute right-0'}`}
-          style={{ zIndex: 10 }}
+        </main>
+        
+        <aside 
+          className={`w-80 border-l border-slate-200/80 dark:border-slate-800/80 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-lg flex flex-col h-full transition-transform duration-300 ease-in-out absolute right-0 z-20 ${rightSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}
         >
-          <Tabs defaultValue="properties" className="h-full">
-            <TabsList className="grid w-full grid-cols-2 m-4 bg-muted/50 p-1 h-10">
-              <TabsTrigger 
-                value="properties" 
-                className="text-xs font-medium data-[state=active]:shadow-sm data-[state=active]:bg-background"
-              >
-                Properties
-              </TabsTrigger>
-              <TabsTrigger 
-                value="results" 
-                className="text-xs font-medium data-[state=active]:shadow-sm data-[state=active]:bg-background"
-              >
-                Results
-              </TabsTrigger>
+          <Tabs defaultValue="properties" className="flex flex-col h-full">
+            <TabsList className="grid w-full grid-cols-2 m-3 bg-slate-200/70 dark:bg-slate-800/70 p-1 h-10 rounded-lg">
+              <TabsTrigger value="properties" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-md rounded-md">Properties</TabsTrigger>
+              <TabsTrigger value="results" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-md rounded-md">Results</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="properties" className="p-4 space-y-6 flex-1 overflow-y-auto">
-              {selectedNode ? (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="font-semibold mb-3">Node Properties</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="node-label">Label</Label>
-                        <Input 
-                          id="node-label" 
-                          value={nodes.find((n) => n.id === selectedNode)?.label || ""} 
-                          onChange={(e) => {
-                            const newLabel = e.target.value
-                            setNodes(prev => 
-                              prev.map(node => 
-                                node.id === selectedNode 
-                                  ? { ...node, label: newLabel } 
-                                  : node
-                              )
-                            )
-                          }}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="node-category">Category</Label>
-                        <Select value={nodes.find((n) => n.id === selectedNode)?.category}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Raw Material Extraction">Raw Material Extraction</SelectItem>
-                            <SelectItem value="Processing & Manufacturing">Processing & Manufacturing</SelectItem>
-                            <SelectItem value="Transportation">Transportation</SelectItem>
-                            <SelectItem value="Use Phase">Use Phase</SelectItem>
-                            <SelectItem value="End-of-Life">End-of-Life</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="space-y-4">
-                    <div className="border rounded-lg overflow-hidden">
-                      <button 
-                        className="w-full flex items-center justify-between p-3 text-left font-medium bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
-                        onClick={() => setExpandedSection(expandedSection === 'inputs' ? null : 'inputs')}
-                      >
-                        <div className="flex items-center">
-                          <ChevronRight className={`h-4 w-4 mr-2 transition-transform ${expandedSection === 'inputs' ? 'rotate-90' : ''}`} />
-                          <span>Inputs</span>
-                          <Badge variant="outline" className="ml-2">
-                            {nodes.find(n => n.id === selectedNode)?.inputs.length || 0}
-                          </Badge>
-                        </div>
-                        <Plus className="h-4 w-4 text-muted-foreground" />
-                      </button>
-                      
-                      {expandedSection === 'inputs' && (
-                        <div className="p-3 border-t space-y-3">
-                          <div className="space-y-2">
-                            {nodes.find(n => n.id === selectedNode)?.inputs.map((input, index) => (
-                              <div key={index} className="flex items-center justify-between p-2 rounded border bg-white dark:bg-gray-800">
-                                <span className="text-sm">{input}</span>
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost" 
-                                  className="h-6 w-6 p-0 text-destructive"
-                                  onClick={() => {
-                                    setNodes(prev => 
-                                      prev.map(node => 
-                                        node.id === selectedNode
-                                          ? { ...node, inputs: node.inputs.filter((_, i) => i !== index) }
-                                          : node
-                                      )
-                                    )
-                                  }}
-                                >
-                                  ×
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                          <div className="flex gap-2">
-                            <Input 
-                              value={newInput}
-                              onChange={(e) => setNewInput(e.target.value)}
-                              placeholder="New input name"
-                              className="flex-1"
-                            />
-                            <Button 
-                              size="sm" 
-                              onClick={() => {
-                                if (newInput.trim()) {
-                                  setNodes(prev => 
-                                    prev.map(node => 
-                                      node.id === selectedNode
-                                        ? { ...node, inputs: [...node.inputs, newInput.trim()] }
-                                        : node
-                                    )
-                                  )
-                                  setNewInput('')
-                                }
-                              }}
-                            >
-                              Add
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="border rounded-lg overflow-hidden">
-                      <button 
-                        className="w-full flex items-center justify-between p-3 text-left font-medium bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
-                        onClick={() => setExpandedSection(expandedSection === 'outputs' ? null : 'outputs')}
-                      >
-                        <div className="flex items-center">
-                          <ChevronRight className={`h-4 w-4 mr-2 transition-transform ${expandedSection === 'outputs' ? 'rotate-90' : ''}`} />
-                          <span>Outputs</span>
-                          <Badge variant="outline" className="ml-2">
-                            {nodes.find(n => n.id === selectedNode)?.outputs.length || 0}
-                          </Badge>
-                        </div>
-                        <Plus className="h-4 w-4 text-muted-foreground" />
-                      </button>
-                      
-                      {expandedSection === 'outputs' && (
-                        <div className="p-3 border-t space-y-3">
-                          <div className="space-y-2">
-                            {nodes.find(n => n.id === selectedNode)?.outputs.map((output, index) => (
-                              <div key={index} className="flex items-center justify-between p-2 rounded border bg-white dark:bg-gray-800">
-                                <span className="text-sm">{output}</span>
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost" 
-                                  className="h-6 w-6 p-0 text-destructive"
-                                  onClick={() => {
-                                    setNodes(prev => 
-                                      prev.map(node => 
-                                        node.id === selectedNode
-                                          ? { ...node, outputs: node.outputs.filter((_, i) => i !== index) }
-                                          : node
-                                      )
-                                    )
-                                  }}
-                                >
-                                  ×
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                          <div className="flex gap-2">
-                            <Input 
-                              value={newOutput}
-                              onChange={(e) => setNewOutput(e.target.value)}
-                              placeholder="New output name"
-                              className="flex-1"
-                            />
-                            <Button 
-                              size="sm" 
-                              onClick={() => {
-                                if (newOutput.trim()) {
-                                  setNodes(prev => 
-                                    prev.map(node => 
-                                      node.id === selectedNode
-                                        ? { ...node, outputs: [...node.outputs, newOutput.trim()] }
-                                        : node
-                                    )
-                                  )
-                                  setNewOutput('')
-                                }
-                              }}
-                            >
-                              Add
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Settings className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <h4 className="font-semibold mb-2">No Node Selected</h4>
-                  <p className="text-sm text-muted-foreground">Click on a process node to edit its properties</p>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="results" className="p-4 space-y-6 flex-1 overflow-y-auto">
-              <div>
-                <h3 className="font-semibold mb-4">Impact Assessment</h3>
-                {showResults ? (
-                  <div className="space-y-4">
-                    <div className="p-3 rounded-lg bg-primary/10">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">System Status</span>
-                        <Badge className="bg-accent text-accent-foreground">Calculated</Badge>
-                      </div>
-                      <div className="text-lg font-bold text-primary">3 Process Nodes</div>
-                      <p className="text-xs text-muted-foreground">2 Material Flows</p>
-                    </div>
-
+            <ScrollArea className="flex-1">
+              <TabsContent value="properties" className="p-4 pt-0 space-y-6">
+                {selectedNode ? (
+                  <div className="space-y-6">
                     <div>
-                      <h4 className="font-semibold mb-3 text-sm">Environmental Impact Categories</h4>
-                      <ScrollArea className="h-64">
-                        <div className="space-y-3">
-                          {impactCategories.map((category, index) => (
-                            <div key={index} className="space-y-1">
-                              <div className="flex justify-between text-xs">
-                                <span>{category.name}</span>
-                                <span className="font-medium">
-                                  {category.value} {category.unit}
-                                </span>
+                      <h3 className="font-semibold mb-3 flex items-center gap-2"><Settings className="h-4 w-4 text-blue-500"/> Node Properties</h3>
+                      <div className="space-y-4 rounded-lg border border-slate-200 dark:border-slate-800 p-4 bg-white/50 dark:bg-slate-800/30">
+                        <div>
+                          <Label htmlFor="node-label">Label</Label>
+                          <Input id="node-label" value={nodes.find((n) => n.id === selectedNode)?.label || ""} onChange={(e) => setNodes(prev => prev.map(n => n.id === selectedNode ? { ...n, label: e.target.value } : n))} />
+                        </div>
+                        <div>
+                          <Label htmlFor="node-category">Category</Label>
+                          <Select value={nodes.find((n) => n.id === selectedNode)?.category}><SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {Array.from(new Set(nodeTypes.map(nt => nt.category))).map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {['inputs', 'outputs'].map(type => (
+                        <div key={type} className="border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden bg-white/50 dark:bg-slate-800/30">
+                          <button className="w-full flex items-center justify-between p-3 text-left font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" onClick={() => setExpandedSection(expandedSection === type ? null : type as 'inputs' | 'outputs')}>
+                            <div className="flex items-center gap-2 capitalize">{type}<Badge variant="secondary">{nodes.find(n => n.id === selectedNode)?.[type as 'inputs' | 'outputs'].length || 0}</Badge></div>
+                            <ChevronRight className={`h-4 w-4 transition-transform ${expandedSection === type ? 'rotate-90' : ''}`} />
+                          </button>
+                          {expandedSection === type && (
+                            <div className="p-3 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                              <div className="space-y-2">
+                                {nodes.find(n => n.id === selectedNode)?.[type as 'inputs' | 'outputs'].map((item, index) => (
+                                  <div key={index} className="flex items-center justify-between p-2 rounded border bg-white dark:bg-slate-800/50">
+                                    <span className="text-sm">{item}</span>
+                                    <Button size="icon" variant="ghost" className="h-6 w-6 text-red-500" onClick={() => setNodes(prev => prev.map(n => n.id === selectedNode ? { ...n, [type]: n[type as 'inputs' | 'outputs'].filter((_, i) => i !== index) } : n))}><Trash2 className="h-3.5 w-3.5"/></Button>
+                                  </div>
+                                ))}
                               </div>
-                              <div className="w-full bg-muted rounded-full h-1.5">
-                                <div
-                                  className="bg-primary h-1.5 rounded-full transition-all"
-                                  style={{ width: `${category.value}%` }}
-                                ></div>
+                              <div className="flex gap-2">
+                                <Input value={type === 'inputs' ? newInput : newOutput} onChange={(e) => type === 'inputs' ? setNewInput(e.target.value) : setNewOutput(e.target.value)} placeholder={`New ${type.slice(0, -1)}...`} />
+                                <Button onClick={() => {
+                                  const value = (type === 'inputs' ? newInput : newOutput).trim();
+                                  if (value) {
+                                    setNodes(prev => prev.map(n => n.id === selectedNode ? { ...n, [type]: [...n[type as 'inputs' | 'outputs'], value] } : n));
+                                    type === 'inputs' ? setNewInput('') : setNewOutput('');
+                                  }
+                                }}>Add</Button>
                               </div>
                             </div>
-                          ))}
+                          )}
                         </div>
-                      </ScrollArea>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold mb-3 text-sm">Hotspot Analysis</h4>
-                      <div className="space-y-2">
-                        <div className="p-2 rounded border-l-4 border-l-destructive bg-destructive/10">
-                          <div className="text-sm font-medium">Aluminum Smelting</div>
-                          <div className="text-xs text-muted-foreground">Highest impact: 92% contribution</div>
-                        </div>
-                        <div className="p-2 rounded border-l-4 border-l-secondary bg-secondary/10">
-                          <div className="text-sm font-medium">Bauxite Mining</div>
-                          <div className="text-xs text-muted-foreground">High impact: 85% contribution</div>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h4 className="font-semibold mb-2">No Results Yet</h4>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Run LCA calculation to see environmental impact results
-                    </p>
-                    <Button size="sm" onClick={handleRunCalculation}>
-                      <Play className="mr-2 h-3 w-3" />
-                      Calculate Now
-                    </Button>
+                  <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                    <Settings className="mx-auto h-12 w-12 mb-4" />
+                    <h4 className="font-semibold mb-2 text-slate-800 dark:text-slate-200">No Node Selected</h4>
+                    <p className="text-sm">Click on a process node to edit its properties.</p>
                   </div>
                 )}
-              </div>
-            </TabsContent>
+              </TabsContent>
+              <TabsContent value="results" className="p-4 pt-0 space-y-6">
+                <div>
+                  <h3 className="font-semibold mb-4 flex items-center gap-2"><BarChart3 className="h-4 w-4 text-blue-500"/> Impact Assessment</h3>
+                  {showResults ? (
+                    <div className="space-y-6">
+                       <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-800 dark:text-green-300">
+                          <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-semibold">System Status</span>
+                              <Badge className="bg-green-500/80 text-white">Calculated</Badge>
+                          </div>
+                          <div className="text-lg font-bold">{nodes.length} Nodes • {connections.length} Flows</div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-3 text-sm">Environmental Impact</h4>
+                        <div className="space-y-3">
+                          {impactCategories.map((category) => (
+                            <div key={category.name} className="space-y-1">
+                              <div className="flex justify-between text-xs font-medium">
+                                <span className="text-slate-600 dark:text-slate-300">{category.name}</span>
+                                <span className="text-slate-500 dark:text-slate-400">{category.value} {category.unit}</span>
+                              </div>
+                              <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5"><div className="bg-gradient-to-r from-blue-400 to-indigo-500 h-2.5 rounded-full transition-all" style={{ width: `${category.value}%`, filter: 'drop-shadow(0 0 2px #60a5fa)' }}/></div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-3 text-sm">Hotspot Analysis</h4>
+                        <div className="space-y-2">
+                          <div className="p-3 rounded-lg border-l-4 border-red-500 bg-red-500/10"><div className="text-sm font-semibold text-red-800 dark:text-red-300">Aluminum Smelting</div><div className="text-xs text-red-600 dark:text-red-400">Highest impact: 92% contribution</div></div>
+                          <div className="p-3 rounded-lg border-l-4 border-orange-500 bg-orange-500/10"><div className="text-sm font-semibold text-orange-800 dark:text-orange-300">Bauxite Mining</div><div className="text-xs text-orange-600 dark:text-orange-400">High impact: 85% contribution</div></div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <BarChart3 className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+                      <h4 className="font-semibold mb-2 text-slate-800 dark:text-slate-200">No Results Yet</h4>
+                      <p className="text-sm text-slate-500 mb-4">Run calculation to see impact results.</p>
+                      <Button onClick={handleRunCalculation} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20"><Play className="mr-2 h-4 w-4" />{isCalculating ? 'Calculating...' : 'Run Calculation'}</Button>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </ScrollArea>
           </Tabs>
-        </div>
+        </aside>
       </div>
     </div>
   )
