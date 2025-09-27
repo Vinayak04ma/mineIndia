@@ -6,19 +6,34 @@
   background-color: #f8fafc; /* Light gray background for map */
 }
 
-/* Fix for Leaflet marker icons */
+/* Custom marker styles */
 .leaflet-div-icon {
-  background: transparent;
-  border: none;
+  background: transparent !important;
+  border: none !important;
 }
 
 .leaflet-marker-icon {
+  background: none !important;
+  border: none !important;
   transition: transform 0.2s ease;
 }
 
 .leaflet-marker-icon:hover {
   transform: scale(1.2);
   z-index: 1000;
+}
+
+/* Hide default marker shadow */
+.leaflet-marker-shadow {
+  display: none !important;
+}
+
+/* Ensure our custom marker content is visible */
+.leaflet-marker-icon .relative {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Popup styles */

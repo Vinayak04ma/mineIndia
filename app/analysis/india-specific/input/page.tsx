@@ -31,6 +31,10 @@ const inputCategories = [
 export default function IndiaSpecificInputPage() {
   const searchParams = useSearchParams()
   const [activeCategory, setActiveCategory] = useState(inputCategories[0].id)
+
+  // Add this state near the top of your component with other state declarations
+  const [showPreloadedData, setShowPreloadedData] = useState(true);
+
   
   // Get URL parameters
   const state = searchParams.get('state') || ''
@@ -1170,11 +1174,22 @@ export default function IndiaSpecificInputPage() {
     }
   };
 
+  const handleBack = () => {
+    window.history.back();
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container py-8">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-center justify-between mb-6">
+            <Button variant="outline" onClick={handleBack}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                <path d="m12 19-7-7 7-7"/>
+                <path d="M19 12H5"/>
+              </svg>
+              Back
+            </Button>
             <div>
               <h1 className="text-3xl font-bold">Analysis Input Parameters</h1>
               <p className="text-muted-foreground">Configure your LCA analysis with location-specific data</p>
@@ -1236,37 +1251,49 @@ export default function IndiaSpecificInputPage() {
             
             {/* Pre-loaded Data Card */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <MapPin className="mr-2 h-5 w-5" />
-                  Pre-loaded Location Data
-                </CardTitle>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center">
+                    <MapPin className="mr-2 h-5 w-5" />
+                    Pre-loaded Location Data
+                  </CardTitle>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShowPreloadedData(!showPreloadedData)}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    {showPreloadedData ? 'Hide' : 'Show'} Details
+                  </Button>
+                </div>
                 <CardDescription>Automatically configured from selected mine location</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="p-3 rounded-lg bg-primary/10">
-                    <Label className="text-sm font-semibold text-primary">Selected Mine</Label>
-                    <p className="text-sm">Bailadila Iron Ore Mine</p>
-                    <p className="text-xs text-muted-foreground">Dantewada, Odisha</p>
+              {showPreloadedData && (
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="p-3 rounded-lg bg-primary/10">
+                      <Label className="text-sm font-semibold text-primary">Selected Mine</Label>
+                      <p className="text-sm">Bailadila Iron Ore Mine</p>
+                      <p className="text-xs text-muted-foreground">Dantewada, Odisha</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-accent/10">
+                      <Label className="text-sm font-semibold text-primary">Climate Zone</Label>
+                      <p className="text-sm">Tropical Monsoon</p>
+                      <p className="text-xs text-muted-foreground">28°C avg, 1200mm rainfall</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-secondary/10">
+                      <Label className="text-sm font-semibold text-primary">Grid Carbon Intensity</Label>
+                      <p className="text-sm">0.82 kg CO₂/kWh</p>
+                      <p className="text-xs text-muted-foreground">Regional grid mix</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-primary/10">
+                      <Label className="text-sm font-semibold text-primary">Ore Grade</Label>
+                      <p className="text-sm">62% Fe</p>
+                      <p className="text-xs text-muted-foreground">High-grade iron ore</p>
+                    </div>
                   </div>
-                  <div className="p-3 rounded-lg bg-accent/10">
-                    <Label className="text-sm font-semibold text-primary">Climate Zone</Label>
-                    <p className="text-sm">Tropical Monsoon</p>
-                    <p className="text-xs text-muted-foreground">28°C avg, 1200mm rainfall</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-secondary/10">
-                    <Label className="text-sm font-semibold text-primary">Grid Carbon Intensity</Label>
-                    <p className="text-sm">0.82 kg CO₂/kWh</p>
-                    <p className="text-xs text-muted-foreground">Regional grid mix</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-primary/10">
-                    <Label className="text-sm font-semibold text-primary">Ore Grade</Label>
-                    <p className="text-sm">62% Fe</p>
-                    <p className="text-xs text-muted-foreground">High-grade iron ore</p>
-                  </div>
-                </div>
-              </CardContent>
+                </CardContent>
+              )}
             </Card>
 
             {/* Main Input Form with Category Navigation */}
