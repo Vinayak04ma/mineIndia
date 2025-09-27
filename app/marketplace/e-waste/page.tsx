@@ -257,16 +257,16 @@ export default function EWasteServicePage() {
 
               <Tabs defaultValue="breakdown" className="space-y-6">
                 <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="breakdown">Value Breakdown</TabsTrigger>
-                  <TabsTrigger value="hazards">Hazards</TabsTrigger>
-                  <TabsTrigger value="environmental">Environmental Impact</TabsTrigger>
-                  <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
+                  <TabsTrigger value="breakdown" className="hover:bg-gray-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary data-[state=active]:text-white">Value Breakdown</TabsTrigger>
+                  <TabsTrigger value="hazards" className="hover:bg-gray-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary data-[state=active]:text-white">Hazards</TabsTrigger>
+                  <TabsTrigger value="environmental" className="hover:bg-gray-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary data-[state=active]:text-white">Environmental Impact</TabsTrigger>
+                  <TabsTrigger value="recommendations" className="hover:bg-gray-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary data-[state=active]:text-white">Recommendations</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="breakdown">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Detailed Value Analysis</CardTitle>
+                      <CardTitle className="text-xl font-semibold mb-4 text-primary/90 flex items-center">  <span className="h-1 w-6 bg-primary/70 mr-2 rounded-full"></span>Detailed Value Analysis</CardTitle>
                       <CardDescription>Market-based pricing for recovered materials</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -331,7 +331,7 @@ export default function EWasteServicePage() {
                 <TabsContent value="environmental">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Environmental Impact</CardTitle>
+                      <CardTitle className="text-xl font-semibold mb-4 text-primary/90 flex items-center">  <span className="h-1 w-6 bg-primary/70 mr-2 rounded-full"></span>Environmental Impact</CardTitle>
                       <CardDescription>Benefits of proper e-waste recycling</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -384,16 +384,7 @@ export default function EWasteServicePage() {
                             </div>
                           </div>
 
-                          <div className="mt-6 p-4 rounded-lg bg-muted/50">
-                            <h5 className="font-semibold mb-2">Sustainability Score</h5>
-                            <div className="flex items-center">
-                              <Progress value={87} className="flex-1 mr-3" />
-                              <span className="text-lg font-bold text-accent">87/100</span>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Based on material recovery and environmental impact
-                            </p>
-                          </div>
+                          
                         </div>
                       </div>
                     </CardContent>
@@ -403,7 +394,7 @@ export default function EWasteServicePage() {
                 <TabsContent value="recommendations">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Recycling Recommendations</CardTitle>
+                      <CardTitle className="text-xl font-semibold mb-4 text-primary/90 flex items-center"> <span className="h-1 w-6 bg-primary/70 mr-2 rounded-full"></span>Recycling Recommendations</CardTitle>
                       <CardDescription>
                         Optimize your e-waste processing for maximum value and sustainability
                       </CardDescription>
@@ -468,7 +459,7 @@ export default function EWasteServicePage() {
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div>
-                          <CardTitle>Hazardous Elements</CardTitle>
+                          <CardTitle className="text-xl font-semibold mb-4 text-primary/90 flex items-center">  <span className="h-1 w-6 bg-primary/70 mr-2 rounded-full"></span>Hazardous Elements</CardTitle>
                           <CardDescription>Potentially dangerous substances detected in your e-waste</CardDescription>
                         </div>
                         <Badge variant="destructive" className="px-3 py-1">
