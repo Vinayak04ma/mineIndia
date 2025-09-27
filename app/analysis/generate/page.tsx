@@ -274,7 +274,7 @@ export default function GenerateLCAPage() {
                   type="submit" 
                   form="lca-form"
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-blue-600 bg-gradient-to-r from-primary to-primary text-white"
                   disabled={isLoading}
                 >
                    {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
@@ -289,7 +289,7 @@ export default function GenerateLCAPage() {
         <div className="max-w-4xl mx-auto">
           {/* Form Header */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-6">
+            <div className="bg-gradient-to-r bg-gradient-to-r from-primary to-primary px-6 py-6">
               <div className="max-w-5xl mx-auto">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                   
@@ -374,7 +374,7 @@ export default function GenerateLCAPage() {
                   ))}
                 </RadioGroup>
               </CardContent>
-              <CardFooter className="flex justify-end">
+              <CardFooter className="flex justify-end py-4">
                 <Button type="button" onClick={goToNextSection}>Next <ArrowRight className="h-4 w-4 ml-2" /></Button>
               </CardFooter>
             </Card>
@@ -1308,7 +1308,7 @@ export default function GenerateLCAPage() {
                  </CardContent>
                  <CardFooter className="flex justify-between py-4">
                     <Button type="button" variant="outline" onClick={goToPrevSection}><ArrowLeft className="h-4 w-4 mr-2" /> Previous</Button>
-                    <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={isLoading}>
+                    <Button type="submit" className="bg-gradient-to-r from-primary to-primary" disabled={isLoading}>
                         {isLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Submitting...</> : 'Submit & Generate Report'}
                     </Button>
                 </CardFooter>

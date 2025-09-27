@@ -425,7 +425,10 @@ export default function AnalysisReportPage() {
             <CardContent className="pt-6">
               <div className="space-y-12">
                 <div>
-                  <h4 className="text-xl font-semibold mb-4 text-foreground/90 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Environmental Impact Comparison</h4>
+                  <h4 className="text-xl font-semibold mb-4 text-foreground/90 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                    <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
+                    Environmental Impact Comparison
+                  </h4>
                   <div className="h-[400px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
