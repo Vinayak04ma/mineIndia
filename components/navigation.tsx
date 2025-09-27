@@ -12,7 +12,12 @@ import {
   ChevronUp,
   HardHat,
   Menu,
-  X
+  X,
+  SlashIcon,
+  Icon,
+  IceCream2Icon,
+  LampDeskIcon,
+  GrabIcon
 } from "lucide-react"
 import { UserDashboard } from "./user-dashboard"
 
@@ -66,12 +71,12 @@ export function Navigation() {
     },
     {
       name: " Marketplace",
-      icon: <Palette className="h-4 w-4" />,
+      icon: <LampDeskIcon className="h-4 w-4" />,
       children: [
         { 
           name: " E-Waste (Urban Mining)", 
           href: "/marketplace/e-waste",
-          icon: null
+          icon: null,
         },
         { 
           name: " Junkyard",
@@ -246,7 +251,7 @@ export function Navigation() {
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-1">
+        <nav className="hidden md:flex items-center space-x-5">
           {renderNavItems(navItems)}
         </nav>
 

@@ -39,8 +39,8 @@ type UserData = {
 
 // Mock data for the user dashboard
 const mockUserData: UserData = {
-  name: "John Doe",
-  email: "john.doe@example.com",
+  name: "Suryansh Shrivastava",
+  email: "suryanshshrivastava9575@gmail.com",
   avatar: "",
   memberSince: "January 2023",
   industryDetails: [

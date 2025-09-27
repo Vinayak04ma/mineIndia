@@ -10,7 +10,6 @@ export const metadata: Metadata = {
   title: "AI LCA Tool - Life Cycle Assessment for Metallurgy",
   description:
     "AI-powered Life Cycle Assessment tool for advancing circularity and sustainability in metallurgy and mining",
-  generator: "v0.app",
 }
 
 export default function RootLayout({
