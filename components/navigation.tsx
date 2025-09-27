@@ -231,7 +231,7 @@ export function Navigation() {
   return (
     <header 
       ref={navRef}
-      className="sticky top-0 z-[1000] w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative"
+      className="sticky top-0 z-[10000] w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative"
       style={{
         position: 'sticky',
         isolation: 'isolate',
