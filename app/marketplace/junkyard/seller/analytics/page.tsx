@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Calendar, Download, BarChart3, LineChart, PieChart, ArrowUpDown, Filter, ChevronDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Download, BarChart3, LineChart, PieChart, ArrowUpDown, Filter, ChevronDown, ArrowLeft, TrendingUp, DollarSign, Package, Clock } from "lucide-react";
 
 // Mock data for charts
 const revenueData = [
@@ -105,182 +107,220 @@ const SimplePieChart = ({ data }: { data: { name: string; value: number; color: 
 
 export default function AnalyticsPage() {
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
-          <p className="text-muted-foreground">Track your marketplace performance and gain insights</p>
-        </div>
-        <div className="flex gap-2 mt-4 md:mt-0">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <Calendar className="h-4 w-4" />
-                Last 12 Months
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>Last 7 Days</DropdownMenuItem>
-              <DropdownMenuItem>Last 30 Days</DropdownMenuItem>
-              <DropdownMenuItem>Last 3 Months</DropdownMenuItem>
-              <DropdownMenuItem>Last 6 Months</DropdownMenuItem>
-              <DropdownMenuItem>Last 12 Months</DropdownMenuItem>
-              <DropdownMenuItem>Custom Range</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
-        </div>
-      </div>
-
-      {/* Performance Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        {performanceMetrics.map((metric, index) => (
-          <Card key={index}>
-            <CardHeader className="pb-2">
-              <CardDescription className="text-sm">{metric.name}</CardDescription>
-              <CardTitle className="text-2xl">{metric.value}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className={`text-sm ${metric.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                {metric.change} from last period
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="revenue">
-            <LineChart className="h-4 w-4 mr-2" />
-            Revenue
-          </TabsTrigger>
-          <TabsTrigger value="inventory">
-            <PieChart className="h-4 w-4 mr-2" />
-            Inventory
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="col-span-4">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Revenue Overview</CardTitle>
-                  <Button variant="ghost" size="sm" className="h-8 gap-1">
-                    <Filter className="h-3.5 w-3.5" />
-                    <span>Filter</span>
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <SimpleLineChart data={revenueData} />
-              </CardContent>
-            </Card>
-            <Card className="col-span-3">
-              <CardHeader>
-                <CardTitle>Sales by Category</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <SimplePieChart data={salesByCategory} />
-              </CardContent>
-            </Card>
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      {/* Header Section */}
+      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex items-center gap-4 mb-6">
+            <Link href="/marketplace/junkyard/seller" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+            <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+              <BarChart3 className="h-5 w-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Analytics Dashboard</h1>
+              <p className="text-gray-600 dark:text-gray-400">Track your marketplace performance and gain insights</p>
+            </div>
           </div>
           
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Top Performing Listings</CardTitle>
-                <CardDescription>Your best-selling items this period</CardDescription>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="font-semibold text-gray-900 dark:text-white">$52,000</span> total revenue
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="font-semibold text-green-600">+12.5%</span> vs last month
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="font-semibold text-blue-600">24</span> active listings
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2 border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700">
+                    <Calendar className="h-4 w-4" />
+                    Last 12 Months
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>Last 7 Days</DropdownMenuItem>
+                  <DropdownMenuItem>Last 30 Days</DropdownMenuItem>
+                  <DropdownMenuItem>Last 3 Months</DropdownMenuItem>
+                  <DropdownMenuItem>Last 6 Months</DropdownMenuItem>
+                  <DropdownMenuItem>Last 12 Months</DropdownMenuItem>
+                  <DropdownMenuItem>Custom Range</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button variant="outline" className="gap-2 border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700">
+                <Download className="h-4 w-4" />
+                Export
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-6 py-8">
+
+        {/* Performance Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {performanceMetrics.map((metric, index) => (
+            <Card key={index} className="border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+              <CardHeader className="pb-2">
+                <CardDescription className="text-sm text-gray-600 dark:text-gray-400">{metric.name}</CardDescription>
+                <CardTitle className="text-2xl text-gray-900 dark:text-white">{metric.value}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {topListings.map((item) => (
-                    <div key={item.id} className="flex items-center">
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium leading-none">{item.name}</p>
-                        <p className="text-sm text-muted-foreground">{item.sales} sales</p>
-                      </div>
-                      <div className="ml-auto font-medium">${item.revenue.toLocaleString()}</div>
-                    </div>
-                  ))}
+                <div className={`text-sm flex items-center ${metric.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                  <TrendingUp className={`h-4 w-4 mr-1 ${metric.isPositive ? 'rotate-0' : 'rotate-180'}`} />
+                  {metric.change} from last period
                 </div>
               </CardContent>
             </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Transactions</CardTitle>
-                <CardDescription>Latest customer purchases</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentTransactions.map((transaction) => (
-                    <div key={transaction.id} className="flex items-center">
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium leading-none">{transaction.customer}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(transaction.date).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="ml-auto">
-                        <div className="font-medium">${transaction.amount.toLocaleString()}</div>
-                        <div className={`text-xs ${
-                          transaction.status === 'completed' ? 'text-green-600' : 
-                          transaction.status === 'pending' ? 'text-amber-600' : 'text-red-600'
-                        }`}>
-                          {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+          ))}
+        </div>
+
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="bg-gray-100 dark:bg-slate-700">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="revenue" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800">
+              <LineChart className="h-4 w-4 mr-2" />
+              Revenue
+            </TabsTrigger>
+            <TabsTrigger value="inventory" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800">
+              <PieChart className="h-4 w-4 mr-2" />
+              Inventory
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+              <Card className="col-span-4 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-gray-900 dark:text-white">Revenue Overview</CardTitle>
+                    <Button variant="ghost" size="sm" className="h-8 gap-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+                      <Filter className="h-3.5 w-3.5" />
+                      <span>Filter</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="pl-2">
+                  <SimpleLineChart data={revenueData} />
+                </CardContent>
+              </Card>
+              <Card className="col-span-3 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                <CardHeader>
+                  <CardTitle className="text-gray-900 dark:text-white">Sales by Category</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <SimplePieChart data={salesByCategory} />
+                </CardContent>
+              </Card>
+            </div>
+          
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card className="border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                <CardHeader>
+                  <CardTitle className="text-gray-900 dark:text-white">Top Performing Listings</CardTitle>
+                  <CardDescription className="text-gray-600 dark:text-gray-400">Your best-selling items this period</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {topListings.map((item) => (
+                      <div key={item.id} className="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-3">
+                          <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium leading-none text-gray-900 dark:text-white">{item.name}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{item.sales} sales</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold text-gray-900 dark:text-white">${item.revenue.toLocaleString()}</div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                <CardHeader>
+                  <CardTitle className="text-gray-900 dark:text-white">Recent Transactions</CardTitle>
+                  <CardDescription className="text-gray-600 dark:text-gray-400">Latest customer purchases</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {recentTransactions.map((transaction) => (
+                      <div key={transaction.id} className="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+                        <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mr-3">
+                          <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium leading-none text-gray-900 dark:text-white">{transaction.customer}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {new Date(transaction.date).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold text-gray-900 dark:text-white">${transaction.amount.toLocaleString()}</div>
+                          <Badge variant={
+                            transaction.status === 'completed' ? 'default' : 
+                            transaction.status === 'pending' ? 'secondary' : 'destructive'
+                          } className="text-xs">
+                            {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+        </TabsContent>
+        
+          <TabsContent value="revenue">
+            <Card className="border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+              <CardHeader>
+                <CardTitle className="text-gray-900 dark:text-white">Revenue Analytics</CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">Detailed revenue breakdown and trends</CardDescription>
+              </CardHeader>
+              <CardContent className="h-80 flex items-center justify-center">
+                <p className="text-gray-500 dark:text-gray-400">Revenue analytics and charts would be displayed here</p>
               </CardContent>
             </Card>
-          </div>
-        </TabsContent>
+          </TabsContent>
+          
+          <TabsContent value="inventory">
+            <Card className="border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+              <CardHeader>
+                <CardTitle className="text-gray-900 dark:text-white">Inventory Analytics</CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">Inventory levels and stock movement</CardDescription>
+              </CardHeader>
+              <CardContent className="h-80 flex items-center justify-center">
+                <p className="text-gray-500 dark:text-gray-400">Inventory analytics and charts would be displayed here</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
         
-        <TabsContent value="revenue">
-          <Card>
-            <CardHeader>
-              <CardTitle>Revenue Analytics</CardTitle>
-              <CardDescription>Detailed revenue breakdown and trends</CardDescription>
-            </CardHeader>
-            <CardContent className="h-80 flex items-center justify-center">
-              <p className="text-muted-foreground">Revenue analytics and charts would be displayed here</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="inventory">
-          <Card>
-            <CardHeader>
-              <CardTitle>Inventory Analytics</CardTitle>
-              <CardDescription>Inventory levels and stock movement</CardDescription>
-            </CardHeader>
-            <CardContent className="h-80 flex items-center justify-center">
-              <p className="text-muted-foreground">Inventory analytics and charts would be displayed here</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-      
-      <div className="mt-6 flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">
-          Data is updated every 24 hours. Last updated: {new Date().toLocaleString()}
-        </p>
-        <Button variant="outline" className="gap-2">
-          <Download className="h-4 w-4" />
-          Download Full Report
-        </Button>
+        <div className="mt-8 flex justify-between items-center p-6 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Data is updated every 24 hours. Last updated: {new Date().toLocaleString()}
+          </p>
+          <Button variant="outline" className="gap-2 border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700">
+            <Download className="h-4 w-4" />
+            Download Full Report
+          </Button>
+        </div>
       </div>
     </div>
   );

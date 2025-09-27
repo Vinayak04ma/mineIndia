@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, X, Upload, Trash2, ChevronDown } from "lucide-react";
+import { Plus, X, Upload, Trash2, ChevronDown, ArrowLeft, Package, CheckCircle } from "lucide-react";
 
 type FormData = {
   title: string;
@@ -240,24 +241,24 @@ export default function CreateListingPage() {
           <div 
             className={`h-10 w-10 rounded-full flex items-center justify-center ${
               step === stepNum 
-                ? 'bg-primary text-primary-foreground' 
+                ? 'bg-blue-600 text-white' 
                 : step > stepNum 
                   ? 'bg-green-100 text-green-600' 
                   : 'bg-gray-100 text-gray-400'
             }`}
           >
-            {step > stepNum ? '✓' : stepNum}
+            {step > stepNum ? <CheckCircle className="h-5 w-5" /> : stepNum}
           </div>
-          <span className="text-sm mt-2">
+          <span className="text-sm mt-2 text-gray-600 dark:text-gray-400">
             {stepNum === 1 ? 'Basic Info' : 
              stepNum === 2 ? 'Details' : 
              stepNum === 3 ? 'Pricing' : 'Review'}
           </span>
         </div>
       ))}
-      <div className="flex-1 h-1 bg-gray-200 mx-2">
+      <div className="flex-1 h-1 bg-gray-200 dark:bg-slate-600 mx-2">
         <div 
-          className="h-full bg-primary transition-all duration-300" 
+          className="h-full bg-blue-600 transition-all duration-300" 
           style={{ width: `${((step - 1) / 3) * 100}%` }}
         ></div>
       </div>
@@ -265,23 +266,38 @@ export default function CreateListingPage() {
   );
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Create New Listing</h1>
-        <p className="text-muted-foreground">Fill in the details of the material you want to sell</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      {/* Header Section */}
+      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex items-center gap-4 mb-6">
+            <Link href="/marketplace/junkyard/seller" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+              <Package className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create New Listing</h1>
+              <p className="text-gray-600 dark:text-gray-400">Fill in the details of the material you want to sell</p>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <div className="container mx-auto px-6 py-8">
 
       <form onSubmit={handleSubmit}>
         {renderStepIndicator()}
 
-        <Card className="mb-6">
+        <Card className="mb-6 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
           <CardHeader>
-            <CardTitle>
+            <CardTitle className="text-gray-900 dark:text-white">
               {step === 1 ? 'Basic Information' : 
                step === 2 ? 'Material Details' : 
                step === 3 ? 'Pricing & Shipping' : 'Review Your Listing'}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
               {step === 1 ? 'Provide basic information about your listing' : 
                step === 2 ? 'Add detailed specifications and certifications' : 
                step === 3 ? 'Set your price and shipping options' : 
@@ -830,12 +846,13 @@ export default function CreateListingPage() {
             )}
           </CardContent>
           
-          <CardFooter className="flex justify-between pt-6 border-t">
+          <CardFooter className="flex justify-between pt-6 border-t border-gray-200 dark:border-slate-700">
             <Button 
               type="button" 
               variant="outline" 
               onClick={prevStep}
               disabled={step === 1}
+              className="border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700"
             >
               Previous
             </Button>
@@ -849,17 +866,19 @@ export default function CreateListingPage() {
                   (step === 2 && !formData.condition) ||
                   (step === 3 && (!formData.price || !formData.quantity))
                 }
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Next
               </Button>
             ) : (
-              <Button type="submit">
+              <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">
                 Publish Listing
               </Button>
             )}
           </CardFooter>
         </Card>
       </form>
+      </div>
     </div>
   );
 }
