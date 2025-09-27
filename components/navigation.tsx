@@ -231,7 +231,12 @@ export function Navigation() {
   return (
     <header 
       ref={navRef}
-      className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      className="sticky top-0 z-[1000] w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative"
+      style={{
+        position: 'sticky',
+        isolation: 'isolate',
+        willChange: 'transform',
+      }}
     >
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center">
