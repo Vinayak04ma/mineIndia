@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { User, LogOut, Settings, ChevronDown, ChevronUp } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { User, LogOut, Settings, UserCircle, UserRound, UserPlus, UserPlus2, UserCog, UserCog2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -70,7 +70,22 @@ const mockUserData: UserData = {
 
 export function UserDashboard() {
   const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const { name, email, industryDetails, memberSince } = mockUserData
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -86,20 +101,15 @@ export function UserDashboard() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <Button 
-        variant="ghost" 
-        size="icon" 
+        variant="outline" 
+        size="icon"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative"
+        className="rounded-full h-10 w-10 flex items-center justify-center"
       >
-        <User className="h-5 w-5" />
+        <User className="h-6 w-6" />
         <span className="sr-only">User menu</span>
-        {isOpen ? (
-          <ChevronUp className="ml-1 h-4 w-4" />
-        ) : (
-          <ChevronDown className="ml-1 h-4 w-4" />
-        )}
       </Button>
 
       {isOpen && (

@@ -166,14 +166,21 @@ export default function WhiteboardPage() {
   const [newOutput, setNewOutput] = useState('')
 
 
-  const deleteNode = (nodeId: string) => {
+  const deleteNode = (nodeId: string, e?: React.MouseEvent) => {
+    // If called with an event, prevent default behavior
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     // Prevent deleting initial nodes
-    const isInitial = INITIAL_NODES.some((n) => n.id === nodeId)
-    if (isInitial) return
-    setNodes((prev) => prev.filter((n) => n.id !== nodeId))
-    setConnections((prev) => prev.filter((c) => c.from !== nodeId && c.to !== nodeId))
-    if (selectedNode === nodeId) setSelectedNode(null)
-    if (isDraggingNode === nodeId) setIsDraggingNode(null)
+    const isInitial = INITIAL_NODES.some((n) => n.id === nodeId);
+    if (isInitial) return;
+    
+    // Remove the node and its connections
+    setNodes((prev) => prev.filter((n) => n.id !== nodeId));
+    setConnections((prev) => prev.filter((c) => c.from !== nodeId && c.to !== nodeId));
+    if (selectedNode === nodeId) setSelectedNode(null);
+    if (isDraggingNode === nodeId) setIsDraggingNode(null);
   }
 
   const nodeTypes = [
@@ -410,15 +417,23 @@ export default function WhiteboardPage() {
   }
   
   const handleZoom = (delta: number, mouseX: number, mouseY: number) => {
+    // Calculate the current mouse position in canvas coordinates
+    const currentX = (mouseX - panOffset.x) / zoomLevel;
+    const currentY = (mouseY - panOffset.y) / zoomLevel;
+    
+    // Calculate new zoom level with bounds
     const newZoom = Math.max(0.5, Math.min(2, zoomLevel + delta));
     
-    const worldPos = screenToCanvasCoords(mouseX, mouseY);
+    // Calculate new pan offset to keep the point under the mouse stationary
+    const newPanOffsetX = mouseX - currentX * newZoom;
+    const newPanOffsetY = mouseY - currentY * newZoom;
     
-    const newPanOffsetX = mouseX - worldPos.x * newZoom;
-    const newPanOffsetY = mouseY - worldPos.y * newZoom;
-    
+    // Apply the new zoom and pan
     setZoomLevel(newZoom);
-    setPanOffset({ x: newPanOffsetX, y: newPanOffsetY });
+    setPanOffset({
+      x: newPanOffsetX,
+      y: newPanOffsetY
+    });
   }
 
   const handleZoomIn = () => {
@@ -435,15 +450,24 @@ export default function WhiteboardPage() {
   
   const handleWheel = (event: React.WheelEvent) => {
     event.preventDefault();
+    
+    // Always zoom with wheel, but at a finer control when Ctrl is held
+    const zoomFactor = event.ctrlKey ? 0.05 : 0.01;
+    const delta = event.deltaY > 0 ? -zoomFactor : zoomFactor;
+    
+    // Get the current mouse position relative to the canvas
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+    
+    // Apply zoom
+    handleZoom(delta, mouseX, mouseY);
+    
+    // Prevent page scrolling when zooming
     if (event.ctrlKey) {
-      const delta = event.deltaY > 0 ? -0.1 : 0.1;
-      handleZoom(delta, event.clientX, event.clientY);
-    } else {
-      // Pan with wheel
-      setPanOffset(prev => ({
-        x: prev.x - event.deltaX,
-        y: prev.y - event.deltaY,
-      }));
+      event.stopPropagation();
     }
   };
 
@@ -1095,12 +1119,26 @@ export default function WhiteboardPage() {
                             </div>
                           </div>
                           {!INITIAL_NODES.some((n) => n.id === node.id) && (
-                            <Button
-                              size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                              onClick={(e) => { e.stopPropagation(); deleteNode(node.id) }} aria-label="Delete node"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <div className="relative group">
+                              <button
+                                type="button"
+                                className="h-7 w-7 flex items-center justify-center text-destructive hover:bg-destructive/10 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-destructive/50 z-50"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  if (confirm('Are you sure you want to delete this node?')) {
+                                    deleteNode(node.id);
+                                  }
+                                }}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                aria-label="Delete node"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                              <div className="absolute right-0 top-full mt-1 px-2 py-1 text-xs bg-destructive text-white rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                Delete Node
+                              </div>
+                            </div>
                           )}
                         </div>
 
