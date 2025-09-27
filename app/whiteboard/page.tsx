@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useRef } from "react"
-import { Navigation } from "@/components/navigation"
+import { WhiteboardNavigation } from "@/components/whiteboard-navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -156,7 +156,20 @@ export default function WhiteboardPage() {
   const [expandedSection, setExpandedSection] = useState<'inputs' | 'outputs' | null>(null)
   const [newInput, setNewInput] = useState('')
   const [newOutput, setNewOutput] = useState('')
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
 
+
+  const toggleCategory = (categoryName: string) => {
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryName)) {
+        newSet.delete(categoryName);
+      } else {
+        newSet.add(categoryName);
+      }
+      return newSet;
+    });
+  };
 
   const deleteNode = (nodeId: string, e?: React.MouseEvent) => {
     if (e) {
@@ -172,15 +185,76 @@ export default function WhiteboardPage() {
     if (isDraggingNode === nodeId) setIsDraggingNode(null);
   }
 
-  const nodeTypes = [
-    { type: "bauxite_mine", label: "Bauxite Mine", icon: Factory, color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300", category: "Raw Material Extraction" },
-    { type: "smelting_plant", label: "Smelting Plant", icon: Settings, color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300", category: "Material Processing / Smelting" },
-    { type: "rolling_mill", label: "Rolling Mill", icon: Settings, color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300", category: "Shaping / Forming" },
-    { type: "air_emission", label: "Air Emission", icon: AlertTriangle, color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300", category: "Waste & Emissions" },
-    { type: "scrap_collection", label: "Scrap Collection", icon: Recycle, color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300", category: "Circularity & End-of-Life" },
-    { type: "grid_electricity", label: "Grid Electricity", icon: Zap, color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300", category: "Energy & Policy Compliance" },
-    { type: "employment", label: "Employment", icon: Users, color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300", category: "Socio-Economic & Human Health" },
+  const nodeCategories = [
+    {
+      name: "Raw Material Extraction",
+      nodes: [
+        { type: "iron_ore_mine", label: "Iron Ore Mine", icon: Factory, color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" },
+        { type: "bauxite_mine", label: "Bauxite Mine", icon: Factory, color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" },
+        { type: "copper_ore_mine", label: "Copper Ore Mine", icon: Factory, color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" },
+        { type: "coal_coke_supplier", label: "Coal / Coke Supplier", icon: Factory, color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" },
+        { type: "flux_supplier", label: "Flux Supplier (limestone, dolomite, quartz)", icon: Factory, color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" },
+        { type: "alloying_material_supplier", label: "Alloying Material Supplier (Ni, Cr, Zn)", icon: Factory, color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" },
+      ]
+    },
+    {
+      name: "Material Processing / Smelting",
+      nodes: [
+        { type: "blast_furnace", label: "Blast Furnace / Electric Arc Furnace / Hydrometallurgical Plant", icon: Settings, color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" },
+        { type: "secondary_refining", label: "Secondary Refining (alloying, purification)", icon: Settings, color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" },
+        { type: "casting_forming_furnace", label: "Casting / Forming Furnace", icon: Settings, color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" },
+      ]
+    },
+    {
+      name: "Shaping / Forming",
+      nodes: [
+        { type: "rolling_mill", label: "Rolling Mill", icon: Settings, color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300" },
+        { type: "extrusion_forging", label: "Extrusion / Forging / Casting Unit", icon: Settings, color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300" },
+        { type: "finishing_machining", label: "Finishing / Machining Unit", icon: Settings, color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300" },
+      ]
+    },
+    {
+      name: "Waste & Emissions",
+      nodes: [
+        { type: "air_emission", label: "Air Emission Node", icon: AlertTriangle, color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300" },
+        { type: "water_effluent", label: "Water Effluent Node", icon: AlertTriangle, color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300" },
+        { type: "solid_waste", label: "Solid Waste Node", icon: AlertTriangle, color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300" },
+        { type: "hazardous_waste", label: "Hazardous Waste Node", icon: AlertTriangle, color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300" },
+      ]
+    },
+    {
+      name: "Circularity & End-of-Life",
+      nodes: [
+        { type: "scrap_collection", label: "Scrap Collection", icon: Recycle, color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" },
+        { type: "product_recycling", label: "Product Recycling / EAF Feed", icon: Recycle, color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" },
+        { type: "industrial_symbiosis", label: "Industrial Symbiosis Partner (slag → cement, fly ash → bricks)", icon: Recycle, color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" },
+        { type: "landfill_incineration", label: "Landfill / Incineration", icon: Recycle, color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" },
+      ]
+    },
+    {
+      name: "Energy & Policy Compliance",
+      nodes: [
+        { type: "grid_electricity", label: "Grid Electricity Node (state-specific)", icon: Zap, color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300" },
+        { type: "renewable_energy", label: "Onsite Renewable Energy Node", icon: Zap, color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300" },
+        { type: "epr_compliance", label: "EPR Compliance Node", icon: Zap, color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300" },
+        { type: "carbon_credit", label: "Carbon Credit Node", icon: Zap, color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300" },
+        { type: "rpo_compliance", label: "RPO Compliance Node", icon: Zap, color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300" },
+      ]
+    },
+    {
+      name: "Socio-Economic & Human Health",
+      nodes: [
+        { type: "employment", label: "Employment Node", icon: Users, color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300" },
+        { type: "workplace_safety", label: "Workplace Safety / Exposure Node", icon: Shield, color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300" },
+        { type: "csr_community", label: "CSR & Community Impact Node", icon: HeartHandshake, color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300" },
+      ]
+    }
   ]
+
+  // Flatten all nodes for backward compatibility
+  const nodeTypes = nodeCategories.flatMap(category => 
+    category.nodes.map(node => ({ ...node, category: category.name }))
+  )
 
   const impactCategories = [
     { name: "Climate Change", value: 87, unit: "kg CO₂ eq" },
@@ -370,12 +444,12 @@ export default function WhiteboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden">
-      <Navigation />
+      <WhiteboardNavigation />
 
       <div className="flex h-[calc(100vh-4rem)] relative">
         <button 
           onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
-          className={`absolute left-0 top-1/2 z-30 -translate-y-1/2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-y border-r border-slate-200 dark:border-slate-700 rounded-r-lg p-2 shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-300 ease-in-out ${leftSidebarOpen ? 'translate-x-80' : 'translate-x-0'}`}
+          className={`absolute left-0 top-1/2 z-30 -translate-y-1/2 backdrop-blur-sm border-y border-r rounded-r-lg p-2 shadow-md transition-all duration-300 ease-in-out ${leftSidebarOpen ? 'translate-x-80 bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700' : 'translate-x-0 bg-blue-500/90 dark:bg-blue-600/90 border-blue-400 dark:border-blue-500 hover:bg-blue-600 dark:hover:bg-blue-700 text-white shadow-lg'}`}
         >
           {leftSidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </button>
@@ -393,34 +467,55 @@ export default function WhiteboardPage() {
             
             <ScrollArea className="h-[calc(100%-4rem)]">
               <div className="space-y-3 pr-2">
-                {nodeTypes.map((nodeType) => {
-                  const Icon = nodeType.icon
+                {nodeCategories.map((category) => {
+                  const isExpanded = expandedCategories.has(category.name);
                   return (
-                    <Card
-                      key={nodeType.type}
-                      className="cursor-grab hover:shadow-lg transition-all duration-200 p-3 active:cursor-grabbing border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-800/50 hover:border-blue-400 dark:hover:border-blue-600 hover:scale-[1.02] group"
-                      onMouseDown={(e) => handleNodeDragStart(nodeType.type, e)}
-                      onClick={() => addNodeToView({
-                        id: `node_${Date.now()}`,
-                        type: nodeType.type,
-                        label: `New ${nodeType.label}`,
-                        x: 0, y: 0,
-                        inputs: ["Input 1"], outputs: ["Output 1"],
-                        impact: Math.floor(Math.random() * 100),
-                        category: nodeType.category,
-                      })}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-2 rounded-lg ${nodeType.color} shadow-sm group-hover:shadow-md transition-all duration-200`}>
-                          <Icon className="h-5 w-5" />
+                    <div key={category.name} className="space-y-2">
+                      <button
+                        onClick={() => toggleCategory(category.name)}
+                        className="w-full flex items-center justify-between p-3 text-left font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-lg border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-800/50"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-slate-800 dark:text-slate-200">{category.name}</span>
+                          <Badge variant="secondary" className="text-xs">{category.nodes.length}</Badge>
                         </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-100">{nodeType.label}</h4>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{nodeType.category}</p>
+                        <ChevronRight className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                      </button>
+                      
+                      {isExpanded && (
+                        <div className="space-y-2 ml-4">
+                          {category.nodes.map((nodeType) => {
+                            const Icon = nodeType.icon
+                            return (
+                              <Card
+                                key={nodeType.type}
+                                className="cursor-grab hover:shadow-lg transition-all duration-200 p-3 active:cursor-grabbing border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-800/50 hover:border-blue-400 dark:hover:border-blue-600 hover:scale-[1.02] group"
+                                onMouseDown={(e) => handleNodeDragStart(nodeType.type, e)}
+                                onClick={() => addNodeToView({
+                                  id: `node_${Date.now()}`,
+                                  type: nodeType.type,
+                                  label: `New ${nodeType.label}`,
+                                  x: 0, y: 0,
+                                  inputs: ["Input 1"], outputs: ["Output 1"],
+                                  impact: Math.floor(Math.random() * 100),
+                                  category: category.name,
+                                })}
+                              >
+                                <div className="flex items-center space-x-3">
+                                  <div className={`p-2 rounded-lg ${nodeType.color} shadow-sm group-hover:shadow-md transition-all duration-200`}>
+                                    <Icon className="h-5 w-5" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-100">{nodeType.label}</h4>
+                                  </div>
+                                  <Plus className="h-4 w-4 text-slate-400 group-hover:text-blue-500 transition-colors opacity-0 group-hover:opacity-100" />
+                                </div>
+                              </Card>
+                            )
+                          })}
                         </div>
-                        <Plus className="h-4 w-4 text-slate-400 group-hover:text-blue-500 transition-colors opacity-0 group-hover:opacity-100" />
-                      </div>
-                    </Card>
+                      )}
+                    </div>
                   )
                 })}
               </div>
@@ -430,7 +525,7 @@ export default function WhiteboardPage() {
 
         <button 
           onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
-          className={`absolute right-0 top-1/2 z-30 -translate-y-1/2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-y border-l border-slate-200 dark:border-slate-700 rounded-l-lg p-2 shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-300 ease-in-out ${rightSidebarOpen ? '-translate-x-80' : 'translate-x-0'}`}
+          className={`absolute right-0 top-1/2 z-30 -translate-y-1/2 backdrop-blur-sm border-y border-l rounded-l-lg p-2 shadow-md transition-all duration-300 ease-in-out ${rightSidebarOpen ? '-translate-x-80 bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700' : 'translate-x-0 bg-blue-500/90 dark:bg-blue-600/90 border-blue-400 dark:border-blue-500 hover:bg-blue-600 dark:hover:bg-blue-700 text-white shadow-lg'}`}
         >
           {rightSidebarOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
@@ -611,13 +706,13 @@ export default function WhiteboardPage() {
           className={`w-80 border-l border-slate-200/80 dark:border-slate-800/80 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-lg flex flex-col h-full transition-transform duration-300 ease-in-out absolute right-0 z-20 ${rightSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}
         >
           <Tabs defaultValue="properties" className="flex flex-col h-full">
-            <TabsList className="grid w-full grid-cols-2 m-3 bg-slate-200/70 dark:bg-slate-800/70 p-1 h-10 rounded-lg">
+            <TabsList className="grid w-full grid-cols-2 m-3 bg-slate-200/70 dark:bg-slate-800/70 p-1 h-10 rounded-lg flex-shrink-0">
               <TabsTrigger value="properties" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-md rounded-md">Properties</TabsTrigger>
               <TabsTrigger value="results" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-md rounded-md">Results</TabsTrigger>
             </TabsList>
 
-            <ScrollArea className="flex-1">
-              <TabsContent value="properties" className="p-4 pt-0 space-y-6">
+            <div className="flex-1 overflow-hidden">
+              <TabsContent value="properties" className="h-full overflow-y-auto p-4 pt-0 space-y-6">
                 {selectedNode ? (
                   <div className="space-y-6">
                     <div>
@@ -679,7 +774,7 @@ export default function WhiteboardPage() {
                   </div>
                 )}
               </TabsContent>
-              <TabsContent value="results" className="p-4 pt-0 space-y-6">
+              <TabsContent value="results" className="h-full overflow-y-auto p-4 pt-0 space-y-6">
                 <div>
                   <h3 className="font-semibold mb-4 flex items-center gap-2"><BarChart3 className="h-4 w-4 text-blue-500"/> Impact Assessment</h3>
                   {showResults ? (
@@ -723,7 +818,7 @@ export default function WhiteboardPage() {
                   )}
                 </div>
               </TabsContent>
-            </ScrollArea>
+            </div>
           </Tabs>
         </aside>
       </div>
