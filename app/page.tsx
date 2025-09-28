@@ -351,7 +351,7 @@ export default function HomePage() {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative w-full h-full">
                   <iframe 
-                    src="https://www.youtube.com/embed/bXISlqXpTi8?si=mI8szpjT3-nRZhnz" 
+                    src="https://youtu.be/ScY_Yb1V8AY?feature=shared" 
                     title="MineIndia AI Platform Demo" 
                     className="w-full h-full" 
                     frameBorder="0" 
@@ -413,14 +413,14 @@ export default function HomePage() {
         {/* Footer */}
         <footer className="border-t pt-4">
           <div className="container py-12">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
+            <div className="grid grid-cols-1 gap-25 md:grid-cols-3">
               <div>
                 <h3 className="text-lg font-semibold">MineIndia AI</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Empowering sustainable mining and metallurgy through AI-powered lifecycle assessment.
                 </p>
               </div>
-              <div>
+              <div className="px-28">
                 <h4 className="text-sm font-medium">Product</h4>
                 <ul className="mt-4 space-y-2">
                   <li><Link href="/analysis" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Analysis</Link></li>
@@ -431,17 +431,8 @@ export default function HomePage() {
               <div>
                 <h4 className="text-sm font-medium">Resources</h4>
                 <ul className="mt-4 space-y-2">
-                  <li><Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</Link></li>
                   <li><Link href="/documentation" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Documentation</Link></li>
                   <li><Link href="/case-studies" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Case Studies</Link></li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">Company</h4>
-                <ul className="mt-4 space-y-2">
-                  <li><Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">About Us</Link></li>
-                  <li><Link href="/careers" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Careers</Link></li>
-                  <li><Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Contact</Link></li>
                 </ul>
               </div>
             </div>
