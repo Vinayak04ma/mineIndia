@@ -351,7 +351,7 @@ export default function HomePage() {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative w-full h-full">
                   <iframe 
-                    src="https://youtu.be/ScY_Yb1V8AY?feature=shared" 
+                    src="https://www.youtube.com/embed/ScY_Yb1V8AY" 
                     title="MineIndia AI Platform Demo" 
                     className="w-full h-full" 
                     frameBorder="0" 
@@ -360,6 +360,7 @@ export default function HomePage() {
                   ></iframe>
                 </div>
               </div>
+
             </motion.div>
             
             <div className="mt-8 text-center">
