@@ -4,22 +4,25 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { motion, AnimatePresence } from "framer-motion"
+import { cn } from "@/lib/utils"
 import { 
   BarChart3, 
-  MapPin, 
   Palette, 
   ChevronDown, 
-  ChevronUp,
-  HardHat,
   Menu,
   X,
-  SlashIcon,
-  Icon,
-  IceCream2Icon,
   LampDeskIcon,
-  GrabIcon
+  LineChart,
+  Map,
+  ShoppingCart,
+  Users,
+  Settings,
+  LogOut,
+  User as UserIcon
 } from "lucide-react"
 import { UserDashboard } from "./user-dashboard"
+import React from "react"
 
 type NavItem = {
   name: string
@@ -49,48 +52,48 @@ export function Navigation() {
 
   const navItems: NavItem[] = [
     {
-      name: " Analysis",
-      icon: <BarChart3 className="h-4 w-4" />,
+      name: "Analysis",
+      icon: <LineChart className="h-4 w-4" />,
       children: [
         { 
           name: "General LCA Analysis", 
           href: "/analysis/generate",
-          icon: null
+          icon: <BarChart3 className="h-3.5 w-3.5" />
         },
         { 
-          name: "India Specific LCA Analysis", 
+          name: "India Specific LCA", 
           href: "/analysis/india-specific",
-          icon: null
+          icon: <Map className="h-3.5 w-3.5" />
         },
       ],
     },
     {
-      name: " Whiteboard",
+      name: "Whiteboard",
       href: "/whiteboard",
       icon: <Palette className="h-4 w-4" />,
     },
     {
-      name: " Marketplace",
-      icon: <LampDeskIcon className="h-4 w-4" />,
+      name: "Marketplace",
+      icon: <ShoppingCart className="h-4 w-4" />,
       children: [
         { 
-          name: " E-Waste (Urban Mining)", 
+          name: "E-Waste (Urban Mining)", 
           href: "/marketplace/e-waste",
-          icon: null,
+          icon: <LampDeskIcon className="h-3.5 w-3.5" />
         },
         { 
-          name: " Junkyard",
-          icon: null,
+          name: "Junkyard",
+          icon: <Users className="h-3.5 w-3.5" />,
           children: [
             { 
-              name: "Buyer", 
+              name: "Buyer Dashboard", 
               href: "/marketplace/junkyard/buyer",
-              icon: null
+              icon: <UserIcon className="h-3 w-3" />
             },
             { 
-              name: "Seller", 
+              name: "Seller Portal", 
               href: "/marketplace/junkyard/seller",
-              icon: null
+              icon: <Settings className="h-3 w-3" />
             },
           ]
         },
@@ -135,17 +138,27 @@ export function Navigation() {
           )
         : isActive(item.href)
 
-      const itemClass = isMobile 
-        ? `flex w-full items-center justify-between px-4 py-2 text-sm ${isItemActive ? 'bg-accent' : 'hover:bg-accent/50'}`
-        : 'flex items-center gap-1'
+      const itemClass = cn(
+        'group relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors duration-200 rounded-lg',
+        isMobile 
+          ? `w-full justify-between ${isItemActive ? 'bg-primary/10 text-primary' : 'hover:bg-accent/50'}`
+          : `hover:bg-accent/50 ${isItemActive ? 'text-primary' : 'text-foreground/80 hover:text-foreground'}`,
+        level > 0 && 'text-sm',
+        level > 1 && 'pl-8 text-sm',
+      )
 
       return (
         <div key={`${item.name}-${level}`} className="relative">
           {hasChildren ? (
-            <div>
+            <div className="relative">
               <Button
-                variant={isItemActive ? 'default' : 'ghost'}
-                className={itemClass}
+                variant="ghost"
+                size={isMobile ? 'default' : 'sm'}
+                className={cn(
+                  'group relative w-full justify-between overflow-hidden transition-all',
+                  isItemActive && 'bg-primary/5 font-medium',
+                  !isMobile && 'px-3 py-1.5 text-sm'
+                )}
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
@@ -156,70 +169,155 @@ export function Navigation() {
                 }}
               >
                 <div className="flex items-center gap-2">
-                  {item.icon}
+                  {item.icon && React.cloneElement(item.icon as React.ReactElement, {
+                    className: cn(
+                      'h-4 w-4 transition-colors',
+                      isItemActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+                    )
+                  })}
                   <span>{item.name}</span>
                 </div>
-                <ChevronDown 
-                  className={`h-4 w-4 transition-transform ${isDropdownOpen(item.name) ? 'rotate-180' : ''}`} 
-                />
+                <motion.div
+                  animate={{ rotate: isDropdownOpen(item.name) ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ChevronDown className="h-4 w-4 opacity-70" />
+                </motion.div>
+                {isItemActive && (
+                  <motion.span
+                    className="absolute bottom-0 left-0 h-0.5 bg-primary"
+                    layoutId="activeNavIndicator"
+                    initial={false}
+                    transition={{ duration: 0.3, type: 'spring' }}
+                    style={{ width: '100%' }}
+                  />
+                )}
               </Button>
               
-              {(isDropdownOpen(item.name) || isMobile) && (
-                <div 
-                  className={`${isMobile ? 'pl-6' : 'absolute left-0 mt-1 w-56 rounded-md border bg-popover p-1 shadow-md z-50'}`}
-                >
-                  {item.children?.map((child) => (
-                    <div key={child.name} className="relative">
-                      {child.children ? (
-                        <div className="relative">
-                          <button
-                            className="flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
-                            onClick={(e) => toggleDropdown(e, child.name, item.name)}
-                          >
-                            <span>{child.name}</span>
-                            <ChevronDown className={`h-4 w-4 opacity-50 ${isDropdownOpen(child.name, item.name) ? 'rotate-180' : ''}`} />
-                          </button>
-                          {isDropdownOpen(child.name, item.name) && !isMobile && (
-                            <div 
-                              className="absolute left-full top-0 ml-1 w-48 rounded-md border bg-popover p-1 shadow-md z-50"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {child.children.map((subItem) => (
-                                <Link
-                                  key={subItem.href}
-                                  href={subItem.href || '#'}
-                                  className="block rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
-                                  onClick={closeAllDropdowns}
+              <AnimatePresence>
+                {(isDropdownOpen(item.name) || isMobile) && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, y: -10 }}
+                    animate={{ opacity: 1, height: 'auto', y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -10 }}
+                    transition={{ duration: 0.2, ease: 'easeInOut' }}
+                    className={cn(
+                      'overflow-hidden',
+                      isMobile ? 'pl-4 border-l-2 border-border/20' : 'absolute left-0 mt-1 min-w-[200px] rounded-lg border bg-popover p-1.5 shadow-lg z-50'
+                    )}
+                  >
+                    {item.children?.map((child) => {
+                      const hasGrandChildren = child.children && child.children.length > 0
+                      const isChildActive = hasGrandChildren
+                        ? child.children?.some(subItem => subItem.href && isActive(subItem.href))
+                        : child.href ? isActive(child.href) : false
+
+                      return (
+                        <div key={child.name} className="relative">
+                          {hasGrandChildren ? (
+                            <>
+                              <button
+                                className={cn(
+                                  'flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition-colors',
+                                  isChildActive ? 'bg-accent/50 text-foreground' : 'hover:bg-accent/30',
+                                  'group'
+                                )}
+                                onClick={(e) => toggleDropdown(e, child.name, item.name)}
+                              >
+                                <div className="flex items-center gap-2">
+                                  {child.icon}
+                                  <span>{child.name}</span>
+                                </div>
+                                <motion.div
+                                  animate={{ rotate: isDropdownOpen(child.name, item.name) ? 180 : 0 }}
+                                  transition={{ duration: 0.2 }}
                                 >
-                                  {subItem.name}
-                                </Link>
-                              ))}
-                            </div>
+                                  <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+                                </motion.div>
+                              </button>
+                              
+                              <AnimatePresence>
+                                {(isDropdownOpen(child.name, item.name) || isMobile) && (
+                                  <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className={cn(
+                                      'overflow-hidden',
+                                      isMobile ? 'pl-4 ml-2 border-l-2 border-border/20' : 'mt-1 rounded-md bg-popover shadow-sm'
+                                    )}
+                                  >
+                                    {child.children?.map((subItem) => (
+                                      <Link
+                                        key={subItem.href}
+                                        href={subItem.href || '#'}
+                                        onClick={closeAllDropdowns}
+                                        className={cn(
+                                          'flex items-center gap-2 px-3 py-2 text-sm transition-colors rounded-md',
+                                          isActive(subItem.href || '') 
+                                            ? 'bg-primary/10 text-primary font-medium' 
+                                            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                                        )}
+                                      >
+                                        {subItem.icon}
+                                        {subItem.name}
+                                      </Link>
+                                    ))}
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </>
+                          ) : (
+                            <Link
+                              href={child.href || '#'}
+                              onClick={closeAllDropdowns}
+                              className={cn(
+                                'flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors',
+                                isActive(child.href || '') 
+                                  ? 'bg-primary/10 text-primary font-medium' 
+                                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                              )}
+                            >
+                              {child.icon}
+                              {child.name}
+                            </Link>
                           )}
                         </div>
-                      ) : (
-                        <Link
-                          href={child.href || '#'}
-                          className="block rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
-                          onClick={closeAllDropdowns}
-                        >
-                          {child.name}
-                        </Link>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
+                      )
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           ) : (
             <Button
-              variant={isActive(item.href || '') ? 'default' : 'ghost'}
+              variant="ghost"
+              size={isMobile ? 'default' : 'sm'}
               asChild
-              className={itemClass}
+              className={cn(
+                'group relative w-full justify-start transition-colors',
+                isActive(item.href || '') ? 'bg-primary/5 font-medium' : '',
+                !isMobile && 'px-3 py-1.5 text-sm'
+              )}
             >
               <Link href={item.href || '#'} onClick={closeAllDropdowns}>
-                {item.icon}
-                <span>{item.name}</span>
+                {item.icon && React.cloneElement(item.icon as React.ReactElement, {
+                  className: cn(
+                    'h-4 w-4 transition-colors',
+                    isActive(item.href || '') ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+                  )
+                })}
+                <span className="ml-2">{item.name}</span>
+                {isActive(item.href || '') && (
+                  <motion.span
+                    className="absolute bottom-0 left-0 h-0.5 bg-primary"
+                    layoutId="activeNavIndicator"
+                    initial={false}
+                    transition={{ duration: 0.3, type: 'spring' }}
+                    style={{ width: '100%' }}
+                  />
+                )}
               </Link>
             </Button>
           )}
@@ -231,48 +329,80 @@ export function Navigation() {
   return (
     <header 
       ref={navRef}
-      className="sticky top-0 z-[10000] w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative"
+      className="sticky top-0 z-10 w-full "
       style={{
         position: 'sticky',
         isolation: 'isolate',
         willChange: 'transform',
       }}
     >
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-16 items-center justify-between px-4 sm:px-6">
         <div className="flex items-center">
-          <button 
-            className="md:hidden mr-2 p-2 rounded-md hover:bg-accent"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          <Link 
+            href="/" 
+            className="flex items-center space-x-2 group" 
+            onClick={closeAllDropdowns}
           >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-          
-          <Link href="/" className="flex items-center space-x-2" onClick={closeAllDropdowns}>
-            <img 
-              src="/logo.jpg" 
-              alt="Logo" 
-              className="w-10 h-8 object-cover rounded-lg border"
-            />
-            <span className="text-xl font-bold">Minecare</span>
+            <motion.div 
+              className="relative overflow-hidden rounded-lg border-2 border-primary/20 group-hover:border-primary/40 transition-colors duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <img 
+                src="/logo.jpg" 
+                alt="Minecare Logo" 
+                className="w-9 h-7 object-cover"
+              />
+            </motion.div>
+            <motion.span 
+              className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              Minecare
+            </motion.span>
           </Link>
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-5">
+        <nav className="hidden md:flex items-center space-x-1">
           {renderNavItems(navItems)}
         </nav>
 
-        <div className="flex items-center">
+        <div className="flex items-center space-x-2">
           <UserDashboard />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden p-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </Button>
         </div>
       </div>
 
       {/* Mobile Navigation */}
-      <div className={`md:hidden border-t ${mobileMenuOpen ? 'block' : 'hidden'}`}>
-        <div className="space-y-2 p-2">
-          {renderNavItems(navItems, true)}
-        </div>
-      </div>
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div 
+            className="md:hidden border-t bg-background/95 backdrop-blur-lg"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+          >
+            <div className="space-y-1 p-2">
+              {renderNavItems(navItems, true)}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }
