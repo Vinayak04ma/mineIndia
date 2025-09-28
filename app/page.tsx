@@ -48,9 +48,9 @@ const FeatureCard = ({
     whileHover={{ y: -5, transition: { duration: 0.2 } }}
     className="h-full"
   >
-    <Card className="h-full transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
+   <Card className="h-full transition-all duration-300 bg-background/30 backdrop-blur-sm border border-border/30 hover:shadow-lg hover:shadow-primary/10">
       <CardHeader>
-        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
+        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/20 backdrop-blur-sm">
           {icon}
         </div>
         <CardTitle className="text-xl">{title}</CardTitle>
