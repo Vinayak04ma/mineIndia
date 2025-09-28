@@ -201,7 +201,7 @@ export default function HomePage() {
       <div className="relative z-0">
         <Navigation />
         {/* Hero Section */}
-        <section className="relative overflow-hidden py-24 sm:py-36">
+        <section className="relative overflow-hidden py-24 sm:py-36 -z-1">
           <div className="container relative">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
