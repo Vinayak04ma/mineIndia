@@ -17,7 +17,7 @@ const AnimatedBackground = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: 'url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQy30hdcauDSYAKgFmrfcg5Y2fDKrwHslK2iA&s)',
+          backgroundImage: 'url(https://wallpapers.com/images/hd/mining-2000-x-1042-background-2qvaeaay5s66jmps.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
