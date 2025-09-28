@@ -326,15 +326,26 @@ export function Navigation() {
     })
   }
 
+  const [isScrolled, setIsScrolled] = useState(false);
+  const isLandingPage = pathname === '/';
+
+  useEffect(() => {
+    if (!isLandingPage) return;
+    
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLandingPage]);
+
   return (
     <header 
       ref={navRef}
-      className="sticky top-0 z-10 w-full "
-      style={{
-        position: 'sticky',
-        isolation: 'isolate',
-        willChange: 'transform',
-      }}
+      className={`w-full  backdrop-blur-lg transition-transform duration-300 ${
+        isLandingPage && isScrolled ? '-translate-y-full' : 'translate-y-0'
+      }`}
     >
       <div className="container flex h-16 items-center justify-between px-4 sm:px-6">
         <div className="flex items-center">

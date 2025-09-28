@@ -17,12 +17,10 @@ const AnimatedBackground = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: 'url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdGM9IRR5HNfi7kI5nE_gcs83-jqqK8b4UBGQI-Ny2tQbXLOW4nm7WwBxTMvrYAaz-xxeREw&s)',
+          backgroundImage: 'url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQy30hdcauDSYAKgFmrfcg5Y2fDKrwHslK2iA&s)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          opacity: 0.8,
-          filter: 'blur(1px)'
         }}
       />
       {/* Gradient overlay */}
