@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Package, LineChart, PlusCircle, AlertCircle, CheckCircle, Clock, TrendingUp, DollarSign, Eye, MessageSquare, Calendar, ArrowRight, Star, Zap, Shield, Target } from "lucide-react";
+import { Package, LineChart, PlusCircle, AlertCircle, CheckCircle, Clock, TrendingUp, DollarSign, Eye, MessageSquare, Calendar, ArrowRight, Star, Zap, Shield, Target, ChevronLeft } from "lucide-react";
 
 type StatCardProps = {
   title: string;
@@ -158,6 +158,19 @@ const activityIcon = (type: string) => {
 export default function SellerDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="container mx-auto px-6 pt-6">
+        <Button 
+          variant="ghost" 
+          asChild 
+          className="mb-2 -ml-2 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+        >
+          <Link href="/marketplace/junkyard" className="flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Back to Marketplace
+          </Link>
+        </Button>
+      </div>
+      
       {/* Hero Section */}
       <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
         <div className="container mx-auto px-6 py-12">
@@ -184,7 +197,7 @@ export default function SellerDashboard() {
                   Create New Listing
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-700">
+              <Button size="lg" variant="outline" className="border-gray-300 text-gray-700 hover:bg-gradient-to-r from-primary to-primary">
                 <LineChart className="h-5 w-5 mr-2" />
                 View Analytics
               </Button>

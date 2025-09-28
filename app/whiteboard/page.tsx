@@ -449,7 +449,7 @@ export default function WhiteboardPage() {
       <div className="flex h-[calc(100vh-4rem)] relative">
         <button 
           onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
-          className={`absolute left-0 top-1/2 z-30 -translate-y-1/2 backdrop-blur-sm border-y border-r rounded-r-lg p-2 shadow-md transition-all duration-300 ease-in-out ${leftSidebarOpen ? 'translate-x-80 bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700' : 'translate-x-0 bg-blue-500/90 dark:bg-blue-600/90 border-blue-400 dark:border-blue-500 hover:bg-blue-600 dark:hover:bg-blue-700 text-white shadow-lg'}`}
+          className={`absolute left-0 top-1/2 z-30 -translate-y-1/2 backdrop-blur-sm border-y border-r rounded-r-lg p-2 shadow-md transition-all duration-300 ease-in-out ${leftSidebarOpen ? 'translate-x-80 bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700' : 'translate-x-0 bg-gradient-to-r from-primary to-primary text-white shadow-lg'}`}
         >
           {leftSidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </button>
@@ -477,7 +477,6 @@ export default function WhiteboardPage() {
                       >
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-slate-800 dark:text-slate-200">{category.name}</span>
-                          <Badge variant="secondary" className="text-xs">{category.nodes.length}</Badge>
                         </div>
                         <ChevronRight className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                       </button>
@@ -525,7 +524,7 @@ export default function WhiteboardPage() {
 
         <button 
           onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
-          className={`absolute right-0 top-1/2 z-30 -translate-y-1/2 backdrop-blur-sm border-y border-l rounded-l-lg p-2 shadow-md transition-all duration-300 ease-in-out ${rightSidebarOpen ? '-translate-x-80 bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700' : 'translate-x-0 bg-blue-500/90 dark:bg-blue-600/90 border-blue-400 dark:border-blue-500 hover:bg-blue-600 dark:hover:bg-blue-700 text-white shadow-lg'}`}
+          className={`absolute right-0 top-1/2 z-30 -translate-y-1/2 backdrop-blur-sm border-y border-l rounded-l-lg p-2 shadow-md transition-all duration-300 ease-in-out ${rightSidebarOpen ? '-translate-x-80 bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700' : 'translate-x-0 bg-gradient-to-r from-primary to-primary text-white shadow-lg'}`}
         >
           {rightSidebarOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>

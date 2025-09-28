@@ -24,9 +24,6 @@ export function WhiteboardNavigation() {
           <div className="h-6 w-px bg-slate-300 dark:bg-slate-700"></div>
           
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">W</span>
-            </div>
             <div>
               <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Process Whiteboard</h1>
               <p className="text-xs text-slate-500 dark:text-slate-400">Interactive LCA Modeling</p>

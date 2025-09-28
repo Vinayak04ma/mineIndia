@@ -4,12 +4,26 @@ import { Navigation } from "@/components/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
-import { ArrowRight, Camera, MapPin, Recycle, Smartphone, Zap } from "lucide-react"
+import { ArrowRight, Camera, ChevronLeft, MapPin, Recycle, Smartphone, Zap } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default function MarketplacePage() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
+
+      <div className="container mx-auto px-6 pt-6">
+        <Button 
+          variant="ghost" 
+          asChild 
+          className="mb-2 -ml-2 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+        >
+          <Link href="/" className="flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Back to Marketplace
+          </Link>
+        </Button>
+      </div>
 
       <div className="container py-8">
         <div className="mx-auto max-w-4xl">

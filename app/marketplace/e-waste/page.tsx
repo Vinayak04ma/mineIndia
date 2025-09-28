@@ -95,7 +95,7 @@ export default function EWasteServicePage() {
       <Navigation />
 
       <div className="container py-8">
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w">
           <div className="flex items-center mb-6">
             <Button variant="ghost" asChild className="mr-4">
               <Link href="/marketplace">
@@ -103,7 +103,7 @@ export default function EWasteServicePage() {
                 Back to Marketplace
               </Link>
             </Button>
-            <div>
+            <div className="mx-64">
               <h1 className="text-3xl font-bold">E-Waste Analysis Service</h1>
               <p className="text-muted-foreground">AI-powered device identification and value estimation</p>
             </div>

@@ -285,8 +285,8 @@ export default function GenerateLCAPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+      <main className="container mx-auto py-8">
+        <div className="max-w mx-auto">
           {/* Form Header */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-gradient-to-r bg-gradient-to-r from-primary to-primary px-6 py-6">
@@ -334,11 +334,11 @@ export default function GenerateLCAPage() {
 
           {/* Navigation Tabs */}
           <div className="bg-white/80 backdrop-blur-sm z-10 py-2 mb-6 border-b rounded-lg">
-            <div className="flex items-center gap-1 overflow-x-auto py-1 px-2 pb-5">
+            <div className="flex items-center gap-2 overflow-x-auto py-2 px-1 pb-1">
               {sectionOrder.map((section) => (
                 <button
                   key={section.key}
-                  className={`px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap ${
+                  className={`px-4 py-2 text-s font-medium rounded-md whitespace-nowrap ${
                     currentSection === section.key
                       ? 'bg-blue-100 font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary'
                       : 'text-gray-600 hover:bg-gray-100'
