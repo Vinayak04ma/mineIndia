@@ -354,17 +354,12 @@ export function Navigation() {
             className="flex items-center space-x-2 group" 
             onClick={closeAllDropdowns}
           >
-            <motion.div 
-              className="relative overflow-hidden rounded-lg border-2 border-primary/20 group-hover:border-primary/40 transition-colors duration-300"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
+            
               <img 
-                src="/logo.jpg" 
+                src="/minecare-logo.png" 
                 alt="Minecare Logo" 
                 className="w-9 h-7 object-cover"
               />
-            </motion.div>
             <motion.span 
               className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent"
               initial={{ opacity: 0, x: -10 }}

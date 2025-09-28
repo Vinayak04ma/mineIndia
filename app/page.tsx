@@ -8,12 +8,19 @@ import { ArrowRight, BarChart3, Brain, Cpu, Database, Globe, LineChart, MapPin, 
 import { motion } from "framer-motion"
 import { useEffect, useRef } from "react"
 import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
+
+type Step = {
+  step: string
+  title: string
+  description: string
+  icon: React.ReactNode
+  image: string
+}
 
 const AnimatedBackground = () => {
   return (
-    // Make this div fill the entire screen and place it very far back in the z-stack
-    <div className="fixed inset-0 -z-10"> {/* Changed from z-[1] to -z-50 */}
-      {/* Background image with overlay */}
+    <div className="fixed inset-0 -z-10">
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{
@@ -23,7 +30,6 @@ const AnimatedBackground = () => {
           backgroundRepeat: 'no-repeat',
         }}
       />
-      {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/90" />
     </div>
   );
@@ -76,6 +82,96 @@ const FeatureCard = ({
   </motion.div>
 );
 
+const HowItWorks = () => {
+  const steps: Step[] = [
+    {
+      step: '1',
+      title: 'Select Materials',
+      description: 'Choose from our extensive database or input custom materials and processes.',
+      icon: <Database className="h-6 w-6" />,
+      image: '/material-selection.png'
+    },
+    {
+      step: '2',
+      title: 'Configure Parameters',
+      description: 'Set your specific parameters and environmental impact categories.',
+      icon: <LineChart className="h-6 w-6" />,
+      image: '/config-parameter.png'
+    },
+    {
+      step: '3',
+      title: 'Run Analysis',
+      description: 'Our AI processes the data to provide comprehensive lifecycle insights.',
+      icon: <Cpu className="h-6 w-6" />,
+      image: '/analysis.png'
+    },
+    {
+      step: '4',
+      title: 'View Results',
+      description: 'Get detailed reports and visualizations of your environmental impact.',
+      icon: <Globe className="h-6 w-6" />,
+      image: '/result.png'
+    }
+  ]
+
+  return (
+    <section className="py-20">
+      <div className="container">
+        <div className="mx-auto max-w-4xl text-center mb-16">
+          <h2 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl lg:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
+            How It Works
+          </h2>
+          <p className="mt-4 text-lg text-muted-foreground text-pretty">
+            Our AI-powered platform makes lifecycle assessment simple and effective
+          </p>
+        </div>
+
+        <div className="mx-auto max-w-5xl">
+          <div className="relative">
+            {/* Timeline line */}
+            <div className="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-border" />
+            
+            {/* Steps */}
+            <div className="space-y-16">
+              {steps.map((item, index) => (
+                <motion.div 
+                  key={item.step}
+                  initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className={`relative flex items-center justify-between ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'} gap-8`}
+                >
+                  <div className={`flex-1 ${index % 2 === 0 ? 'text-right' : 'text-left'}`}>
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                      {item.step}
+                    </span>
+                    <h3 className="mt-4 text-xl font-semibold text-foreground">{item.title}</h3>
+                    <p className="mt-2 text-muted-foreground">{item.description}</p>
+                  </div>
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    {item.icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className={`h-48 w-full rounded-xl overflow-hidden ${index % 2 === 0 ? 'bg-gradient-to-r from-primary/5 to-transparent' : 'bg-gradient-to-l from-primary/5 to-transparent'} p-1`}>
+                      <img 
+                        src={item.image} 
+                        alt={item.title} 
+                        className="h-full w-full object-cover rounded-lg"
+                        loading="lazy"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function HomePage() {
   const featuresRef = useRef<HTMLDivElement>(null);
 
@@ -100,12 +196,12 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen"> {/* Added relative to contain children with higher z-index */}
-      <AnimatedBackground /> {/* Moved AnimatedBackground here */}
+    <div className="min-h-screen">
+      <AnimatedBackground />
       <div className="relative z-0">
         <Navigation />
         {/* Hero Section */}
-        <section className="relative overflow-hidden py-24 sm:py-36"> {/* Removed z-[1] */}
+        <section className="relative overflow-hidden py-24 sm:py-36">
           <div className="container relative">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -141,7 +237,7 @@ export default function HomePage() {
         </section>
 
         {/* Features Section */}
-        <section ref={featuresRef} className="py-20"> {/* Removed  z-[1] */}
+        <section ref={featuresRef} className="py-20">
           <div className="container">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -231,85 +327,10 @@ export default function HomePage() {
         </section>
 
         {/* How It Works Section */}
-        <section className="py-20"> {/* Removed  z-[1] */}
-          <div className="container">
-            <div className="mx-auto max-w-4xl text-center mb-16">
-              <h2 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl lg:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
-                How It Works
-              </h2>
-              <p className="mt-4 text-lg text-muted-foreground text-pretty">
-                Our AI-powered platform makes lifecycle assessment simple and effective
-              </p>
-            </div>
-
-            <div className="mx-auto max-w-5xl">
-              <div className="relative">
-                {/* Timeline line */}
-                <div className="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-border" />
-                
-                {/* Steps */}
-                <div className="space-y-16">
-                  {[
-                    {
-                      step: '1',
-                      title: 'Select Materials',
-                      description: 'Choose from our extensive database or input custom materials and processes.',
-                      icon: <Database className="h-6 w-6" />
-                    },
-                    {
-                      step: '2',
-                      title: 'Configure Parameters',
-                      description: 'Set your specific parameters and environmental impact categories.',
-                      icon: <LineChart className="h-6 w-6" />
-                    },
-                    {
-                      step: '3',
-                      title: 'Run Analysis',
-                      description: 'Our AI processes the data to provide comprehensive lifecycle insights.',
-                      icon: <Cpu className="h-6 w-6" />
-                    },
-                    {
-                      step: '4',
-                      title: 'View Results',
-                      description: 'Get detailed reports and visualizations of your environmental impact.',
-                      icon: <Globe className="h-6 w-6" />
-                    }
-                  ].map((item, index) => (
-                    <motion.div 
-                      key={item.step}
-                      initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      viewport={{ once: true }}
-                      className={`relative flex items-center justify-between ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'} gap-8`}
-                    >
-                      <div className={`flex-1 ${index % 2 === 0 ? 'text-right' : 'text-left'}`}>
-                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                          {item.step}
-                        </span>
-                        <h3 className="mt-4 text-xl font-semibold text-foreground">{item.title}</h3>
-                        <p className="mt-2 text-muted-foreground">{item.description}</p>
-                      </div>
-                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                        {item.icon}
-                      </div>
-                      <div className="flex-1">
-                        {index % 2 === 0 && (
-                          <div className="h-48 w-full rounded-xl bg-gradient-to-r from-primary/5 to-transparent p-1">
-                            <div className="h-full w-full rounded-lg bg-muted/50"></div>
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <HowItWorks />
 
         {/* Video Demo Section */}
-        <section className="py-20 ml-4"> {/* Removed  z-[1] */}
+        <section className="py-20">
           <div className="container">
             <div className="mx-auto max-w-4xl text-center mb-12">
               <h2 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl lg:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
@@ -358,13 +379,13 @@ export default function HomePage() {
         </section>
 
         {/* CTA Section */}
-        <section className="relative py-24 mx-auto overflow-hidden"> {/* Removed  z-[1] */}
+        <section className="relative py-24 mx-auto overflow-hidden">
           <div className="container relative">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="mx-auto max-w-4xl rounded-2xl "
+              className="mx-auto max-w-4xl rounded-2xl"
             >
               <div className="text-center">
                 <h2 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl">Ready to Transform Your Sustainability Journey?</h2>
@@ -390,7 +411,7 @@ export default function HomePage() {
         </section>
 
         {/* Footer */}
-        <footer className=" pl-18 border-t pt-4"> {/* Removed  z-[1] */}
+        <footer className="border-t pt-4">
           <div className="container py-12">
             <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
               <div>
@@ -428,8 +449,8 @@ export default function HomePage() {
               <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} MineIndia AI. All rights reserved.</p>
               <div className="mt-4 md:mt-0 flex space-x-6">
                 <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy</Link>
-                <li><Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms</Link></li>
-                <li><Link href="/cookies" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Cookies</Link></li>
+                <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms</Link>
+                <Link href="/cookies" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Cookies</Link>
               </div>
             </div>
           </div>
