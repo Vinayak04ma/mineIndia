@@ -114,7 +114,7 @@ const getStatusBadge = (status: TransactionStatus) => {
     pending: { text: 'Pending', variant: 'secondary' as const },
     confirmed: { text: 'Confirmed', variant: 'default' as const },
     shipped: { text: 'Shipped', variant: 'default' as const },
-    delivered: { text: 'Delivered', variant: 'success' as const },
+    delivered: { text: 'Delivered', variant: 'default' as const },
     cancelled: { text: 'Cancelled', variant: 'destructive' as const },
   };
 
@@ -124,7 +124,7 @@ const getStatusBadge = (status: TransactionStatus) => {
 
 const getPaymentBadge = (status: string) => {
   const statusConfig = {
-    paid: { text: 'Paid', variant: 'success' as const },
+    paid: { text: 'Paid', variant: 'default' as const },
     pending: { text: 'Pending', variant: 'secondary' as const },
     failed: { text: 'Failed', variant: 'destructive' as const },
     refunded: { text: 'Refunded', variant: 'outline' as const },
