@@ -461,121 +461,112 @@ export default function IndiaLCAResults() {
                   </Card>
                 </TabsContent>
         
-        {/* Section 3: Waste Analysis */}
-                <TabsContent value="waste">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary/90 to-primary/60 bg-clip-text text-transparent">Waste Analysis</CardTitle>
-                      <CardDescription className="text-base">
-                        Comprehensive waste generation and management analysis
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div>
-                        <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
-                          <span className="h-1 w-6 bg-primary/70 mr-2 rounded-full"></span>
-                          Waste Generation Analysis
-                        </h3>
-                        <div className="grid gap-4 md:grid-cols-3">
-                          <div className="rounded-lg border p-4">
-                            <h4 className="text-sm font-medium text-muted-foreground">Total Waste Generated</h4>
-                            <p className="text-2xl font-bold">1,250 t/yr</p>
-                          </div>
-                          <div className="rounded-lg border p-4">
-                            <h4 className="text-sm font-medium text-muted-foreground">Hazardous Waste</h4>
-                            <p className="text-2xl font-bold">15%</p>
-                          </div>
-                          <div className="rounded-lg border p-4">
-                            <h4 className="text-sm font-medium text-muted-foreground">Recycling Rate</h4>
-                            <p className="text-2xl font-bold">78%</p>
-                          </div>
-                        </div>
-                      </div>
-        
-                      <div>
-                      <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
-                        <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
-                          Waste Composition
-                      </h3>
-                        <div className="h-86 w-full">
-                          <div className="flex flex-col md:flex-row gap-8">
-                            <div className="w-full md:w-1/2 h-80">
-                              <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                  <Pie
-                                    data={wasteCompositionData}
-                                    cx="50%"
-                                    cy="50%"
-                                    labelLine={false}
-                                    outerRadius={120}
-                                    fill="#8884d8"
-                                    dataKey="value"
-                                  >
-                                    {wasteCompositionData.map((entry, index) => (
-                                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                  </Pie>
-                                  <Tooltip content={<CustomTooltip />} />
-                                  <Legend />
-                                </PieChart>
-                              </ResponsiveContainer>
-                            </div>
-                            <div className="w-full md:w-1/2">
-                              <div className="overflow-x-auto">
-                                <table className="min-w-full border rounded-lg overflow-hidden">
-                                  <thead className="bg-muted/50">
-                                    <tr>
-                                      <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Waste Type</th>
-                                      <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Percentage</th>
-                                      <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Description</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-border">
-                                    {wasteComposition.map((waste, index) => (
-                                      <tr key={waste.name} className="hover:bg-muted/10 transition-colors">
-                                        <td className="px-4 py-3 text-sm font-medium">{waste.name}</td>
-                                        <td className="px-4 py-3 text-right text-sm">{waste.value}%</td>
-                                        <td className="px-4 py-3 text-sm text-muted-foreground">{waste.description}</td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-        
-                      <div>
-                      <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
-                        <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
-                          Waste Management Recommendations
-                      </h3>
-                        <div className="space-y-4">
-                          <div className="p-4 border rounded-lg">
-                            <h4 className="font-medium">1. Implement Waste Segregation</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Separate waste at source to improve recycling rates and reduce contamination.
-                            </p>
-                          </div>
-                          <div className="p-4 border rounded-lg">
-                            <h4 className="font-medium">2. Explore Waste-to-Energy Options</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Convert non-recyclable waste into energy through incineration or gasification.
-                            </p>
-                          </div>
-                          <div className="p-4 border rounded-lg">
-                            <h4 className="font-medium">3. Optimize Material Use</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Redesign processes to minimize material waste during production.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
+       {/* Section 3: Waste Analysis */}
+             <TabsContent value="waste">
+               <Card>
+                 <CardHeader>
+                   <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary/90 to-primary/60 bg-clip-text text-transparent">Waste Analysis</CardTitle>
+                   <CardDescription className="text-base">
+                     Comprehensive waste generation and management analysis
+                   </CardDescription>
+                 </CardHeader>
+                 <CardContent className="space-y-8">
+                   <div>
+                     <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
+                       <span className="h-1 w-6 bg-primary/70 mr-2 rounded-full"></span>
+                       Waste Generation Summary
+                     </h3>
+                     <div className="grid gap-4 md:grid-cols-3">
+                       <div className="rounded-lg border p-4">
+                         <h4 className="text-sm font-medium text-muted-foreground">Total Waste Generated</h4>
+                         <p className="text-2xl font-bold">1,250 t/yr</p>
+                       </div>
+                       <div className="rounded-lg border p-4">
+                         <h4 className="text-sm font-medium text-muted-foreground">Hazardous Waste</h4>
+                         <p className="text-2xl font-bold">15%</p>
+                       </div>
+                       <div className="rounded-lg border p-4">
+                         <h4 className="text-sm font-medium text-muted-foreground">Recycling Rate</h4>
+                         <p className="text-2xl font-bold">78%</p>
+                       </div>
+                     </div>
+                   </div>
+                   
+                   {/* START: MODIFIED SECTION */}
+                   <div>
+                     <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
+                       <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
+                       Waste Composition
+                     </h3>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                       {/* Left Column: Descriptive Blocks */}
+                       <div className="space-y-4">
+                         {wasteComposition.map((item, index) => (
+                           <div key={index} className="p-4 rounded-lg border bg-muted/20">
+                             <h4 className="font-semibold text-primary mb-1">{item.name} ({item.value}%)</h4>
+                             <p className="text-sm text-muted-foreground">
+                               {item.description}
+                             </p>
+                           </div>
+                         ))}
+                       </div>
+     
+                       {/* Right Column: Pie Chart */}
+                       <div className="h-80 w-full">
+                         <ResponsiveContainer width="100%" height="100%">
+                           <PieChart>
+                             <Pie
+                               data={wasteComposition}
+                               cx="50%"
+                               cy="50%"
+                               labelLine={false}
+                               outerRadius={120}
+                               fill="#8884d8"
+                               dataKey="value"
+                               nameKey="name"
+                             >
+                               {wasteComposition.map((entry, index) => (
+                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                               ))}
+                             </Pie>
+                             <Tooltip content={<CustomTooltip />} />
+                             <Legend />
+                           </PieChart>
+                         </ResponsiveContainer>
+                       </div>
+                     </div>
+                   </div>
+                   {/* END: MODIFIED SECTION */}
+     
+                   <div>
+                     <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
+                       <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
+                       Waste Management Recommendations
+                     </h3>
+                     <div className="space-y-4">
+                       <div className="p-4 border rounded-lg">
+                         <h4 className="font-medium">1. Implement Waste Segregation</h4>
+                         <p className="text-sm text-muted-foreground">
+                           Separate waste at source to improve recycling rates and reduce contamination.
+                         </p>
+                       </div>
+                       <div className="p-4 border rounded-lg">
+                         <h4 className="font-medium">2. Explore Waste-to-Energy Options</h4>
+                         <p className="text-sm text-muted-foreground">
+                           Convert non-recyclable waste into energy through incineration or gasification.
+                         </p>
+                       </div>
+                       <div className="p-4 border rounded-lg">
+                         <h4 className="font-medium">3. Optimize Material Use</h4>
+                         <p className="text-sm text-muted-foreground">
+                           Redesign processes to minimize material waste during production.
+                         </p>
+                       </div>
+                     </div>
+                   </div>
+                 </CardContent>
+               </Card>
+             </TabsContent>
         {/* Section 4: Comparison */}
                 <TabsContent value="comparison">
                   <Card>
