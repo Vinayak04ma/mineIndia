@@ -136,7 +136,7 @@ type SectionKey =
   | 'water' 
   | 'waste' 
   | 'resource' 
-  | 'toxicity' 
+  | 'toxicity'
   | 'circularity'
   | 'circularityMetrics'
 
@@ -146,37 +146,85 @@ export default function GenerateLCAPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isDraftSaving, setIsDraftSaving] = useState(false)
   const [isDraftSaved, setIsDraftSaved] = useState(false)
-
-  const [currentSection, setCurrentSection] = useState<SectionKey>('mineral');
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [currentSection, setCurrentSection] = useState<SectionKey>('mineral')
   
   // Define section order for navigation and tabs
-  const sectionOrder: { key: SectionKey; label: string }[] = [
-    { key: 'mineral', label: 'Mineral' },
-    { key: 'production', label: 'Production' },
-    { key: 'energy', label: 'Energy' },
-    { key: 'materials', label: 'Materials' },
-    { key: 'airEmissions', label: 'Air Emissions' },
-    { key: 'water', label: 'Water' },
-    { key: 'waste', label: 'Waste' },
-    { key: 'resource', label: 'Resource Use' },
-    { key: 'toxicity', label: 'Toxicity' },
-    { key: 'circularity', label: 'Circularity' },
-    { key: 'circularityMetrics', label: 'Circularity Metrics' },
-  ];
+  const sectionOrder = [
+    { key: 'mineral' as const, label: 'Mineral' },
+    { key: 'production' as const, label: 'Production' },
+    { key: 'energy' as const, label: 'Energy' },
+    { key: 'materials' as const, label: 'Materials' },
+    { key: 'airEmissions' as const, label: 'Air Emissions' },
+    { key: 'water' as const, label: 'Water' },
+    { key: 'waste' as const, label: 'Waste' },
+    { key: 'resource' as const, label: 'Resource Use' },
+    { key: 'toxicity' as const, label: 'Toxicity' },
+    { key: 'circularity' as const, label: 'Circularity' },
+    { key: 'circularityMetrics' as const, label: 'Circularity Metrics' },
+  ] satisfies Array<{ key: SectionKey, label: string }>
+
+  const validateCurrentSection = (section: SectionKey): boolean => {
+    const newErrors: Record<string, string> = {}
+    let hasError = false
+
+    const requiredFields: Record<SectionKey, (keyof FormData)[]> = {
+      mineral: ['selectedMineral'],
+      production: ['annualProduction', 'operatingHours', 'yieldEfficiency', 'technologyType'],
+      energy: ['gridElectricity', 'fuelOilConsumption', 'coalCokeInput', 'naturalGasInput'],
+      materials: ['oreMined', 'concentratesUsed', 'fluxes'],
+      airEmissions: ['co2Direct', 'co2FromFuels', 'so2Emissions', 'noxEmissions'],
+      water: ['waterWithdrawn', 'waterConsumed', 'wastewaterGenerated'],
+      waste: ['overburdenWasteRock', 'tailingsGenerated', 'hazardousWaste'],
+      resource: ['landAreaOccupied', 'landDisturbed', 'waterSourceType'],
+      toxicity: ['workplaceDust', 'workplaceHeavyMetals'],
+      circularity: ['recycledInputShare', 'byProductsReuse', 'wasteDiverted'],
+      circularityMetrics: ['mRecoverable', 'mReused', 'mLandfill']
+    }
+
+    requiredFields[section]?.forEach(field => {
+      if (!formData[field]) {
+        newErrors[field] = `${String(field).replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} is required`
+        hasError = true
+      } else if (['annualProduction', 'operatingHours', 'yieldEfficiency', 'oreGrade', 'gridElectricity', 'fuelOilConsumption', 'coalCokeInput', 'naturalGasInput', 'waterWithdrawn', 'waterConsumed'].includes(field) && isNaN(Number(formData[field]))) {
+        newErrors[field] = 'Please enter a valid number'
+        hasError = true
+      }
+    })
+
+    setErrors(prev => ({
+      ...prev,
+      ...newErrors
+    }))
+
+    return !hasError
+  }
 
   const goToNextSection = () => {
-    const currentIndex = sectionOrder.findIndex(s => s.key === currentSection);
-    if (currentIndex < sectionOrder.length - 1) {
-      setCurrentSection(sectionOrder[currentIndex + 1].key);
+    // Validate current section before proceeding
+    if (!validateCurrentSection(currentSection)) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields before proceeding.",
+        variant: "destructive"
+      })
+      return
     }
-  };
+    
+    const currentIndex = sectionOrder.findIndex(s => s.key === currentSection)
+    if (currentIndex < sectionOrder.length - 1) {
+      const nextSection = sectionOrder[currentIndex + 1].key
+      setCurrentSection(nextSection)
+    }
+  }
 
   const goToPrevSection = () => {
-    const currentIndex = sectionOrder.findIndex(s => s.key === currentSection);
+    const currentIndex = sectionOrder.findIndex(s => s.key === currentSection)
     if (currentIndex > 0) {
-      setCurrentSection(sectionOrder[currentIndex - 1].key);
+      const prevSection = sectionOrder[currentIndex - 1].key
+      setCurrentSection(prevSection)
     }
-  };
+  }
 
   const [formData, setFormData] = useState<FormData>({
     selectedMineral: '',
@@ -194,6 +242,15 @@ export default function GenerateLCAPage() {
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[field]
+        return newErrors
+      })
+    }
   }
 
   const saveDraft = async () => {
@@ -225,9 +282,18 @@ export default function GenerateLCAPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.selectedMineral) {
-      toast({ title: "Error", description: "Please select a mineral.", variant: "destructive" })
-      setCurrentSection('mineral');
+    
+    // Validate all sections before submission
+    const allSectionsValid = sectionOrder.every(section => {
+      return validateCurrentSection(section.key)
+    })
+    
+    if (!allSectionsValid) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields marked in red.",
+        variant: "destructive"
+      })
       return
     }
     
@@ -246,7 +312,22 @@ export default function GenerateLCAPage() {
     }
   }
 
-  const completionPercentage = 20 // This would be calculated
+  // Calculate completion percentage based on filled required fields
+  const completionPercentage = (() => {
+    const requiredFields: (keyof FormData)[] = [
+      'selectedMineral', 'annualProduction', 'operatingHours', 'yieldEfficiency', 
+      'technologyType', 'oreGrade', 'gridElectricity', 'fuelOilConsumption',
+      'coalCokeInput', 'naturalGasInput', 'waterWithdrawn', 'waterConsumed',
+      'co2Direct', 'co2FromFuels', 'so2Emissions', 'noxEmissions',
+      'overburdenWasteRock', 'tailingsGenerated', 'hazardousWaste',
+      'landAreaOccupied', 'landDisturbed', 'waterSourceType',
+      'workplaceDust', 'workplaceHeavyMetals', 'recycledInputShare',
+      'byProductsReuse', 'wasteDiverted', 'mVirgin', 'mRecycledIn', 'mEol'
+    ]
+    
+    const filledFields = requiredFields.filter(field => !!formData[field]).length
+    return Math.round((filledFields / requiredFields.length) * 100)
+  })()
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -261,6 +342,7 @@ export default function GenerateLCAPage() {
             </div>
              <div className="flex items-center gap-4">
                  <Button 
+                 id="save-draft"
                   type="button" 
                   variant="outline" 
                   size="sm"
@@ -457,7 +539,7 @@ export default function GenerateLCAPage() {
             {/* Section 1: Mineral Selection */}
             <Card className={`${currentSection === 'mineral' ? 'block' : 'hidden'} border-2 border-gray-100 shadow-md`}>
               <CardHeader>
-                <CardTitle>1. Select Mineral</CardTitle>
+                <CardTitle>1. Select Mineral<span className="text-red-500">*</span></CardTitle>
                 <CardDescription>Choose the primary mineral for your LCA analysis.</CardDescription>
               </CardHeader>
               <CardContent>
@@ -475,6 +557,10 @@ export default function GenerateLCAPage() {
                     </Label>
                   ))}
                 </RadioGroup>
+                {errors.selectedMineral && (
+                  <p className="text-sm text-red-600">{errors.selectedMineral}</p>
+              )}
+
               </CardContent>
               <CardFooter className="flex justify-end py-4">
                 <Button type="button" onClick={goToNextSection}>Next <ArrowRight className="h-4 w-4 ml-2" /></Button>
@@ -490,7 +576,7 @@ export default function GenerateLCAPage() {
                 <CardContent className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                          <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                            <Label htmlFor="annualProduction" className="text-sm font-medium text-gray-700">Annual production volume (t/yr)</Label>
+                            <Label htmlFor="annualProduction" className="text-sm font-medium text-gray-700">Annual production volume (t/yr)<span className="text-red-500">*</span></Label>
                             <Input 
                                 id="annualProduction" 
                                 type="number" 
@@ -499,9 +585,12 @@ export default function GenerateLCAPage() {
                                 placeholder="e.g., 100000"
                                 className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             />
+                            {errors.annualProduction && (
+                              <p className="text-sm text-red-600">{errors.annualProduction}</p>
+                          )}
                          </div>
                          <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                            <Label htmlFor="operatingHours" className="text-sm font-medium text-gray-700">Plant operating hours (h/yr)</Label>
+                            <Label htmlFor="operatingHours" className="text-sm font-medium text-gray-700">Plant operating hours (h/yr)<span className="text-red-500">*</span></Label>
                             <Input 
                                 id="operatingHours" 
                                 type="number" 
@@ -510,9 +599,12 @@ export default function GenerateLCAPage() {
                                 placeholder="e.g., 8000"
                                 className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             />
+                            {errors.operatingHours && (
+                              <p className="text-sm text-red-600">{errors.operatingHours}</p>
+                          )}
                          </div>
                          <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                            <Label htmlFor="yieldEfficiency" className="text-sm font-medium text-gray-700">Yield/Efficiency (%)</Label>
+                            <Label htmlFor="yieldEfficiency" className="text-sm font-medium text-gray-700">Yield/Efficiency (%)<span className="text-red-500">*</span></Label>
                             <Input 
                                 id="yieldEfficiency" 
                                 type="number" 
@@ -521,6 +613,9 @@ export default function GenerateLCAPage() {
                                 placeholder="e.g., 95"
                                 className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             />
+                            {errors.yieldEfficiency && (
+                              <p className="text-sm text-red-600">{errors.yieldEfficiency}</p>
+                          )}
                          </div>
                          <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                             <Label htmlFor="oreGrade" className="text-sm font-medium text-gray-700">Ore grade (%)</Label>
@@ -534,7 +629,7 @@ export default function GenerateLCAPage() {
                             />
                          </div>
                          <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                            <Label htmlFor="technologyType" className="text-sm font-medium text-gray-700">Technology type</Label>
+                            <Label htmlFor="technologyType" className="text-sm font-medium text-gray-700">Technology type<span className="text-red-500">*</span></Label>
                             <Select 
                                 value={formData.technologyType} 
                                 onValueChange={(value) => handleInputChange('technologyType', value)}
@@ -549,6 +644,9 @@ export default function GenerateLCAPage() {
                                     <SelectItem value="other">Other</SelectItem>
                                 </SelectContent>
                             </Select>
+                            {errors.technologyType && (
+                              <p className="text-sm text-red-600">{errors.technologyType}</p>
+                          )}
                          </div>
                          <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                             <Label htmlFor="functionalUnit" className="text-sm font-medium text-gray-700">Functional unit</Label>
@@ -572,7 +670,7 @@ export default function GenerateLCAPage() {
                 <CardHeader><CardTitle>3. Energy Inputs</CardTitle><CardDescription>Provide data on energy consumption from various sources.</CardDescription></CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="gridElectricity" className="text-sm font-medium text-gray-700">Grid electricity consumption (kWh/t product)</Label>
+                        <Label htmlFor="gridElectricity" className="text-sm font-medium text-gray-700">Grid electricity consumption (kWh/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="gridElectricity" 
                             type="number" 
@@ -581,6 +679,9 @@ export default function GenerateLCAPage() {
                             placeholder="e.g., 500"
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.gridElectricity && (
+                            <p className="text-sm text-red-600">{errors.gridElectricity}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                         <Label htmlFor="gridEmissionFactor" className="text-sm font-medium text-gray-700">Grid emission factor (kg CO₂/kWh)</Label>
@@ -594,7 +695,7 @@ export default function GenerateLCAPage() {
                         />
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="fuelOilConsumption" className="text-sm font-medium text-gray-700">Fuel oil consumption (L or MJ/t product)</Label>
+                        <Label htmlFor="fuelOilConsumption" className="text-sm font-medium text-gray-700">Fuel oil consumption (L or MJ/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="fuelOilConsumption" 
                             type="number" 
@@ -603,9 +704,12 @@ export default function GenerateLCAPage() {
                             placeholder="e.g., 100"
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.fuelOilConsumption && (
+                            <p className="text-sm text-red-600">{errors.fuelOilConsumption}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="coalCokeInput" className="text-sm font-medium text-gray-700">Coal/coke input (kg/t product)</Label>
+                        <Label htmlFor="coalCokeInput" className="text-sm font-medium text-gray-700">Coal/coke input (kg/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="coalCokeInput" 
                             type="number" 
@@ -614,9 +718,12 @@ export default function GenerateLCAPage() {
                             placeholder="e.g., 400"
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.coalCokeInput && (
+                            <p className="text-sm text-red-600">{errors.coalCokeInput}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="naturalGasInput" className="text-sm font-medium text-gray-700">Natural gas input (Nm³/t product)</Label>
+                        <Label htmlFor="naturalGasInput" className="text-sm font-medium text-gray-700">Natural gas input (Nm³/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="naturalGasInput" 
                             type="number" 
@@ -625,6 +732,9 @@ export default function GenerateLCAPage() {
                             placeholder="e.g., 80"
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.naturalGasInput && (
+                            <p className="text-sm text-red-600">{errors.naturalGasInput}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                         <Label htmlFor="renewableEnergyShare" className="text-sm font-medium text-gray-700">Renewable energy share (%)</Label>
@@ -672,7 +782,7 @@ export default function GenerateLCAPage() {
                 <CardHeader><CardTitle>4. Raw Material Inputs</CardTitle><CardDescription>Detail the raw materials used in the process.</CardDescription></CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="oreMined" className="text-sm font-medium text-gray-700">Ore mined/processed (t/yr)</Label>
+                        <Label htmlFor="oreMined" className="text-sm font-medium text-gray-700">Ore mined/processed (t/yr)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="oreMined" 
                             type="number" 
@@ -680,9 +790,12 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('oreMined', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.oreMined && (
+                            <p className="text-sm text-red-600">{errors.oreMined}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="concentratesUsed" className="text-sm font-medium text-gray-700">Concentrates used (t/yr)</Label>
+                        <Label htmlFor="concentratesUsed" className="text-sm font-medium text-gray-700">Concentrates used (t/yr)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="concentratesUsed" 
                             type="number" 
@@ -690,9 +803,12 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('concentratesUsed', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.concentratesUsed && (
+                            <p className="text-sm text-red-600">{errors.concentratesUsed}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="fluxes" className="text-sm font-medium text-gray-700">Fluxes (kg/t product)</Label>
+                        <Label htmlFor="fluxes" className="text-sm font-medium text-gray-700">Fluxes (kg/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="fluxes" 
                             type="number" 
@@ -700,6 +816,9 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('fluxes', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.fluxes && (
+                            <p className="text-sm text-red-600">{errors.fluxes}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                         <Label htmlFor="scrapRecycledInput" className="text-sm font-medium text-gray-700">Scrap/recycled metal input (%)</Label>
@@ -754,7 +873,7 @@ export default function GenerateLCAPage() {
                 <CardHeader><CardTitle>5. Air Emissions</CardTitle><CardDescription>Quantify emissions released into the atmosphere.</CardDescription></CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="co2Direct" className="text-sm font-medium text-gray-700">Direct CO₂ emissions (kg CO₂/t product)</Label>
+                        <Label htmlFor="co2Direct" className="text-sm font-medium text-gray-700">Direct CO₂ emissions (kg CO₂/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="co2Direct" 
                             type="number" 
@@ -762,9 +881,12 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('co2Direct', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.co2Direct && (
+                            <p className="text-sm text-red-600">{errors.co2Direct}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="co2FromFuels" className="text-sm font-medium text-gray-700">CO₂ from fuel combustion (kg CO₂/t product)</Label>
+                        <Label htmlFor="co2FromFuels" className="text-sm font-medium text-gray-700">CO₂ from fuel combustion (kg CO₂/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="co2FromFuels" 
                             type="number" 
@@ -772,6 +894,9 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('co2FromFuels', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.co2FromFuels && (
+                            <p className="text-sm text-red-600">{errors.co2FromFuels}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                         <Label htmlFor="ch4Emissions" className="text-sm font-medium text-gray-700">CH₄ emissions (kg CH₄/t product)</Label>
@@ -794,7 +919,7 @@ export default function GenerateLCAPage() {
                         />
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="so2Emissions" className="text-sm font-medium text-gray-700">SO₂ emissions (kg SO₂/t product)</Label>
+                        <Label htmlFor="so2Emissions" className="text-sm font-medium text-gray-700">SO₂ emissions (kg SO₂/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="so2Emissions" 
                             type="number" 
@@ -802,9 +927,12 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('so2Emissions', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.so2Emissions && (
+                            <p className="text-sm text-red-600">{errors.so2Emissions}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="noxEmissions" className="text-sm font-medium text-gray-700">NOₓ emissions (kg NOₓ/t product)</Label>
+                        <Label htmlFor="noxEmissions" className="text-sm font-medium text-gray-700">NOₓ emissions (kg NOₓ/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="noxEmissions" 
                             type="number" 
@@ -812,6 +940,9 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('noxEmissions', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.noxEmissions && (
+                            <p className="text-sm text-red-600">{errors.noxEmissions}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                         <Label htmlFor="coEmissions" className="text-sm font-medium text-gray-700">CO emissions (kg CO/t product)</Label>
@@ -876,7 +1007,7 @@ export default function GenerateLCAPage() {
                 <CardHeader><CardTitle>6. Water Inputs & Emissions</CardTitle><CardDescription>Detail water usage and wastewater discharge.</CardDescription></CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="waterWithdrawn" className="text-sm font-medium text-gray-700">Water withdrawn (m³/t product)</Label>
+                        <Label htmlFor="waterWithdrawn" className="text-sm font-medium text-gray-700">Water withdrawn (m³/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="waterWithdrawn" 
                             type="number" 
@@ -884,9 +1015,12 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('waterWithdrawn', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.waterWithdrawn && (
+                            <p className="text-sm text-red-600">{errors.waterWithdrawn}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="waterConsumed" className="text-sm font-medium text-gray-700">Water consumed (m³/t product)</Label>
+                        <Label htmlFor="waterConsumed" className="text-sm font-medium text-gray-700">Water consumed (m³/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="waterConsumed" 
                             type="number" 
@@ -894,6 +1028,9 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('waterConsumed', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.waterConsumed && (
+                            <p className="text-sm text-red-600">{errors.waterConsumed}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                         <Label htmlFor="coolingWater" className="text-sm font-medium text-gray-700">Cooling water (m³/t product)</Label>
@@ -906,7 +1043,7 @@ export default function GenerateLCAPage() {
                         />
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="wastewaterGenerated" className="text-sm font-medium text-gray-700">Wastewater generated (m³/t product)</Label>
+                        <Label htmlFor="wastewaterGenerated" className="text-sm font-medium text-gray-700">Wastewater generated (m³/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="wastewaterGenerated" 
                             type="number" 
@@ -914,6 +1051,9 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('wastewaterGenerated', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.wastewaterGenerated && (
+                            <p className="text-sm text-red-600">{errors.wastewaterGenerated}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                         <Label htmlFor="wastewaterCodBod" className="text-sm font-medium text-gray-700">Wastewater COD/BOD (kg/t product)</Label>
@@ -970,7 +1110,7 @@ export default function GenerateLCAPage() {
                 <CardHeader><CardTitle>7. Solid Waste & By-products</CardTitle><CardDescription>Provide data on waste generation and by-product creation.</CardDescription></CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                      <Label htmlFor="overburdenWasteRock">Overburden/waste rock (t/t product)</Label>
+                      <Label htmlFor="overburdenWasteRock">Overburden/waste rock (t/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                           id="overburdenWasteRock" 
                           type="number"  
@@ -978,9 +1118,12 @@ export default function GenerateLCAPage() {
                           onChange={(e) => handleInputChange('overburdenWasteRock', e.target.value)} 
                           className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                       />
+                      {errors.overburdenWasteRock && (
+                        <p className="text-sm text-red-600">{errors.overburdenWasteRock}</p>
+                      )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="tailingsGenerated" className="text-sm font-medium text-gray-700">Tailings generated (t/t product)</Label>
+                        <Label htmlFor="tailingsGenerated" className="text-sm font-medium text-gray-700">Tailings generated (t/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="tailingsGenerated" 
                             type="number" 
@@ -988,6 +1131,9 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('tailingsGenerated', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.tailingsGenerated && (
+                            <p className="text-sm text-red-600">{errors.tailingsGenerated}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                         <Label htmlFor="slagGeneration" className="text-sm font-medium text-gray-700">Slag generation (kg/t product)</Label>
@@ -1020,7 +1166,7 @@ export default function GenerateLCAPage() {
                         />
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="hazardousWaste" className="text-sm font-medium text-gray-700">Hazardous waste (kg/t product)</Label>
+                        <Label htmlFor="hazardousWaste" className="text-sm font-medium text-gray-700">Hazardous waste (kg/t product)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="hazardousWaste" 
                             type="number" 
@@ -1028,6 +1174,9 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('hazardousWaste', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.hazardousWaste && (
+                            <p className="text-sm text-red-600">{errors.hazardousWaste}</p>
+                        )}
                     </div>
                     <div className="space-y-2 md:col-span-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                         <Label htmlFor="recyclableByProducts" className="text-sm font-medium text-gray-700">Recyclable by-products (list with quantities)</Label>
@@ -1051,7 +1200,7 @@ export default function GenerateLCAPage() {
                 <CardHeader><CardTitle>8. Resource Use & Land</CardTitle><CardDescription>Information on land occupation and resource depletion.</CardDescription></CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                      <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                         <Label htmlFor="landAreaOccupied" className="text-sm font-medium text-gray-700">Land area occupied (m²/t product)</Label>
+                         <Label htmlFor="landAreaOccupied" className="text-sm font-medium text-gray-700">Land area occupied (m²/t product)<span className="text-red-500">*</span></Label>
                          <Input 
                              id="landAreaOccupied" 
                              type="number" 
@@ -1059,9 +1208,12 @@ export default function GenerateLCAPage() {
                              onChange={(e) => handleInputChange('landAreaOccupied', e.target.value)}
                              className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                          />
+                         {errors.landAreaOccupied && (
+                            <p className="text-sm text-red-600">{errors.landAreaOccupied}</p>
+                        )}
                      </div>
                      <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                         <Label htmlFor="landDisturbed" className="text-sm font-medium text-gray-700">Land disturbed (m²/t product)</Label>
+                         <Label htmlFor="landDisturbed" className="text-sm font-medium text-gray-700">Land disturbed (m²/t product)<span className="text-red-500">*</span></Label>
                          <Input 
                              id="landDisturbed" 
                              type="number" 
@@ -1069,6 +1221,9 @@ export default function GenerateLCAPage() {
                              onChange={(e) => handleInputChange('landDisturbed', e.target.value)}
                              className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                          />
+                         {errors.landDisturbed && (
+                            <p className="text-sm text-red-600">{errors.landDisturbed}</p>
+                        )}
                      </div>
                      <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                          <Label htmlFor="biodiversityImpact" className="text-sm font-medium text-gray-700">Biodiversity impact (species affected)</Label>
@@ -1081,7 +1236,7 @@ export default function GenerateLCAPage() {
                          />
                      </div>
                      <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                         <Label htmlFor="waterSourceType" className="text-sm font-medium text-gray-700">Water source type</Label>
+                         <Label htmlFor="waterSourceType" className="text-sm font-medium text-gray-700">Water source type<span className="text-red-500">*</span></Label>
                          <Select 
                              value={formData.waterSourceType} 
                              onValueChange={(value) => handleInputChange('waterSourceType', value)}
@@ -1096,6 +1251,9 @@ export default function GenerateLCAPage() {
                                  <SelectItem value="seawater">Seawater</SelectItem>
                              </SelectContent>
                          </Select>
+                         {errors.waterSourceType && (
+                            <p className="text-sm text-red-600">{errors.waterSourceType}</p>
+                        )}
                      </div>
                      <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                          <Label htmlFor="mineralDepletion" className="text-sm font-medium text-gray-700">Mineral depletion (kg Sb-eq/t product)</Label>
@@ -1129,7 +1287,7 @@ export default function GenerateLCAPage() {
                  <CardHeader><CardTitle>9. Toxicity & Human Health</CardTitle><CardDescription>Data related to workplace exposure and toxic emissions.</CardDescription></CardHeader>
                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="workplaceDust" className="text-sm font-medium text-gray-700">Workplace dust exposure (mg/m³)</Label>
+                        <Label htmlFor="workplaceDust" className="text-sm font-medium text-gray-700">Workplace dust exposure (mg/m³)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="workplaceDust" 
                             type="number" 
@@ -1137,9 +1295,12 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('workplaceDust', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.workplaceDust && (
+                            <p className="text-sm text-red-600">{errors.workplaceDust}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="workplaceHeavyMetals" className="text-sm font-medium text-gray-700">Workplace heavy metals (mg/m³)</Label>
+                        <Label htmlFor="workplaceHeavyMetals" className="text-sm font-medium text-gray-700">Workplace heavy metals (mg/m³)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="workplaceHeavyMetals" 
                             type="number" 
@@ -1147,6 +1308,9 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('workplaceHeavyMetals', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.workplaceHeavyMetals && (
+                            <p className="text-sm text-red-600">{errors.workplaceHeavyMetals}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                         <Label htmlFor="toxicAirPollutants" className="text-sm font-medium text-gray-700">Toxic air pollutants (CTUh/t product)</Label>
@@ -1180,7 +1344,7 @@ export default function GenerateLCAPage() {
                  <CardHeader><CardTitle>10. Circularity & End-of-Life</CardTitle><CardDescription>Information about recycling, reuse, and product lifecycle.</CardDescription></CardHeader>
                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="recycledInputShare" className="text-sm font-medium text-gray-700">Recycled input share (%)</Label>
+                        <Label htmlFor="recycledInputShare" className="text-sm font-medium text-gray-700">Recycled input share (%)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="recycledInputShare" 
                             type="number" 
@@ -1189,9 +1353,12 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('recycledInputShare', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.recycledInputShare && (
+                            <p className="text-sm text-red-600">{errors.recycledInputShare}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="byProductsReuse" className="text-sm font-medium text-gray-700">By-products reuse rate (%)</Label>
+                        <Label htmlFor="byProductsReuse" className="text-sm font-medium text-gray-700">By-products reuse rate (%)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="byProductsReuse" 
                             type="number" 
@@ -1200,9 +1367,12 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('byProductsReuse', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.byProductsReuse && (
+                            <p className="text-sm text-red-600">{errors.byProductsReuse}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                        <Label htmlFor="wasteDiverted" className="text-sm font-medium text-gray-700">Waste diverted from landfill (%)</Label>
+                        <Label htmlFor="wasteDiverted" className="text-sm font-medium text-gray-700">Waste diverted from landfill (%)<span className="text-red-500">*</span></Label>
                         <Input 
                             id="wasteDiverted" 
                             type="number" 
@@ -1211,6 +1381,9 @@ export default function GenerateLCAPage() {
                             onChange={(e) => handleInputChange('wasteDiverted', e.target.value)}
                             className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
+                        {errors.wasteDiverted && (
+                            <p className="text-sm text-red-600">{errors.wasteDiverted}</p>
+                        )}
                     </div>
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
                         <Label htmlFor="recyclingCredit" className="text-sm font-medium text-gray-700">Recycling credit (kg CO₂-eq/t product)</Label>
@@ -1265,7 +1438,7 @@ export default function GenerateLCAPage() {
                  <CardHeader><CardTitle>11. Circularity Metrics</CardTitle><CardDescription>Advanced metrics for a detailed circularity assessment.</CardDescription></CardHeader>
                  <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                      <Label htmlFor="mRecoverable" className="text-sm font-medium text-gray-700">M_recoverable (kg)</Label>
+                      <Label htmlFor="mRecoverable" className="text-sm font-medium text-gray-700">M_recoverable (kg)<span className="text-red-500">*</span></Label>
                       <Input 
                         id="mRecoverable" 
                         type="number" 
@@ -1274,10 +1447,15 @@ export default function GenerateLCAPage() {
                         placeholder="Recoverable material"
                         className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                       />
+
+
+                      {errors.mRecoverable && (
+                        <p className="text-sm text-red-600">{errors.mRecoverable}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                      <Label htmlFor="mReused" className="text-sm font-medium text-gray-700">M_reused (kg)</Label>
+                      <Label htmlFor="mReused" className="text-sm font-medium text-gray-700">M_reused (kg)<span className="text-red-500">*</span></Label>
                       <Input 
                         id="mReused" 
                         type="number" 
@@ -1286,6 +1464,10 @@ export default function GenerateLCAPage() {
                         placeholder="Reused material"
                         className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                       />
+
+                      {errors.mReused && (
+                        <p className="text-sm text-red-600">{errors.mReused}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
@@ -1301,7 +1483,7 @@ export default function GenerateLCAPage() {
                     </div>
 
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
-                      <Label htmlFor="mLandfill" className="text-sm font-medium text-gray-700">M_landfill (kg)</Label>
+                      <Label htmlFor="mLandfill" className="text-sm font-medium text-gray-700">M_landfill (kg)<span className="text-red-500">*</span></Label>
                       <Input 
                         id="mLandfill" 
                         type="number" 
@@ -1310,6 +1492,10 @@ export default function GenerateLCAPage() {
                         placeholder="Material to landfill"
                         className="mt-1 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                       />
+
+                      {errors.mLandfill && (
+                        <p className="text-sm text-red-600">{errors.mLandfill}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 transition-colors">
