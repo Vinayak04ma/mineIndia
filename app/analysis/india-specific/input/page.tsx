@@ -4,12 +4,12 @@ import { useState } from "react"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { useToast } from "@/components/ui/use-toast"
+import { toast, useToast } from "@/components/ui/use-toast"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, MapPin, Calculator, TrendingUp, Factory, Battery, Droplets, Cloud, Trash2, LandPlot, Activity, Recycle } from "lucide-react"
+import { ArrowLeft, MapPin, Zap, Calculator, TrendingUp, Factory, Battery, Droplets, Cloud, Trash2, LandPlot, Activity, Recycle, Upload } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
@@ -25,59 +25,60 @@ const inputCategories = [
   { id: 'circularity', label: 'Circularity & End-of-Life', icon: Recycle },
   { id: 'mining', label: 'Mining-Specific Inputs', icon: Factory },
   { id: 'policy', label: 'Regulatory & Policy Inputs', icon: TrendingUp },
+  { id: 'logistics', label: 'Logistics & Infrastructure', icon: TrendingUp },
   { id: 'additional', label: 'Additional Process Inputs', icon: Calculator },
 ]
 
 export default function IndiaSpecificInputPage() {
   const searchParams = useSearchParams()
   const [activeCategory, setActiveCategory] = useState(inputCategories[0].id)
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const { toast } = useToast();
+
+  // Add this state near the top of your component with other state declarations
   const [showPreloadedData, setShowPreloadedData] = useState(true);
 
+  
   // Get URL parameters
-  const state = searchParams.get('state') || '';
-  const stateLabel = searchParams.get('stateLabel') || '';
-  const mine = searchParams.get('mine') || '';
-  const mineName = searchParams.get('mineName') || '';
-  const type = searchParams.get('type') || '';
-
-  // --- STATE DECLARATIONS ---
+  const state = searchParams.get('state') || ''
+  const stateLabel = searchParams.get('stateLabel') || ''
+  const mine = searchParams.get('mine') || ''
+  const mineName = searchParams.get('mineName') || ''
+  const type = searchParams.get('type') || ''
+  
   // Production Data
-  const [productionVolume, setProductionVolume] = useState("");
-  const [operatingHours, setOperatingHours] = useState("");
-  const [yieldEfficiency, setYieldEfficiency] = useState(""); // Added missing state
-  const [technologyType, setTechnologyType] = useState(""); // Added missing state
-  const [oreGrade, setOreGrade] = useState("");
-  const [functionalUnit, setFunctionalUnit] = useState("1 tonne product");
-
+  const [productionVolume, setProductionVolume] = useState("")
+  const [operatingHours, setOperatingHours] = useState("")
+  const [yieldEfficiency, setYieldEfficiency] = useState("")
+  const [technologyType, setTechnologyType] = useState("")
+  const [oreGrade, setOreGrade] = useState("")
+  const [functionalUnit, setFunctionalUnit] = useState("1 tonne product")
+  
   // Energy Inputs
-  const [gridElectricity, setGridElectricity] = useState("");
-  const [gridEmissionFactor, setGridEmissionFactor] = useState("");
-  const [fuelOilConsumption, setFuelOilConsumption] = useState("");
-  const [coalInput, setCoalInput] = useState("");
-  const [naturalGasInput, setNaturalGasInput] = useState("");
-  const [renewableShare, setRenewableShare] = useState("");
-  const [onsiteElectricity, setOnsiteElectricity] = useState("");
-  const [energyRecovery, setEnergyRecovery] = useState("");
-  const [regionalGridMix, setRegionalGridMix] = useState("");
-  const [timeOfDayEmissions, setTimeOfDayEmissions] = useState("");
-  const [captivePlantEfficiency, setCaptivePlantEfficiency] = useState("");
-
+  const [gridElectricity, setGridElectricity] = useState("")
+  const [gridEmissionFactor, setGridEmissionFactor] = useState("")
+  const [fuelOilConsumption, setFuelOilConsumption] = useState("")
+  const [coalInput, setCoalInput] = useState("")
+  const [naturalGasInput, setNaturalGasInput] = useState("")
+  const [renewableShare, setRenewableShare] = useState("")
+  const [onsiteElectricity, setOnsiteElectricity] = useState("")
+  const [energyRecovery, setEnergyRecovery] = useState("")
+  const [regionalGridMix, setRegionalGridMix] = useState("")
+  const [timeOfDayEmissions, setTimeOfDayEmissions] = useState("")
+  const [captivePlantEfficiency, setCaptivePlantEfficiency] = useState("")
+  
   // Water Inputs & Emissions
-  const [waterWithdrawn, setWaterWithdrawn] = useState("");
-  const [waterConsumed, setWaterConsumed] = useState("");
-  const [coolingWater, setCoolingWater] = useState("");
-  const [wastewater, setWastewater] = useState("");
-  const [codBod, setCodBod] = useState("");
-  const [heavyMetalsWater, setHeavyMetalsWater] = useState("");
-  const [nutrients, setNutrients] = useState("");
-  const [effluentPh, setEffluentPh] = useState("");
-  const [waterStressIndex, setWaterStressIndex] = useState("");
-  const [groundwaterTableDepth, setGroundwaterTableDepth] = useState("");
-  const [seasonalWaterVariation, setSeasonalWaterVariation] = useState("");
-  const [waterTdsHardness, setWaterTdsHardness] = useState("");
-
+  const [waterWithdrawn, setWaterWithdrawn] = useState("")
+  const [waterConsumed, setWaterConsumed] = useState("")
+  const [coolingWater, setCoolingWater] = useState("")
+  const [wastewater, setWastewater] = useState("")
+  const [codBod, setCodBod] = useState("")
+  const [heavyMetalsWater, setHeavyMetalsWater] = useState("")
+  const [nutrients, setNutrients] = useState("")
+  const [effluentPh, setEffluentPh] = useState("")
+  const [waterStressIndex, setWaterStressIndex] = useState("")
+  const [groundwaterTableDepth, setGroundwaterTableDepth] = useState("")
+  const [seasonalWaterVariation, setSeasonalWaterVariation] = useState("")
+  const [waterTdsHardness, setWaterTdsHardness] = useState("")
+  
   // Air Emissions
   const [co2Process, setCo2Process] = useState("")
   const [co2Fossil, setCo2Fossil] = useState("")
@@ -111,7 +112,7 @@ export default function IndiaSpecificInputPage() {
   const [rehabilitationProgress, setRehabilitationProgress] = useState("")
   const [biodiversityHotspotDistance, setBiodiversityHotspotDistance] = useState("")
   const [soilFertilityLossIndex, setSoilFertilityLossIndex] = useState("")
-
+  
   // Toxicity & Human Health
   const [dustExposure, setDustExposure] = useState("")
   const [metalExposure, setMetalExposure] = useState("")
@@ -151,7 +152,7 @@ export default function IndiaSpecificInputPage() {
   const [informalRecoveryRate, setInformalRecoveryRate] = useState("")
   const [hazardousByProductsInformal, setHazardousByProductsInformal] = useState("")
 
-  // Mining-Specific Inputs
+  // Mining-Specific Inputs (Added missing state variables)
   const [strippingRatio, setStrippingRatio] = useState("")
   const [mineDepth, setMineDepth] = useState("")
   const [blastingAgentConsumption, setBlastingAgentConsumption] = useState("")
@@ -172,77 +173,17 @@ export default function IndiaSpecificInputPage() {
   // Additional Inputs
   const [additionalInputs, setAdditionalInputs] = useState("")
 
-
-  // --- VALIDATION LOGIC ---
-  const validateCurrentCategory = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    let hasError = false;
-    
-    const allStateValues: Record<string, string> = {
-      productionVolume, operatingHours, gridElectricity, fuelOilConsumption, 
-      waterWithdrawn, waterConsumed, co2Process, co2Fossil, overburden, 
-      tailings, landOccupied, landDisturbed, dustExposure, metalExposure, 
-      recycledInput, byproductReuse, strippingRatio, mineDepth, eprCompliance, 
-      spcbConsentValidity, transportModeSplit, averageFreightDistance
-    };
-  
-    const requiredFields: Record<string, string[]> = {
-      production: ['productionVolume', 'operatingHours'],
-      energy: ['gridElectricity', 'fuelOilConsumption'],
-      water: ['waterWithdrawn', 'waterConsumed'],
-      air: ['co2Process', 'co2Fossil'],
-      waste: ['overburden', 'tailings'],
-      resources: ['landOccupied', 'landDisturbed'],
-      toxicity: ['dustExposure', 'metalExposure'],
-      circularity: ['recycledInput', 'byproductReuse'],
-      mining: ['strippingRatio', 'mineDepth'],
-      policy: ['eprCompliance', 'spcbConsentValidity'],
-      logistics: ['transportModeSplit', 'averageFreightDistance'],
-      additional: []
-    };
-  
-    const categoryFields = requiredFields[activeCategory] || [];
-    
-    categoryFields.forEach(field => {
-      if (!allStateValues[field]?.trim()) {
-        const fieldLabel = field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-        newErrors[field] = `${fieldLabel} is required`;
-        hasError = true;
-      }
-    });
-  
-    setErrors(newErrors);
-    
-    if (hasError) {
-      const firstErrorField = Object.keys(newErrors)[0];
-      if (firstErrorField) {
-        const element = document.getElementById(firstErrorField);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          element.focus();
-        }
-      }
-      
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields before proceeding.",
-        variant: "destructive",
-      });
-      return false;
-    }
-    return true;
-  };
-  // Build report link
+  // Build report link preserving context from the state-wise flow
   const qs = new URLSearchParams()
+  
+  // Add all URL parameters to the query string
   const params = { state, stateLabel, mine, mineName, type }
   Object.entries(params).forEach(([key, value]) => {
     if (value) qs.set(key, value)
   })
+  
   const reportHref = `/analysis/india-specific/report?${qs.toString()}`
 
-  const getErrorClass = (fieldName: string) => {
-    return errors[fieldName] ? 'border-red-500' : 'border-gray-300';
-  };
   // Helper function to render input fields based on the active category
   const renderInputFields = () => {
     switch (activeCategory) {
@@ -254,34 +195,26 @@ export default function IndiaSpecificInputPage() {
            
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
-                <Label htmlFor="production-volume" className="text-sm font-medium text-gray-900">Annual Production Volume (t/yr)<span className="text-red-500">*</span></Label>
+                <Label htmlFor="production-volume" className="text-sm font-medium text-gray-900">Annual Production Volume (t/yr)</Label>
                 <Input 
                   id="production-volume" 
                   type="number"
                   placeholder="Enter production volume" 
                   value={productionVolume} 
                   onChange={(e) => setProductionVolume(e.target.value)}
-                  className={`border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield] ${getErrorClass('productionVolume')}`}
-                  required
+                  className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.productionVolume && (
-                  <p className="mt-1 text-sm text-red-600">{errors.productionVolume}</p>
-                )}
               </div>
               <div className="space-y-3">
-                <Label htmlFor="operating-hours" className="text-sm font-medium text-gray-900">Plant Operating Hours (h/yr)<span className="text-red-500">*</span></Label>
+                <Label htmlFor="operating-hours" className="text-sm font-medium text-gray-900">Plant Operating Hours (h/yr)</Label>
                 <Input 
                   id="operating-hours" 
                   type="number"
                   placeholder="Enter operating hours" 
                   value={operatingHours} 
                   onChange={(e) => setOperatingHours(e.target.value)}
-                  className={`border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield] ${getErrorClass('operatingHours')}`}
-                  required
+                  className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.operatingHours && (
-                  <p className="mt-1 text-sm text-red-600">{errors.operatingHours}</p>
-                )}
               </div>
               <div className="space-y-3">
                 <Label htmlFor="yield-efficiency" className="text-sm font-medium text-gray-900">Yield/Efficiency (%)</Label>
@@ -342,18 +275,14 @@ export default function IndiaSpecificInputPage() {
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
-                <Label htmlFor="gridElectricity" className="text-sm font-medium text-gray-900">Grid Electricity (kWh/t)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Grid Electricity (kWh/t)</Label>
                 <Input 
-                  id="gridElectricity"
                   type="number"
                   placeholder="Enter electricity consumption" 
                   value={gridElectricity} 
                   onChange={(e) => setGridElectricity(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                 {errors.gridElectricity && (
-            <p className="mt-1 text-sm text-red-600">{errors.gridElectricity}</p>
-          )}
               </div>
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-900">Grid Emission Factor (kg CO₂/kWh)</Label>
@@ -367,18 +296,14 @@ export default function IndiaSpecificInputPage() {
                 />
               </div>
               <div className="space-y-3">
-                <Label htmlFor="fuelOilConsumption" className="text-sm font-medium text-gray-900">Fuel Oil Consumption (L/t)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Fuel Oil Consumption (L/t)</Label>
                 <Input 
-                id="fuelOilConsumption"
                   type="number"
                   placeholder="Enter fuel oil consumption" 
                   value={fuelOilConsumption} 
                   onChange={(e) => setFuelOilConsumption(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                   {errors.fuelOilConsumption && (
-            <p className="mt-1 text-sm text-red-600">{errors.fuelOilConsumption}</p>
-          )}
               </div>
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-900">Coal/Coke Input (kg/t)</Label>
@@ -439,21 +364,17 @@ export default function IndiaSpecificInputPage() {
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
-                <Label htmlFor="waterWithdrawn" className="text-sm font-medium text-gray-900">Water Withdrawn (m³/t)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Water Withdrawn (m³/t)</Label>
                 <Input 
-                id="waterWithdrawn"
                   type="number"
                   placeholder="Enter water withdrawn" 
                   value={waterWithdrawn} 
                   onChange={(e) => setWaterWithdrawn(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.waterWithdrawn && (
-            <p className="mt-1 text-sm text-red-600">{errors.waterWithdrawn}</p>
-          )}
               </div>
               <div className="space-y-3">
-                <Label htmlFor="waterConsumed" className="text-sm font-medium text-gray-900">Water Consumed (m³/t)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Water Consumed (m³/t)</Label>
                 <Input 
                   type="number"
                   placeholder="Enter water consumed" 
@@ -461,9 +382,6 @@ export default function IndiaSpecificInputPage() {
                   onChange={(e) => setWaterConsumed(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.waterConsumed && (
-            <p className="mt-1 text-sm text-red-600">{errors.waterConsumed}</p>
-          )}
               </div>
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-900">Cooling Water Used (m³/yr)</Label>
@@ -534,32 +452,24 @@ export default function IndiaSpecificInputPage() {
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
-                <Label htmlFor="co2Process" className="text-sm font-medium text-gray-900">CO₂ Process Emissions (kg/t)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">CO₂ Process Emissions (kg/t)</Label>
                 <Input 
-                id="co2Process"
                   type="number"
                   placeholder="Enter CO₂ process emissions" 
                   value={co2Process} 
                   onChange={(e) => setCo2Process(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.co2Process && (
-            <p className="mt-1 text-sm text-red-600">{errors.co2Process}</p>
-          )}
               </div>
               <div className="space-y-3">
-                <Label htmlFor="co2Fossil" className="text-sm font-medium text-gray-900">CO₂ from Fossil Fuels (kg/t)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">CO₂ from Fossil Fuels (kg/t)</Label>
                 <Input 
-                id="co2Fossil"
                   type="number"
                   placeholder="Enter CO₂ from fossil fuels" 
                   value={co2Fossil} 
                   onChange={(e) => setCo2Fossil(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.co2Fossil && (
-            <p className="mt-1 text-sm text-red-600">{errors.co2Fossil}</p>
-          )}
               </div>
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-900">CH₄ Emissions (kg/t)</Label>
@@ -659,32 +569,24 @@ export default function IndiaSpecificInputPage() {
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
-                <Label htmlFor="overburden" className="text-sm font-medium text-gray-900">Overburden/Waste Rock (t/yr)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Overburden/Waste Rock (t/yr)</Label>
                 <Input 
-                id="overburden"
                   type="number"
                   placeholder="Enter overburden" 
                   value={overburden} 
                   onChange={(e) => setOverburden(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.overburden && (
-            <p className="mt-1 text-sm text-red-600">{errors.overburden}</p>
-          )}
               </div>
               <div className="space-y-3">
-                <Label htmlFor="tailings" className="text-sm font-medium text-gray-900">Tailings Generated (t/t ore)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Tailings Generated (t/t ore)</Label>
                 <Input 
-                id="tailings"
                   type="number"
                   placeholder="Enter tailings generated" 
                   value={tailings} 
                   onChange={(e) => setTailings(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.tailings && (
-            <p className="mt-1 text-sm text-red-600">{errors.tailings}</p>
-          )}
               </div>
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-900">Slag Generation (kg/t)</Label>
@@ -744,32 +646,24 @@ export default function IndiaSpecificInputPage() {
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
-                <Label htmlFor="landOccupied" className="text-sm font-medium text-gray-900">Land Area Occupied (ha)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Land Area Occupied (ha)</Label>
                 <Input 
-                  id="landOccupied"
                   type="number"
                   placeholder="Enter land area occupied" 
                   value={landOccupied} 
                   onChange={(e) => setLandOccupied(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.landOccupied && (
-            <p className="mt-1 text-sm text-red-600">{errors.landOccupied}</p>
-          )}
               </div>
               <div className="space-y-3">
-                <Label htmlFor="landDisturbed" className="text-sm font-medium text-gray-900">Land Disturbed/Mined (ha/yr)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Land Disturbed/Mined (ha/yr)</Label>
                 <Input 
-                id="landDisturbed"
                   type="number"
                   placeholder="Enter land disturbed" 
                   value={landDisturbed} 
                   onChange={(e) => setLandDisturbed(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.landDisturbed && (
-            <p className="mt-1 text-sm text-red-600">{errors.landDisturbed}</p>
-          )}
               </div>
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-900">Biodiversity Impact Zone (ha)</Label>
@@ -824,32 +718,24 @@ export default function IndiaSpecificInputPage() {
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
-                <Label htmlFor="dustExposure" className="text-sm font-medium text-gray-900">Workplace Dust Exposure (mg/m³)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Workplace Dust Exposure (mg/m³)</Label>
                 <Input 
-                  id="dustExposure"
                   type="number"
                   placeholder="Enter dust exposure" 
                   value={dustExposure} 
                   onChange={(e) => setDustExposure(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.dustExposure && (
-            <p className="mt-1 text-sm text-red-600">{errors.dustExposure}</p>
-          )}
               </div>
               <div className="space-y-3">
-                <Label htmlFor="metalExposure" className="text-sm font-medium text-gray-900">Heavy Metal Exposure (mg/m³)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Heavy Metal Exposure (mg/m³)</Label>
                 <Input 
-                  id="metalExposure"
                   type="number"
                   placeholder="Enter metal exposure" 
                   value={metalExposure} 
                   onChange={(e) => setMetalExposure(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.metalExposure && (
-            <p className="mt-1 text-sm text-red-600">{errors.metalExposure}</p>
-          )}
               </div>
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-900">Toxic Air Pollutants (kg/t)</Label>
@@ -879,32 +765,24 @@ export default function IndiaSpecificInputPage() {
           <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
-                <Label htmlFor="recycledInput" className="text-sm font-medium text-gray-900">Share of Recycled Input (%)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Share of Recycled Input (%)</Label>
                 <Input 
-                id="recycledInput"
                   type="number"
                   placeholder="Enter recycled input share" 
                   value={recycledInput} 
                   onChange={(e) => setRecycledInput(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.recycledInput && (
-            <p className="mt-1 text-sm text-red-600">{errors.recycledInput}</p>
-          )}
               </div>
               <div className="space-y-3">
-                <Label htmlFor="byproductReuse" className="text-sm font-medium text-gray-900">By-product Reuse (kg/t)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">By-product Reuse (kg/t)</Label>
                 <Input 
-                id="byproductReuse"
                   type="number"
                   placeholder="Enter by-product reuse" 
                   value={byproductReuse} 
                   onChange={(e) => setByproductReuse(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.byproductReuse && (
-            <p className="mt-1 text-sm text-red-600">{errors.byproductReuse}</p>
-          )}
               </div>
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-900">Waste Diverted from Landfill (%)</Label>
@@ -1139,32 +1017,24 @@ export default function IndiaSpecificInputPage() {
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
-                <Label htmlFor="strippingRatio" className="text-sm font-medium text-gray-900">Stripping Ratio (:1)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Stripping Ratio (:1)</Label>
                 <Input 
-                id="strippingRatio"
                   type="number"
                   placeholder="Enter stripping ratio" 
                   value={strippingRatio} 
                   onChange={(e) => setStrippingRatio(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                  {errors.strippingRatio && (
-            <p className="mt-1 text-sm text-red-600">{errors.strippingRatio}</p>
-          )}
               </div>
               <div className="space-y-3">
-                <Label htmlFor="mineDepth" className="text-sm font-medium text-gray-900">Mine Depth (m)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Mine Depth (m)</Label>
                 <Input 
-                id="mineDepth"
                   type="number"
                   placeholder="Enter mine depth" 
                   value={mineDepth} 
                   onChange={(e) => setMineDepth(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.mineDepth && (
-            <p className="mt-1 text-sm text-red-600">{errors.mineDepth}</p>
-          )}
               </div>
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-900">Blasting Agent Consumption (kg/t)</Label>
@@ -1204,7 +1074,7 @@ export default function IndiaSpecificInputPage() {
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
-                <Label className="text-sm font-medium text-gray-900">EPR Compliance Status<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">EPR Compliance Status</Label>
                 <Select value={eprCompliance} onValueChange={setEprCompliance}>
                   <SelectTrigger className="border-gray-300 focus:border-orange-500 focus:ring-orange-500">
                     <SelectValue placeholder="Select status" />
@@ -1216,22 +1086,15 @@ export default function IndiaSpecificInputPage() {
                     <SelectItem value="na">Not Applicable</SelectItem>
                   </SelectContent>
                 </Select>
-                {errors.eprCompliance && (
-            <p className="mt-1 text-sm text-red-600">{errors.eprCompliance}</p>
-          )}
               </div>
               <div className="space-y-3">
-                <Label htmlFor="spcbConsentValidity" className="text-sm font-medium text-gray-900">SPCB Consent Validity<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">SPCB Consent Validity</Label>
                 <Input 
-                id="spcbConsentValidity"
                   type="date" 
                   value={spcbConsentValidity} 
                   onChange={(e) => setSpcbConsentValidity(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
                 />
-                {errors.spcbConsentValidity && (
-            <p className="mt-1 text-sm text-red-600">{errors.spcbConsentValidity}</p>
-          )}
               </div>
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-900">RPO Compliance (%)</Label>
@@ -1265,32 +1128,24 @@ export default function IndiaSpecificInputPage() {
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
-                <Label htmlFor="transportModeSplit" className="text-sm font-medium text-gray-900">Transport Mode Split<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Transport Mode Split</Label>
                 <Input 
-                id="transportModeSplit"
                   type="text"
                   placeholder="e.g., 60% road, 30% rail, 10% conveyor" 
                   value={transportModeSplit} 
                   onChange={(e) => setTransportModeSplit(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
                 />
-                {errors.transportModeSplit && (
-            <p className="mt-1 text-sm text-red-600">{errors.transportModeSplit}</p>
-          )}
               </div>
               <div className="space-y-3">
-                <Label htmlFor="averageFreightDistance" className="text-sm font-medium text-gray-900">Average Freight Distance (km)<span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium text-gray-900">Average Freight Distance (km)</Label>
                 <Input 
-                id="averageFreightDistance"
                   type="number"
                   placeholder="Enter average freight distance" 
                   value={averageFreightDistance} 
                   onChange={(e) => setAverageFreightDistance(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
-                {errors.averageFreightDistance && (
-            <p className="mt-1 text-sm text-red-600">{errors.averageFreightDistance}</p>
-          )}
               </div>
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-900">Fuel Efficiency of Mine Trucks (km/L)</Label>
@@ -1316,9 +1171,6 @@ export default function IndiaSpecificInputPage() {
               rows={3}
               className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
             />
-            {errors.additionalInputs && (
-            <p className="mt-1 text-sm text-red-600">{errors.additionalInputs}</p>
-          )}
           </div>
         );
       default:
@@ -1600,26 +1452,15 @@ export default function IndiaSpecificInputPage() {
                     
                     {inputCategories.findIndex(c => c.id === activeCategory) === inputCategories.length - 1 ? (
                       <Link href={reportHref}>
-                        <Button 
-                          className="bg-gradient-to-r from-primary to-primary text-white hover:from-primary hover:to-primary"
-                          onClick={(e) => {
-                            if (!validateCurrentCategory()) {
-                              e.preventDefault();
-                            }
-                          }}
-                        >
+                        <Button className="bg-gradient-to-r from-primary to-primary text-white hover:from-primary hover:to-primary">
                           Submit & Generate Report
                         </Button>
                       </Link>
                     ) : (
                       <Button
-                        onClick={(e) => {
-                          if (validateCurrentCategory()) {
-                            const currentIndex = inputCategories.findIndex(c => c.id === activeCategory);
-                            setActiveCategory(inputCategories[currentIndex + 1].id);
-                          } else {
-                            e.preventDefault();
-                          }
+                        onClick={() => {
+                          const currentIndex = inputCategories.findIndex(c => c.id === activeCategory);
+                          setActiveCategory(inputCategories[currentIndex + 1].id);
                         }}
                         className="bg-gradient-to-r from-primary to-primary text-white hover:from-primary hover:to-primary"
                       >
