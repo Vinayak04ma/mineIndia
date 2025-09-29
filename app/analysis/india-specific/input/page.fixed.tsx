@@ -153,15 +153,3 @@ export default function IndiaSpecificInputPage() {
 
   // ... (rest of the component code)
 }
-// mineral: ['selectedMineral'],
-// production: ['annualProduction', 'operatingHours', 'yieldEfficiency', 'technologyType'],
-// energy: ['gridElectricity', 'fuelOilConsumption', 'coalCokeInput', 'naturalGasInput'],
-// materials: ['oreMined', 'concentratesUsed', 'fluxes'],
-// airEmissions: ['co2Direct', 'co2FromFuels', 'so2Emissions', 'noxEmissions'],
-// water: ['waterWithdrawn', 'waterConsumed', 'wastewaterGenerated'],
-// waste: ['overburdenWasteRock', 'tailingsGenerated', 'hazardousWaste'],
-// resource: ['landAreaOccupied', 'landDisturbed', 'waterSourceType'],
-// toxicity: ['workplaceDust', 'workplaceHeavyMetals'],
-// circularity: ['recycledInputShare', 'byProductsReuse', 'wasteDiverted'],
-// circularityMetrics: ['mRecoverable', 'mReused', 'mLandfill']
-// }
