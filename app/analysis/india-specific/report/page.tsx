@@ -119,12 +119,32 @@ export default function IndiaLCAResults() {
     { name: 'Recycling Efficiency', value: '88', unit: '%' },
   ]
 
-  const wasteData: Array<{ name: string; value: number }> = [
-    { name: 'Hazardous Waste', value: 15 },
-    { name: 'Inert Waste', value: 35 },
-    { name: 'Recyclable', value: 25 },
-    { name: 'Organic', value: 15 },
-    { name: 'E-waste', value: 10 },
+  const wasteData: Array<{ name: string; value: number; description?: string }> = [
+    { 
+      name: 'Hazardous Waste', 
+      value: 15,
+      description: 'Includes lead-acid batteries, mercury-containing waste, and chemical byproducts' 
+    },
+    { 
+      name: 'Inert Waste', 
+      value: 35,
+      description: 'Includes rock waste, overburden, and tailings from mining operations'
+    },
+    { 
+      name: 'Recyclable Materials', 
+      value: 25,
+      description: 'Includes scrap metal, paper, plastics, and glass that can be recycled'
+    },
+    { 
+      name: 'Organic Waste', 
+      value: 15,
+      description: 'Includes food waste, green waste, and other biodegradable materials'
+    },
+    { 
+      name: 'E-waste', 
+      value: 10,
+      description: 'Includes discarded electrical and electronic equipment'
+    }
   ]
 
   const comparisonData: Array<{ name: string; conventional: number; sustainable: number }> = [
@@ -184,12 +204,48 @@ export default function IndiaLCAResults() {
     ]
   }
 
-  const wasteComposition = [
-    { name: "Mineral waste", value: 45 },
-    { name: "Metal scraps", value: 25 },
-    { name: "Chemicals", value: 15 },
-    { name: "Packaging", value: 10 },
-    { name: "Other", value: 5 },
+  interface WasteItem {
+    name: string;
+    value: number;
+    description: string;
+  }
+
+  // Data for the pie chart (only name and value)
+  const wasteCompositionData = [
+    { name: 'Hazardous Waste', value: 15 },
+    { name: 'Inert Waste', value: 35 },
+    { name: 'Recyclable Materials', value: 25 },
+    { name: 'Organic Waste', value: 15 },
+    { name: 'E-waste', value: 10 }
+  ];
+
+  // Extended data for the table view
+  const wasteComposition: WasteItem[] = [
+    { 
+      name: 'Hazardous Waste', 
+      value: 15,
+      description: 'Includes lead-acid batteries, mercury-containing waste, and chemical byproducts' 
+    },
+    { 
+      name: 'Inert Waste', 
+      value: 35,
+      description: 'Includes rock waste, overburden, and tailings from mining operations'
+    },
+    { 
+      name: 'Recyclable Materials', 
+      value: 25,
+      description: 'Includes scrap metal, paper, plastics, and glass that can be recycled'
+    },
+    { 
+      name: 'Organic Waste', 
+      value: 15,
+      description: 'Includes food waste, green waste, and other biodegradable materials'
+    },
+    { 
+      name: 'E-waste', 
+      value: 10,
+      description: 'Includes discarded electrical and electronic equipment'
+    }
   ]
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -442,25 +498,51 @@ export default function IndiaLCAResults() {
                           Waste Composition
                       </h3>
                         <div className="h-86 w-full">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                              <Pie
-                                data={wasteComposition}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                outerRadius={120}
-                                fill="#8884d8"
-                                dataKey="value"
-                              >
-                                {wasteComposition.map((entry, index) => (
-                                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                              </Pie>
-                              <Tooltip content={<CustomTooltip />} />
-                              <Legend />
-                            </PieChart>
-                          </ResponsiveContainer>
+                          <div className="flex flex-col md:flex-row gap-8">
+                            <div className="w-full md:w-1/2 h-80">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                  <Pie
+                                    data={wasteCompositionData}
+                                    cx="50%"
+                                    cy="50%"
+                                    labelLine={false}
+                                    outerRadius={120}
+                                    fill="#8884d8"
+                                    dataKey="value"
+                                  >
+                                    {wasteCompositionData.map((entry, index) => (
+                                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                  </Pie>
+                                  <Tooltip content={<CustomTooltip />} />
+                                  <Legend />
+                                </PieChart>
+                              </ResponsiveContainer>
+                            </div>
+                            <div className="w-full md:w-1/2">
+                              <div className="overflow-x-auto">
+                                <table className="min-w-full border rounded-lg overflow-hidden">
+                                  <thead className="bg-muted/50">
+                                    <tr>
+                                      <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Waste Type</th>
+                                      <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Percentage</th>
+                                      <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Description</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-border">
+                                    {wasteComposition.map((waste, index) => (
+                                      <tr key={waste.name} className="hover:bg-muted/10 transition-colors">
+                                        <td className="px-4 py-3 text-sm font-medium">{waste.name}</td>
+                                        <td className="px-4 py-3 text-right text-sm">{waste.value}%</td>
+                                        <td className="px-4 py-3 text-sm text-muted-foreground">{waste.description}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
         

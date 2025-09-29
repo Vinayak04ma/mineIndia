@@ -53,18 +53,17 @@ export default function AnalysisReportPage() {
     { name: "CO₂ avoided", value: "1.8", unit: "t CO₂e/t" },
     { name: "Closed-loop recycling rate", value: "28", unit: "%" },
     { name: "Landfilling ratio", value: "12", unit: "%" },
-    { name: "Linear Flow Index", value: "0.65", unit: "" },
     { name: "Material Circularity Indicator", value: "0.42", unit: "" },
     { name: "Circular CO₂ benefit", value: "-1.2", unit: "t CO₂e/t" },
     { name: "Recycling efficiency", value: "82", unit: "%" },
   ]
 
   const wasteComposition = [
-    { name: "Mineral waste", value: 45 },
-    { name: "Metal scraps", value: 25 },
-    { name: "Chemicals", value: 15 },
-    { name: "Packaging", value: 10 },
-    { name: "Other", value: 5 },
+    { name: "Overburden & Waste Rock", value: 55 },
+    { name: "Tailings (Process Residue)", value: 30 },
+    { name: "Slag & Smelter Waste", value: 8 },
+    { name: "Acid Mine Drainage Sludge", value: 4 },
+    { name: "Used Oil & Lubricants", value: 3 },
   ]
 
   const comparisonData: ChartData[] = [
@@ -77,7 +76,7 @@ export default function AnalysisReportPage() {
     { name: "Product Lifetime", conventional: 60, sustainable: 85 },
     { name: "Material Circularity", conventional: 40, sustainable: 80 },
     { name: "Supply Chain Dependence", conventional: 75, sustainable: 40 },
-    { name: "End-of-Life Strategy", conventional: 30, sustainable: 85 },
+    { name: "End-of-Life Strategy", conventional: 30, sustainable: 85 }
   ]
 
   // Data for radar chart
