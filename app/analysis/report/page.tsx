@@ -58,12 +58,13 @@ export default function AnalysisReportPage() {
     { name: "Recycling efficiency", value: "82", unit: "%" },
   ]
 
+  // MODIFICATION: Added descriptions to be displayed next to the pie chart
   const wasteComposition = [
-    { name: "Overburden & Waste Rock", value: 55 },
-    { name: "Tailings (Process Residue)", value: 30 },
-    { name: "Slag & Smelter Waste", value: 8 },
-    { name: "Acid Mine Drainage Sludge", value: 4 },
-    { name: "Used Oil & Lubricants", value: 3 },
+    { name: "Overburden & Waste Rock", value: 55, description: "Non-mineralized rock and soil removed to access the ore body." },
+    { name: "Tailings (Process Residue)", value: 30, description: "Finely ground rock and process effluents remaining after mineral extraction." },
+    { name: "Slag & Smelter Waste", value: 8, description: "Byproduct of smelting, containing impurities from the ore." },
+    { name: "Acid Mine Drainage Sludge", value: 4, description: "Precipitated solids from the treatment of acidic water from mining areas." },
+    { name: "Used Oil & Lubricants", value: 3, description: "Waste from the maintenance of heavy machinery and equipment." },
   ]
 
   const comparisonData: ChartData[] = [
@@ -98,7 +99,6 @@ export default function AnalysisReportPage() {
     { year: '2027', impact: 45, target: 30 },
   ];
   
-  // **FIXED**: Renamed this constant to `circularProgressMetrics` to avoid conflict with the `circularityMetrics: Metric[]` array defined earlier.
   const circularProgressMetrics = [
     { name: 'Material Circularity', value: '42', unit: '%' },
     { name: 'Energy Recovery', value: '65', unit: '%' },
@@ -236,7 +236,6 @@ export default function AnalysisReportPage() {
             <CardContent>
               <div className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* **FIXED**: Using the corrected `circularProgressMetrics` constant here */}
                   {circularProgressMetrics.map((metric, index) => (
                     <div key={`metric-${index}`} className="border rounded-lg p-4 bg-gradient-to-br from-background to-muted/10">
                       <div className="flex flex-col items-center justify-center h-40">
@@ -340,11 +339,11 @@ export default function AnalysisReportPage() {
                 Comprehensive waste generation and management analysis
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-8">
               <div>
                 <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
                   <span className="h-1 w-6 bg-primary/70 mr-2 rounded-full"></span>
-                  Waste Generation Analysis
+                  Waste Generation Summary
                 </h3>
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="rounded-lg border p-4">
@@ -361,40 +360,58 @@ export default function AnalysisReportPage() {
                   </div>
                 </div>
               </div>
-
+              
+              {/* START: MODIFIED SECTION */}
               <div>
-              <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
-                <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
+                <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
+                  <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
                   Waste Composition
-              </h3>
-                <div className="h-86 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={wasteComposition}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={120}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {wasteComposition.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                  {/* Left Column: Descriptive Blocks */}
+                  <div className="space-y-4">
+                    {wasteComposition.map((item, index) => (
+                      <div key={index} className="p-4 rounded-lg border bg-muted/20">
+                        <h4 className="font-semibold text-primary mb-1">{item.name} ({item.value}%)</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {item.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Right Column: Pie Chart */}
+                  <div className="h-80 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={wasteComposition}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={120}
+                          fill="#8884d8"
+                          dataKey="value"
+                          nameKey="name"
+                        >
+                          {wasteComposition.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
+              {/* END: MODIFIED SECTION */}
 
               <div>
-              <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
-                <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
+                <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
+                  <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
                   Waste Management Recommendations
-              </h3>
+                </h3>
                 <div className="space-y-4">
                   <div className="p-4 border rounded-lg">
                     <h4 className="font-medium">1. Implement Waste Segregation</h4>
