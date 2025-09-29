@@ -331,28 +331,6 @@ export default function GenerateLCAPage() {
             </div>
           </div>
 
-
-          {/* Navigation Tabs */}
-          <div className="bg-white/80 backdrop-blur-sm z-10 py-2 mb-6 border-b rounded-lg">
-            <div className="flex items-center gap-2 overflow-x-auto py-2 px-1 pb-1">
-              {sectionOrder.map((section) => (
-                <button
-                  key={section.key}
-                  className={`px-4 py-2 text-s font-medium rounded-md whitespace-nowrap ${
-                    currentSection === section.key
-                      ? 'bg-blue-100 font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                  onClick={() => setCurrentSection(section.key)}
-                >
-                  {section.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-
-
           <Card className="mb-6 border-2 border-dashed border-gray-200 hover:border-blue-400 transition-colors duration-200 overflow-hidden">
   <CardHeader className="pb-3">
     <div className="flex items-center gap-3">
@@ -443,6 +421,28 @@ export default function GenerateLCAPage() {
     </p>
   </CardFooter>
 </Card>
+
+
+          {/* Navigation Tabs */}
+          <div className="bg-white/80 backdrop-blur-sm z-10 py-2 mb-6 border-b rounded-lg">
+            <div className="flex items-center gap-2 overflow-x-auto py-2 px-1 pb-1">
+              {sectionOrder.map((section) => (
+                <button
+                  key={section.key}
+                  className={`px-4 py-2 text-s font-medium rounded-md whitespace-nowrap ${
+                    currentSection === section.key
+                      ? 'bg-blue-100 font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                  onClick={() => setCurrentSection(section.key)}
+                >
+                  {section.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+
 
 
 

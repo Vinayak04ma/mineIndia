@@ -190,96 +190,9 @@ export default function IndiaSpecificInputPage() {
       case 'production':
         return (
           <div className="space-y-4">
-            <Card className="mb-6 border-2 border-dashed border-gray-200 hover:border-blue-400 transition-colors duration-200 overflow-hidden">
-  <CardHeader className="pb-3">
-    <div className="flex items-center gap-3">
-      <div className="p-2 bg-blue-50 rounded-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-blue-600">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/>
-          <line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-      </div>
-      <div>
-        <CardTitle className="text-lg">Upload Documents</CardTitle>
-        <CardDescription className="text-sm">
-          Upload your documents and we'll extract the required data automatically.
-        </CardDescription>
-      </div>
-    </div>
-  </CardHeader>
-  <CardContent>
-    <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors hover:border-blue-400 bg-gray-50/50">
-      <div className="flex flex-col items-center justify-center space-y-3">
-        <div className="p-3 bg-blue-100 rounded-full">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 text-blue-600">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-        </div>
-        <div className="space-y-1">
-          <p className="text-sm text-gray-700">
-            <span className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer">Click to upload</span> or drag and drop
-          </p>
-          <p className="text-xs text-gray-500">
-            PDF, DOC, DOCX, XLS, XLSX (Max 10MB)
-          </p>
-        </div>
-      </div>
-      <Input
-        id="document-upload"
-        type="file"
-        accept=".pdf,.doc,.docx,.xls,.xlsx"
-        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) {
-            // Here you would typically handle the file upload
-            toast({
-              title: "Document uploaded",
-              description: `${file.name} has been uploaded successfully. Extracting data...`,
-            });
-            // Simulate data extraction
-            setTimeout(() => {
-              toast({
-                title: "Data extracted",
-                description: "Data has been extracted from the document. Please review the fields below.",
-              });
-            }, 2000);
-          }
-        }}
-      />
-    </div>
-    
-    {/* Upload Progress (initially hidden) */}
-    <div className="mt-4 hidden" id="upload-progress-container">
-      <div className="flex justify-between text-sm mb-1">
-        <span>Uploading...</span>
-        <span className="text-gray-600">0%</span>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-1.5">
-        <div className="bg-blue-600 h-1.5 rounded-full transition-all duration-300" style={{ width: '0%' }} id="upload-progress-bar"></div>
-      </div>
-    </div>
-    
-    {/* Uploaded Files Preview */}
-    <div className="mt-4 hidden" id="uploaded-files">
-      <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500 mr-2">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-          <polyline points="22 4 12 14.01 9 11.01"/>
-        </svg>
-        <span className="text-sm text-green-700">Document processed successfully</span>
-      </div>
-    </div>
-  </CardContent>
-  <CardFooter className="bg-gray-50 px-6 py-3 border-t border-gray-100">
-    <p className="text-xs text-gray-500">
-      After uploading,generate the report.
-    </p>
-  </CardFooter>
-</Card>
+             
+                  {/* Navigation Buttons */}
+           
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
                 <Label htmlFor="production-volume" className="text-sm font-medium text-gray-900">Annual Production Volume (t/yr)</Label>
@@ -1386,6 +1299,96 @@ export default function IndiaSpecificInputPage() {
                 </CardContent>
               )}
             </Card>
+            <Card className="mb-6 border-2 border-dashed border-gray-200 hover:border-blue-400 transition-colors duration-200 overflow-hidden">
+  <CardHeader className="pb-3">
+    <div className="flex items-center gap-3">
+      <div className="p-2 bg-blue-50 rounded-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-blue-600">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <div>
+        <CardTitle className="text-lg">Upload Documents</CardTitle>
+        <CardDescription className="text-sm">
+          Upload your documents and we'll extract the required data automatically.
+        </CardDescription>
+      </div>
+    </div>
+  </CardHeader>
+  <CardContent>
+    <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors hover:border-blue-400 bg-gray-50/50">
+      <div className="flex flex-col items-center justify-center space-y-3">
+        <div className="p-3 bg-blue-100 rounded-full">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 text-blue-600">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div className="space-y-1">
+          <p className="text-sm text-gray-700">
+            <span className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer">Click to upload</span> or drag and drop
+          </p>
+          <p className="text-xs text-gray-500">
+            PDF, DOC, DOCX, XLS, XLSX (Max 10MB)
+          </p>
+        </div>
+      </div>
+      <Input
+        id="document-upload"
+        type="file"
+        accept=".pdf,.doc,.docx,.xls,.xlsx"
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            // Here you would typically handle the file upload
+            toast({
+              title: "Document uploaded",
+              description: `${file.name} has been uploaded successfully. Extracting data...`,
+            });
+            // Simulate data extraction
+            setTimeout(() => {
+              toast({
+                title: "Data extracted",
+                description: "Data has been extracted from the document. Please review the fields below.",
+              });
+            }, 2000);
+          }
+        }}
+      />
+    </div>
+    
+    {/* Upload Progress (initially hidden) */}
+    <div className="mt-4 hidden" id="upload-progress-container">
+      <div className="flex justify-between text-sm mb-1">
+        <span>Uploading...</span>
+        <span className="text-gray-600">0%</span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-1.5">
+        <div className="bg-blue-600 h-1.5 rounded-full transition-all duration-300" style={{ width: '0%' }} id="upload-progress-bar"></div>
+      </div>
+    </div>
+    
+    {/* Uploaded Files Preview */}
+    <div className="mt-4 hidden" id="uploaded-files">
+      <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500 mr-2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <span className="text-sm text-green-700">Document processed successfully</span>
+      </div>
+    </div>
+  </CardContent>
+  <CardFooter className="bg-gray-50 px-6 py-3 border-t border-gray-100">
+    <p className="text-xs text-gray-500">
+      After uploading,generate the report.
+    </p>
+  </CardFooter>
+</Card>
 
             {/* Main Input Form with Category Navigation */}
             <div className="space-y-6">
@@ -1409,6 +1412,7 @@ export default function IndiaSpecificInputPage() {
                 })}
               </div>
               <Card>
+                
                 <CardHeader>
                   <CardTitle>{inputCategories.find(c => c.id === activeCategory)?.label}</CardTitle>
                   <CardDescription>
@@ -1426,7 +1430,9 @@ export default function IndiaSpecificInputPage() {
                     {activeCategory === 'additional' && 'Specify any additional process requirements or notes'}
                   </CardDescription>
                 </CardHeader>
+                
                 <CardContent>
+                  
                   {renderInputFields()}
                   
                   {/* Navigation Buttons */}
