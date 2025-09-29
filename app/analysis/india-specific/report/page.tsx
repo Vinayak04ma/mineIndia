@@ -220,32 +220,13 @@ export default function IndiaLCAResults() {
   ];
 
   // Extended data for the table view
-  const wasteComposition: WasteItem[] = [
-    { 
-      name: 'Hazardous Waste', 
-      value: 15,
-      description: 'Includes lead-acid batteries, mercury-containing waste, and chemical byproducts' 
-    },
-    { 
-      name: 'Inert Waste', 
-      value: 35,
-      description: 'Includes rock waste, overburden, and tailings from mining operations'
-    },
-    { 
-      name: 'Recyclable Materials', 
-      value: 25,
-      description: 'Includes scrap metal, paper, plastics, and glass that can be recycled'
-    },
-    { 
-      name: 'Organic Waste', 
-      value: 15,
-      description: 'Includes food waste, green waste, and other biodegradable materials'
-    },
-    { 
-      name: 'E-waste', 
-      value: 10,
-      description: 'Includes discarded electrical and electronic equipment'
-    }
+  // MODIFICATION: Added descriptions to be displayed next to the pie chart
+  const wasteComposition = [
+    { name: "Overburden & Waste Rock", value: 55, description: "Non-mineralized rock and soil removed to access the ore body." },
+    { name: "Tailings (Process Residue)", value: 30, description: "Finely ground rock and process effluents remaining after mineral extraction." },
+    { name: "Slag & Smelter Waste", value: 8, description: "Byproduct of smelting, containing impurities from the ore." },
+    { name: "Acid Mine Drainage Sludge", value: 4, description: "Precipitated solids from the treatment of acidic water from mining areas." },
+    { name: "Used Oil & Lubricants", value: 3, description: "Waste from the maintenance of heavy machinery and equipment." },
   ]
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -492,24 +473,24 @@ export default function IndiaLCAResults() {
                      </div>
                    </div>
                    
-                   {/* START: MODIFIED SECTION */}
                    <div>
-                     <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
-                       <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
-                       Waste Composition
-                     </h3>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                       {/* Left Column: Descriptive Blocks */}
-                       <div className="space-y-4">
-                         {wasteComposition.map((item, index) => (
-                           <div key={index} className="p-4 rounded-lg border bg-muted/20">
-                             <h4 className="font-semibold text-primary mb-1">{item.name} ({item.value}%)</h4>
-                             <p className="text-sm text-muted-foreground">
-                               {item.description}
-                             </p>
-                           </div>
-                         ))}
-                       </div>
+                <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
+                  <span className="h-1 w-8 bg-primary/70 mr-2 rounded-full"></span>
+                  Waste Composition
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                  {/* Left Column: Descriptive Blocks */}
+                  <div className="space-y-4">
+                    {wasteComposition.map((item, index) => (
+                      <div key={index} className="p-4 rounded-lg border bg-muted/20">
+                        <h4 className="font-semibold text-primary mb-1">{item.name} ({item.value}%)</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {item.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
      
                        {/* Right Column: Pie Chart */}
                        <div className="h-80 w-full">
